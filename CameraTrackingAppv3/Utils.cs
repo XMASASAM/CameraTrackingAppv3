@@ -84,5 +84,23 @@ namespace CameraTrackingAppv3
             WriteLine("Error:" + msg);
 
         }
+
+        public static Rect RectScale(Rect rect,double scale)
+        {
+            int w = (int)(rect.Width * scale);
+            int h = (int)(rect.Height * scale);
+            return RectWide(rect, w, h);
+        }
+
+        public static Rect RectWide(Rect rect,int wideX,int wideY)
+        {
+            int w = wideX >> 1;
+            int h = wideY >> 1;
+            rect.X -= w;
+            rect.Y -= h;
+            rect.Width += wideX ;
+            rect.Height += wideY ;
+            return rect;
+        }
     }
 }

@@ -61,6 +61,29 @@ namespace CameraTrackingAppv3.Properties {
         }
         
         /// <summary>
+        ///   &lt;?xml version=&quot;1.0&quot;?&gt;
+        ///&lt;!--
+        ///    Stump-based 24x24 discrete(?) adaboost frontal face detector.
+        ///    Created by Rainer Lienhart.
+        ///
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///
+        ///  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+        ///
+        ///  By downloading, copying, installing or using the software you agree to this license.
+        ///  If you do not agree to this license, do not download, install,
+        ///  copy or use the software.
+        ///
+        ///
+        ///                        Intel License Agreeme [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string haarcascade_frontalface_default {
+            get {
+                return ResourceManager.GetString("haarcascade_frontalface_default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Bitmap icon_loader_c_ww_01_s1 {
