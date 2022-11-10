@@ -102,5 +102,28 @@ namespace CameraTrackingAppv3
             rect.Height += wideY ;
             return rect;
         }
+
+        public static OpenCvSharp.Point RectCenter(OpenCvSharp.Rect rect)
+        {
+            var ans = new OpenCvSharp.Point();
+            ans.X = rect.X + (rect.Width >> 1);
+            ans.Y = rect.Y + (rect.Height >> 1);
+            return ans;
+        }
+
+        public static OpenCvSharp.Point cvtPointForm2CV(System.Drawing.Point point)
+        {
+            return new OpenCvSharp.Point(point.X, point.Y);
+        }
+
+        public static System.Drawing.Point cvtCV2Form(OpenCvSharp.Point point)
+        {
+            return new System.Drawing.Point(point.X, point.Y);
+        }
+
+        public static double GetDistanceSquared(double x,double y)
+        {
+            return x * y;
+        }
     }
 }

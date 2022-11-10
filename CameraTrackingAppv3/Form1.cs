@@ -33,7 +33,7 @@ namespace CameraTrackingAppv3
         delegate void ControlFormDelegate();
         string active_camera_id = "";
         Mat camera_frame = new Mat();
-        Tracker mouse_tracker;
+        GeneralTracker mouse_tracker;
         public Form1()
         {
             InitializeComponent();
@@ -51,7 +51,8 @@ namespace CameraTrackingAppv3
             removeWatcher = new ManagementEventWatcher(removeQuery);
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
-            mouse_tracker = new Tracker();
+
+
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -196,6 +197,8 @@ namespace CameraTrackingAppv3
             active_camera_id = deviceID[index];
         }
 
+
+        bool f_first_camera = true;
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (!f_set_up)
@@ -214,15 +217,28 @@ namespace CameraTrackingAppv3
             if (capture.Read(camera_frame))
             {
                 f_infrared_mode = DetectColorORGray(camera_frame);
+                if (f_first_camera)
+                {
+                    mouse_tracker = new GeneralTracker(f_infrared_mode);
+                    f_first_camera = false;
+                }
 
                 if (f_control_active)
                 {
-                    mouse_tracker.Update(f_infrared_mode,camera_frame);
+                    // mouse_tracker.Update(f_infrared_mode,camera_frame);
+                    if (mouse_tracker.Update(camera_frame))
+                    {
+                        CursorControl.MoveCursor(mouse_tracker.GetCenterPoint);
+                    }
+
                 }
                 if (f_camera_visible)
+                {
+                    mouse_tracker.Draw(camera_frame, OpenCvSharp.Scalar.Green);
                     using (Bitmap bitmap = BitmapConverter.ToBitmap(camera_frame))
                     using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size[0], comform_picture_size[1]))
                         graphics.DrawImage(resize_bitmap, comform_picture_offset[0], comform_picture_offset[1], comform_picture_size[0], comform_picture_size[1]);
+                }
             }
             else
             {
@@ -233,7 +249,6 @@ namespace CameraTrackingAppv3
                 capture = null;
                 Utils.Alert_Error("カメラからの画像読み取りができませんでした");
             }
-            
 
         }
 
@@ -298,7 +313,7 @@ namespace CameraTrackingAppv3
             using (var resize = frame.Resize(new OpenCvSharp.Size(10, 10)))
             {
                 var bgr = resize.Mean();
-                if (Math.Abs(bgr[0] - bgr[1]) < 0.1 && Math.Abs(bgr[2] - bgr[1]) < 0.1)
+                if (Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
                 {
                     return true;
                 }
