@@ -85,21 +85,21 @@ namespace CameraTrackingAppv3
 
         }
 
-        public static Rect RectScale(Rect rect,double scale)
+        public static Rect RectScale(Rect rect,double scaleX,double scaleY)
         {
-            int w = (int)(rect.Width * scale);
-            int h = (int)(rect.Height * scale);
+            int w = (int)(rect.Width * scaleX);
+            int h = (int)(rect.Height * scaleY);
             return RectWide(rect, w, h);
         }
 
         public static Rect RectWide(Rect rect,int wideX,int wideY)
         {
-            int w = wideX >> 1;
-            int h = wideY >> 1;
-            rect.X -= w;
-            rect.Y -= h;
-            rect.Width += wideX ;
-            rect.Height += wideY ;
+            var cp = RectCenter(rect);
+
+            rect.X = cp.X - (wideX >> 1);
+            rect.Y = cp.Y - (wideY >> 1);
+            rect.Width = wideX ;
+            rect.Height = wideY ;
             return rect;
         }
 
@@ -123,7 +123,7 @@ namespace CameraTrackingAppv3
 
         public static double GetDistanceSquared(double x,double y)
         {
-            return x * y;
+            return x*x + y*y;
         }
     }
 }
