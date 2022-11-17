@@ -35,8 +35,17 @@ namespace CameraTrackingAppv3
             Mat hist = new Mat();
             Cv2.CalcHist(new Mat[] { gray }, new int[] { 0 }, null, hist, 1, new int[] { 256 }, new Rangef[] { new Rangef(0, 256) });
             Cv2.Normalize(hist, hist);
-           // return cvtMat2IntArray(hist);
-            return cvtMat2FloatArray(hist);
+            var f = cvtMat2FloatArray(hist);
+            // return cvtMat2IntArray(hist);
+          //  float max_v = 0;
+         //   foreach (var i in f)
+          //      if (max_v < i)
+          //          max_v = i;
+
+         //   for (int i = 0; i < f.Length; i++)
+         //       f[i] = f[i] * 10/max_v;
+
+            return f;
         }
 
         static public Mat GetHist2d(float[] hist_list)

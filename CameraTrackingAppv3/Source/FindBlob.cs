@@ -11,7 +11,7 @@ namespace CameraTrackingAppv3
         {
             var wh = rect.Width / (double)rect.Height;
 
-            return 0.5 <= wh && wh <= 2;
+            return 0.6 <= wh && wh <= 1.6;
         }
 
         static bool BlobFilter_2(Mat binary, Rect rect, int threshold)
@@ -45,11 +45,12 @@ namespace CameraTrackingAppv3
             return BlobFilter_2(binary, rect, threshold);
         }
 
-        static public bool Rect(Mat gray, int threshold, out Rect blob_rect)
+        static public bool Rect(Mat gray, int threshold, out Rect blob_rect, int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
-            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode);
+            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
+
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
 
             foreach (var contour in contours)
@@ -67,12 +68,14 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
-        static public bool Rect(Mat gray, int threshold, int pre_area, out Rect blob_rect)
+        static public bool Rect(Mat gray, int threshold, int pre_area, out Rect blob_rect,int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
             int min_diff = int.MaxValue;
-            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode);
+            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
+            Cv2.ImShow("binaryyyy", binary);
+            Cv2.ImShow("erode", erode);
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
 
             foreach (var contour in contours)
@@ -83,6 +86,40 @@ namespace CameraTrackingAppv3
                 {
                     ans = true;
                     var diff = Math.Abs(area - pre_area);
+                    if (min_diff > diff)
+                    {
+                        blob_rect = rect;
+                        min_diff = diff;
+                    }
+                }
+            }
+
+            binary.Dispose();
+            erode.Dispose();
+            return ans;
+        }
+
+        static public bool Rect(Mat gray, int threshold, int pre_area,Point pre_point,Point clip_topleft, out Rect blob_rect, int iteration = 1)
+        {
+            blob_rect = new Rect();
+            bool ans = false;
+            double min_diff = double.MaxValue;
+            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode, iteration);
+            Cv2.ImShow("binaryyyy", binary);
+            Cv2.ImShow("erode", erode);
+            Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+
+            foreach (var contour in contours)
+            {
+                var rect = Cv2.BoundingRect(contour);
+                var area = rect.Width * rect.Height;
+                if (BlobFlilter(rect, area, pre_area, binary, threshold))
+                {
+                    ans = true;
+                    var p = new Point(rect.X + clip_topleft.X + (rect.Width>>1), 
+                                      rect.Y + clip_topleft.Y + (rect.Height>>1));
+                    var dis_p = p - pre_point;
+                    var diff = Utils.GetDistanceSquared(dis_p.X,dis_p.Y);//Math.Abs(area - pre_area);
                     if (min_diff > diff)
                     {
                         blob_rect = rect;

@@ -125,5 +125,73 @@ namespace CameraTrackingAppv3
         {
             return x*x + y*y;
         }
+
+
+        public static List<int> GetInflectionPoint(float[] p)
+        {
+            List<int> ans = new List<int>();
+            var pre_p = p[2];
+            var pre_d_p = p[2] - p[1];
+            var pre_dd_p = (p[2] - p[1]) - (p[1] - p[0]);
+            for (int i = 3; i < p.Length; i++)
+            {
+                var d_p = p[i] - pre_p;
+                
+
+                var dd_p = d_p - pre_d_p;
+              //  Utils.WriteLine("p:" + p[i].ToString() + " dp:" + d_p.ToString() + " ddp:" + dd_p.ToString());
+                //    Utils.WriteLine("ddp:" + d_p.ToString() + " pddp:" + pre_d_p.ToString());
+                if (-1.2< d_p && d_p < -0.5 && dd_p >0  && pre_dd_p > 0)// dd_p > 100 && pre_d_p < -50 && pre_dd_p >50)//&& pre_dd_p < -100)
+                {
+                   // Utils.WriteLine("p:"+p[i].ToString() + " dp:" + d_p.ToString() + " ddp:" + dd_p.ToString());
+                    ans.Add(i);
+                }
+                pre_p = p[i];
+                pre_d_p = d_p;
+                pre_dd_p = dd_p;
+            }
+
+            return ans;
+
+        }
+
+        public static bool FindJustThreshold(float[] p ,int otsu_threshold,out int out_threshold)
+        {
+            out_threshold = 0;
+            var pre_p = p[2];
+            var pre_d_p = p[2] - p[1];
+            var pre_dd_p = (p[2] - p[1]) - (p[1] - p[0]);
+            for (int i = 3; i < p.Length; i++)
+            {
+                var d_p = p[i] - pre_p;
+                pre_p = p[i];
+
+                var dd_p = d_p - pre_d_p;
+                pre_d_p = d_p;
+
+                if (otsu_threshold < i && -1.2 < d_p && d_p < -0.5 && dd_p > 0 && pre_dd_p > 0)
+                {
+                    out_threshold = i;
+                    return true;
+                }
+
+                pre_dd_p = dd_p;
+            }
+
+            return false;
+        }
+
+        public static float[] NormalizArray(float[] a,float max_value = 1f)
+        {
+            float max_v = 0;
+            foreach (var i in a)
+                if (max_v < i)
+                    max_v = i;
+
+            for (int i = 0; i < a.Length; i++)
+                a[i] = a[i] * max_value / max_v;
+            return a;
+        }
+
     }
 }
