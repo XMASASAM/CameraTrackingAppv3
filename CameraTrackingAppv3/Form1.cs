@@ -234,7 +234,7 @@ namespace CameraTrackingAppv3
                 }
                 if (f_camera_visible)
                 {
-                    mouse_tracker.Draw(camera_frame, OpenCvSharp.Scalar.Green);
+                    mouse_tracker.Draw(camera_frame);
                     using (Bitmap bitmap = BitmapConverter.ToBitmap(camera_frame))
                     using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size[0], comform_picture_size[1]))
                         graphics.DrawImage(resize_bitmap, comform_picture_offset[0], comform_picture_offset[1], comform_picture_size[0], comform_picture_size[1]);

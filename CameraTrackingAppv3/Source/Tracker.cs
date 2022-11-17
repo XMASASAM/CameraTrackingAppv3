@@ -12,8 +12,9 @@ namespace CameraTrackingAppv3
         protected Rect pre_rect;
         protected int pre_area;
         protected Vec2d center_point;
+        protected bool f_error = false;
         public Vec2d GetCenterPoint { get { return center_point; } }
-
+        public bool IsError { get { return f_error; } }
         public virtual bool Update(Mat frame)
         {
             bool ok = false;
@@ -21,6 +22,7 @@ namespace CameraTrackingAppv3
             {
                 if (f_first)
                 {
+                    CursorControl.Init();
                     ok = First(gray);
                     f_first = !ok;
                 }
@@ -34,7 +36,12 @@ namespace CameraTrackingAppv3
             {
                 center_point.Item0 = pre_rect.X + pre_rect.Width * 0.5;
                 center_point.Item1 = pre_rect.Y + pre_rect.Height * 0.5;
-
+                f_error = false;
+            }
+            else
+            {
+                f_error = true;
+                f_first = true;
             }
             return ok;
         }
@@ -49,7 +56,7 @@ namespace CameraTrackingAppv3
             OpenCvSharp.Point cp = Utils.RectCenter(pre_rect);
             frame.Circle(cp, 4, color, 4);
         }
-
+        
 
 
 
@@ -81,6 +88,14 @@ namespace CameraTrackingAppv3
             tracker.Draw(frame,color);
         }
 
+        public void Draw(Mat frame)
+        {
+            if (tracker.IsError)
+                tracker.Draw(frame, Scalar.Red);
+            else
+                tracker.Draw(frame, Scalar.Green);
+        }
+
         public Vec2d
             GetCenterPoint { get { return tracker.GetCenterPoint; } }
 
@@ -106,7 +121,7 @@ namespace CameraTrackingAppv3
             bool ok = false;
             using (var roi = new Mat(gray, pre_rect))
             {
-                ok = FindBlob.Rect(roi, 150, pre_area, out var rect);
+                ok = FindBlob.Rect(roi, 200, pre_area, out var rect);
                 if (ok)
                 {
                     rect.X += pre_rect.X;

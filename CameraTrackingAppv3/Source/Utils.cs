@@ -193,5 +193,13 @@ namespace CameraTrackingAppv3
             return a;
         }
 
+        public static double Grap(double min,double value,double max)
+        {
+            return Math.Max(Math.Min(value, max), min);
+        }
+
+        public static int ScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
+        public static int ScreenHeight { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height; } }
+
     }
 }

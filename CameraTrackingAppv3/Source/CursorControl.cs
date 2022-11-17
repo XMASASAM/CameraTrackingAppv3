@@ -76,13 +76,20 @@ namespace CameraTrackingAppv3
 
             pre_sensor_point = sensor_point;
 
-            location += dx;
-
+            location.Item0 += dx.Item0;
+            location.Item1 -= dx.Item1;
+            location.Item0 = Utils.Grap(0,location.Item0,Utils.ScreenWidth);
+            location.Item1 = Utils.Grap(0,location.Item1,Utils.ScreenHeight);
+            //Math.Min(Math.Max(location.Item0,),);
             //MouseControl.Move((int)dx.Item0,- (int)dx.Item1);
-            MouseControl.SetLocation((int)location.Item0, -(int)location.Item1);
+            MouseControl.SetLocation((int)location.Item0, (int)location.Item1);
         }
 
-
+        static public void Init()
+        {
+            f_first = true;
+            f_first_2 = true;
+        }
 
     }
 }
