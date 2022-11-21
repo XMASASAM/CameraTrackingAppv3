@@ -63,6 +63,10 @@ namespace CameraTrackingAppv3
             }
         }
 
+        public void DisplayFPS(int fps)
+        {
+            label1.Text = "FPS:" + fps.ToString();
+        }
 
     }
 }

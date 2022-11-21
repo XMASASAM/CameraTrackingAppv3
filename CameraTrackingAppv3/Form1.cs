@@ -34,6 +34,8 @@ namespace CameraTrackingAppv3
         string active_camera_id = "";
         Mat camera_frame = new Mat();
         GeneralTracker mouse_tracker;
+        CountFPS countFPS;
+        Form3 form3;
         public Form1()
         {
             InitializeComponent();
@@ -51,7 +53,7 @@ namespace CameraTrackingAppv3
             removeWatcher = new ManagementEventWatcher(removeQuery);
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
-
+            countFPS = new CountFPS();
 
         }
 
@@ -133,6 +135,9 @@ namespace CameraTrackingAppv3
                 Utils.Alert_Error("カメラを開けませんでした");
                 return;
             }
+
+            Utils.CameraWidth = capture.FrameWidth;
+            Utils.CameraHeight = capture.FrameHeight;
 
 
             SetResizeParams(pictureBox1.Width, pictureBox1.Height);
@@ -216,6 +221,12 @@ namespace CameraTrackingAppv3
 
             if (capture.Read(camera_frame))
             {
+                countFPS.Update();
+                if (form3 != null)
+                {
+                    form3.DisplayFPS(countFPS.Get);
+                }
+
                 f_infrared_mode = DetectColorORGray(camera_frame);
                 if (f_first_camera)
                 {
@@ -226,10 +237,11 @@ namespace CameraTrackingAppv3
                 if (f_control_active)
                 {
                     // mouse_tracker.Update(f_infrared_mode,camera_frame);
-                    if (mouse_tracker.Update(camera_frame))
-                    {
-                        CursorControl.MoveCursor(mouse_tracker.GetCenterPoint);
-                    }
+                    mouse_tracker.Update(camera_frame);
+                    CursorControl.Update(mouse_tracker.IsError, mouse_tracker.Velocity);
+                 /*   {
+                        CursorControl.MoveCursor(mouse_tracker.Velocity);
+                    }*/
 
                 }
                 if (f_camera_visible)
@@ -260,7 +272,7 @@ namespace CameraTrackingAppv3
                 return;
             }
 
-            var form3 = new Form3(this);
+            form3 = new Form3(this);
             form3.Show();
             insertWatcher.Stop();
             removeWatcher.Stop();
