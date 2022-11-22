@@ -14,35 +14,25 @@ using System.Management;
 using System.Threading;
 namespace CameraTrackingAppv3
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form,IDrawFrameForm
     {
         VideoCapture capture;
-        Graphics graphics;
         ManagementEventWatcher insertWatcher;
         ManagementEventWatcher removeWatcher;
         List<string> deviceID = new List<string>();
-        Vec2i comform_picture_offset = new Vec2i(0,0);
-        Vec2i comform_picture_size =  new Vec2i(0,0);
-        double scale;
-        bool f_set_up = false;
         bool f_start_up = false;
-        bool f_camera_visible = true;
-        bool f_control_active = false;
-        bool f_infrared_mode = true;
-
         delegate void ControlFormDelegate();
         string active_camera_id = "";
-        Mat camera_frame = new Mat();
-        GeneralTracker mouse_tracker;
-        CountFPS countFPS;
         Form3 form3;
         public Form1()
         {
             InitializeComponent();
-            //TODO:aaaaa
             LoadDeviceList();
-            label1.Visible = false;
-            SetCameraOutPut(pictureBox1.CreateGraphics());
+
+            userControl11.VisibleCameraName(false);
+            userControl11.VisibleFPS(false);
+            //Main.current_picture_control = userControl11;
+            Main.ChangeDisplayCameraForm(this, userControl11);
 
             WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
             insertWatcher = new ManagementEventWatcher(insertQuery);
@@ -53,7 +43,6 @@ namespace CameraTrackingAppv3
             removeWatcher = new ManagementEventWatcher(removeQuery);
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
-            countFPS = new CountFPS();
 
         }
 
@@ -72,6 +61,7 @@ namespace CameraTrackingAppv3
             f_start_up = true;
             var thread = new Thread(new ParameterizedThreadStart(ComformCamera));
             thread.Start(selected_index);
+            userControl11.VisibleFPS(false);
 
         }
 
@@ -109,11 +99,15 @@ namespace CameraTrackingAppv3
         void ComformCamera(object index)
         {
             var p = this.Location;
-            p.X += pictureBox1.Location.X + (int)(pictureBox1.Width * 0.2);
-            p.Y += pictureBox1.Location.Y + (int)(pictureBox1.Height * 0.4);
-            Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert),"カメラを起動",p);
-            graphics.Clear(BackColor);
-            f_set_up = false;
+            var cp = userControl11.GetPictureBoxCenterPoint();
+            p.X += userControl11.Location.X + cp.X;
+            p.Y += userControl11.Location.Y + cp.Y;
+
+            Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert), "カメラを起動",p);
+
+            userControl11.DisplayClear();//.PictureClear();
+
+            Main.ReSetVideoCapture();
 
             if (capture != null)
             {
@@ -136,14 +130,17 @@ namespace CameraTrackingAppv3
                 return;
             }
 
+            
+
             Utils.CameraWidth = capture.FrameWidth;
             Utils.CameraHeight = capture.FrameHeight;
 
 
-            SetResizeParams(pictureBox1.Width, pictureBox1.Height);
+            
+            Main.SetUpVideoCapture(capture, userControl11.PictureWidth, userControl11.PictureHeight);
 
-
-            f_set_up = true;
+         //   Main.f_set_up = true;
+         //   Main.SetVideoCapture(capture);
             f_start_up = false;
             Utils.WriteLine("確認プロセス完了");
             Invoke(new Utils.InvokeString(Utils.CloseLoadAlert), "カメラを起動");
@@ -153,12 +150,6 @@ namespace CameraTrackingAppv3
         }
         void LoadDeviceList()
         {
-
-        /*    string pre_id = null;
-            if (comboBox1.Items.Count > 0)
-            {
-                pre_id = deviceID[comboBox1.SelectedIndex];
-            }*/
 
 
             comboBox1.Items.Clear();
@@ -197,71 +188,18 @@ namespace CameraTrackingAppv3
 
         void DisplayActiveCamera(int index)
         {
-            label1.Text = "起動中:" + comboBox1.Items[index];
-            label1.Visible = true;
+            //   label1.Text = "起動中:" + comboBox1.Items[index];
+            //    label1.Visible = true;
+            userControl11.SetCameraName((string)comboBox1.Items[index]);
+            userControl11.VisibleCameraName(true);
+            userControl11.VisibleFPS(true);
             active_camera_id = deviceID[index];
         }
 
 
-        bool f_first_camera = true;
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (!f_set_up)
-            {
-                label1.Visible = false;
-                return;
-            }
-
-
-            if (camera_frame != null)
-            {
-                camera_frame.Dispose();
-                camera_frame = new Mat();
-            }
-
-            if (capture.Read(camera_frame))
-            {
-                countFPS.Update();
-                if (form3 != null)
-                {
-                    form3.DisplayFPS(countFPS.Get);
-                }
-
-                f_infrared_mode = DetectColorORGray(camera_frame);
-                if (f_first_camera)
-                {
-                    mouse_tracker = new GeneralTracker(f_infrared_mode);
-                    f_first_camera = false;
-                }
-
-                if (f_control_active)
-                {
-                    // mouse_tracker.Update(f_infrared_mode,camera_frame);
-                    mouse_tracker.Update(camera_frame);
-                    CursorControl.Update(mouse_tracker.IsError, mouse_tracker.Velocity);
-                 /*   {
-                        CursorControl.MoveCursor(mouse_tracker.Velocity);
-                    }*/
-
-                }
-                if (f_camera_visible)
-                {
-                    mouse_tracker.Draw(camera_frame);
-                    using (Bitmap bitmap = BitmapConverter.ToBitmap(camera_frame))
-                    using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size[0], comform_picture_size[1]))
-                        graphics.DrawImage(resize_bitmap, comform_picture_offset[0], comform_picture_offset[1], comform_picture_size[0], comform_picture_size[1]);
-                }
-            }
-            else
-            {
-                f_set_up = false;
-                graphics.Clear(BackColor);
-                capture.Release();
-                capture.Dispose();
-                capture = null;
-                Utils.Alert_Error("カメラからの画像読み取りができませんでした");
-            }
-
+            Main.Update();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -271,70 +209,24 @@ namespace CameraTrackingAppv3
                 Utils.Alert_Note("カメラを起動してください");
                 return;
             }
-
-            form3 = new Form3(this);
-            form3.Show();
+            Form form;
+            if (true)
+            {
+                form = new Form4(this);
+            }
+            else
+            {
+                form = new Form3(this);
+            }
+           // form3 = new Form3(this);
+            form.Show();
             insertWatcher.Stop();
             removeWatcher.Stop();
             this.Visible = false;
         }
 
-        public void SetCameraOutPut(Graphics graphics)
+        public void DrawFrame(ref Mat frame)
         {
-            this.graphics = graphics;
         }
-
-        public void SetResizeParams(int out_width,int out_height)
-        {
-            int w = capture.FrameWidth;
-            int h = capture.FrameHeight;
-            Utils.ZoomFitSize(w, h, out_width,out_height, out int ox, out int oy, out int rw, out int rh, out double scale);
-            comform_picture_offset[0] = ox;
-            comform_picture_offset[1] = oy;
-            comform_picture_size[0] = rw;
-            comform_picture_size[1] = rh;
-            this.scale = scale;
-        }
-
-        public bool IsCameraVisible { get { return f_camera_visible; }
-            set
-            {
-                f_camera_visible = value;
-            }
-        }
-
-        public bool IsInfraredMode { get { return f_infrared_mode; } }
-
-        public Mat GetCameraFrame()
-        {
-            return camera_frame;
-        }
-
-        public void BeginControl()
-        {
-            f_control_active = true;
-        }
-
-        public void StopControl()
-        {
-            f_control_active = false;
-        }
-
-        public bool DetectColorORGray(Mat frame)
-        {
-            using (var resize = frame.Resize(new OpenCvSharp.Size(10, 10)))
-            {
-                var bgr = resize.Mean();
-                if (Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
     }
 }

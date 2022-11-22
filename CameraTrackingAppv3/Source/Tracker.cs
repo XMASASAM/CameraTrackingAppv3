@@ -31,7 +31,7 @@ namespace CameraTrackingAppv3
             tracker.Draw(frame, color);
         }
 
-        public void Draw(Mat frame)
+        public void Draw(ref Mat frame)
         {
             if (!tracker.IsActive) return;
 

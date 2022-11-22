@@ -16,6 +16,9 @@ namespace CameraTrackingAppv3
 {
     static class Utils
     {
+
+        
+
         static Dictionary<string, Form2> loadalert = new Dictionary<string, Form2>();//   Form2 loadalert = null;
         public delegate void InvokeInt(int send);
         public delegate void InvokeString(string send);
@@ -50,12 +53,12 @@ namespace CameraTrackingAppv3
         }
 
 
-        public static void ShowLoadAlert(string title,System.Drawing.Point start_locate)
+        public static void ShowLoadAlert(string title,System.Drawing.Point center_locate)
         {
             if (loadalert.ContainsKey(title))
                 return;
 
-            loadalert.Add(title, new Form2(title,start_locate));
+            loadalert.Add(title, new Form2(title,center_locate));
             loadalert[title].Show();
             WriteLine("Load Start:" + title);
         }
