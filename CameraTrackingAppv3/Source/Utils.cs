@@ -24,6 +24,14 @@ namespace CameraTrackingAppv3
         public delegate void InvokeString(string send);
         public delegate void InvokeVoid();
         public delegate void InvokeLoadAlert(string title,System.Drawing.Point start_point);
+        public static readonly int ScreenWidthHalf;
+        public static readonly int ScreenHeightHalf;
+
+        static Utils()
+        {
+            ScreenWidthHalf = ScreenWidth >> 1;
+            ScreenHeightHalf = ScreenHeight >> 1;
+        }
 
         public static void WriteLine(string msg)
         {
@@ -130,11 +138,21 @@ namespace CameraTrackingAppv3
             return new System.Drawing.Point(point.X, point.Y);
         }
 
+        public static OpenCvSharp.Point cvtVec2d2Point(Vec2d point)
+        {
+            return new OpenCvSharp.Point((int)point.Item0, (int)point.Item1);
+        }
+
         public static double GetDistanceSquared(double x,double y)
         {
             return x*x + y*y;
         }
 
+        public static double GetDistanceSquared(Vec2d p1,Vec2d p2)
+        {
+            var p = p1 - p2;
+            return GetDistanceSquared(p.Item0, p.Item1);
+        }
 
         public static List<int> GetInflectionPoint(float[] p)
         {
@@ -220,6 +238,7 @@ namespace CameraTrackingAppv3
         }
         public static int ScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
         public static int ScreenHeight { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height; } }
+        
 
         public static int CameraWidth { get; set; }
         public static int CameraHeight { get; set; }

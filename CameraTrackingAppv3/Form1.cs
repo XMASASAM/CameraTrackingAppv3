@@ -14,7 +14,7 @@ using System.Management;
 using System.Threading;
 namespace CameraTrackingAppv3
 {
-    public partial class Form1 : Form,IDrawFrameForm
+    public partial class Form1 : Form,IFormUpdate
     {
         VideoCapture capture;
         ManagementEventWatcher insertWatcher;
@@ -24,6 +24,8 @@ namespace CameraTrackingAppv3
         delegate void ControlFormDelegate();
         string active_camera_id = "";
         Form3 form3;
+        public UserControl1 UserControl { get { return userControl11; } }
+
         public Form1()
         {
             InitializeComponent();
@@ -32,7 +34,7 @@ namespace CameraTrackingAppv3
             userControl11.VisibleCameraName(false);
             userControl11.VisibleFPS(false);
             //Main.current_picture_control = userControl11;
-            Main.ChangeDisplayCameraForm(this, userControl11);
+            Main.ChangeDisplayCameraForm(this);
 
             WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
             insertWatcher = new ManagementEventWatcher(insertQuery);
@@ -225,8 +227,9 @@ namespace CameraTrackingAppv3
             this.Visible = false;
         }
 
-        public void DrawFrame(ref Mat frame)
+        public void FormUpdate(ref Mat frame)
         {
+            Main.DisplayCamera(frame);
         }
     }
 }

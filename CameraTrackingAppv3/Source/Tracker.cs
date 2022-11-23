@@ -41,9 +41,7 @@ namespace CameraTrackingAppv3
                 tracker.Draw(frame, Scalar.Green);
         }
 
-     //   public Vec2d
-     //       GetCenterPoint
-     //   { get { return tracker.GetCenterPoint; } }
+        public Vec2d CenterPoint{ get { return tracker.CenterPoint; } }
 
         public Vec2d Velocity { get { return tracker.Velocity; } }
 
@@ -58,10 +56,10 @@ namespace CameraTrackingAppv3
         protected bool f_active = false;
        // protected Rect pre_rect;
        // protected int pre_area;
-       // protected Vec2d center_point;
+        protected Vec2d center_point;
        // protected Vec2d pre_center_point;
         protected bool f_error = true;
-       // public Vec2d GetCenterPoint { get { return center_point; } }
+        public Vec2d CenterPoint { get { return center_point; } }
 
         public Vec2d Velocity { get; protected set; }
 
@@ -120,7 +118,7 @@ namespace CameraTrackingAppv3
         int wide = 50;
         Rect pre_rect;
         int pre_area;
-        Vec2d center_point;
+     //   Vec2d center_point;
         Vec2d pre_center_point;
         protected override bool First(Mat gray)
         {
@@ -213,7 +211,7 @@ namespace CameraTrackingAppv3
             }
 
             face_rect = Utils.RectScale(face_rect, 0.7, 0.8);
-
+            center_point = Utils.RectCenter2Vec2d(face_rect);
             face_rect_point = new Point2f(face_rect.X, face_rect.Y);
             face_rect_width = face_rect.Width;
             face_rect_height = face_rect.Height;
@@ -272,6 +270,8 @@ namespace CameraTrackingAppv3
             face_rect.Height = face_rect_height;
             face_rect = Utils.RectGrap(face_rect, new Rect(0, 0, Utils.CameraWidth, Utils.CameraHeight));
 
+
+            center_point = Utils.RectCenter2Vec2d(face_rect);
 
             using(var clip = new Mat(gray, face_rect))
             {

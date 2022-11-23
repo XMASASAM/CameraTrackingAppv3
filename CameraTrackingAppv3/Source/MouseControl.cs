@@ -11,9 +11,11 @@ namespace CameraTrackingAppv3
     static class MouseControl
     {
         static Thread clicking;
+        public static bool IsControl { get; set; }
         static public OpenCvSharp.Point GetLocation { get { return Utils.cvtPointForm2CV(System.Windows.Forms.Cursor.Position); } }
-        static public void Move(int dx,int dy)
+        static public void Move(int dx, int dy)
         {
+            if (!IsControl) return;
             var p = System.Windows.Forms.Cursor.Position;
             p.X += dx;
             p.Y += dy;
@@ -22,11 +24,14 @@ namespace CameraTrackingAppv3
 
         static public void SetLocation(int x,int y)
         {
-            System.Windows.Forms.Cursor.Position = new System.Drawing.Point(x,y);
+            if (!IsControl) return;
+            System.Windows.Forms.Cursor.Position = new System.Drawing.Point(x, y);
         }
 
         static public void Click(MouseState state)
         {
+            if (!IsControl) return;
+
             if (clicking != null && clicking.IsAlive)
                 clicking.Abort();
 

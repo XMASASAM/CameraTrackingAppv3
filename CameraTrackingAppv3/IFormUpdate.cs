@@ -4,9 +4,9 @@ using System.Text;
 using OpenCvSharp;
 namespace CameraTrackingAppv3
 {
-    interface IDrawFrameForm
+    interface IFormUpdate
     {
-
-        void DrawFrame(ref Mat frame);
+        UserControl1 UserControl { get; }
+        void FormUpdate(ref Mat frame);
     }
 }

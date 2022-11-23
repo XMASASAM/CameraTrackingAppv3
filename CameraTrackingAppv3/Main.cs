@@ -21,20 +21,22 @@ namespace CameraTrackingAppv3
 
         static bool f_set_up = false;
 
-        public static bool f_camera_visible = true;
-        public static bool f_control_active = false;
+
         static bool f_infrared_mode = true;
         static bool f_first_camera = true;
-
+        static bool f_set_range_of_motion = false;
 
         static UserControl1 current_picture_control;
-        static Form current_form;
+       // static Form current_form;
         static GeneralTracker mouse_tracker;
         static CountFPS countFPS;
 
-        delegate void DrawFrame(ref Mat frame);
-        static DrawFrame draw_frame = null;
+        delegate void FormUpdate(ref Mat frame);
+        static FormUpdate form_update = null;
         static public GeneralTracker Tracker { get { return mouse_tracker; } }
+
+        static Vec2d[] range_of_motion = new Vec2d[4];
+        static int step_range_of_motion = 0;
 
         static Main()
         {
@@ -65,31 +67,14 @@ namespace CameraTrackingAppv3
                 current_picture_control.SetFPS(countFPS.Get);
 
                 f_infrared_mode = DetectColorORGray(camera_frame);
+
                 if (f_first_camera)
-                {
-                    mouse_tracker = new GeneralTracker(f_infrared_mode);
-                    f_first_camera = false;
-                }
+                    Sub_FirstCamera();
 
-                if (f_control_active)
-                {
-                    mouse_tracker.Update(camera_frame);
-                    CursorControl.Update(mouse_tracker.IsError, mouse_tracker.Velocity);
 
-                }
+                if (form_update != null)
+                    form_update(ref camera_frame);
 
-                if (f_camera_visible)
-                {
-                    // if(f_control_active)mouse_tracker.Draw(ref camera_frame);
-                    //DrawFrame(ref camera_frame);
-                    if (draw_frame != null)
-                        draw_frame(ref camera_frame);
-
-                    using (Bitmap bitmap = BitmapConverter.ToBitmap(camera_frame))
-                    using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size.X, comform_picture_size.Y))
-                        current_picture_control.DrawImage(bitmap, comform_picture_offset, comform_picture_size);
-                  
-                }
             }
             else
             {
@@ -144,13 +129,49 @@ namespace CameraTrackingAppv3
             }
         }
 
-        public static void ChangeDisplayCameraForm<T>(T form,UserControl1 userControl1)where T:IDrawFrameForm
+        public static void ChangeDisplayCameraForm<T>(T form)where T:IFormUpdate
         {
             //current_form = form;
-            draw_frame = form.DrawFrame;
-            current_picture_control = userControl1;
+            form_update = form.FormUpdate;
+            current_picture_control = form.UserControl;//userControl1;
         }
 
+        public static void SetRangeOfMotion()
+        {
+            f_set_range_of_motion = true;
+            step_range_of_motion = 0;
+        }
+
+        public static void CloseSetRangeOfMotion()
+        {
+            f_set_range_of_motion = false;
+            step_range_of_motion = 0;
+        }
+
+        static void Sub_FirstCamera()
+        {
+            mouse_tracker = new GeneralTracker(f_infrared_mode);
+            f_first_camera = false;
+        }
+
+        static void Sub_ControlActive()
+        {
+
+        }
+
+        public static void DisplayCamera(Mat frame)
+        {
+            using (Bitmap bitmap = BitmapConverter.ToBitmap(frame))
+          //  using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size.X, comform_picture_size.Y))
+                current_picture_control.DrawImage(bitmap, comform_picture_offset, comform_picture_size);
+        }
+
+        
+        static void Sub_SetRangeOfMotion()
+        {
+
+
+        }
 
     }
 }
