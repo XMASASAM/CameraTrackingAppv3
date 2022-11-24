@@ -186,7 +186,8 @@ namespace CameraTrackingAppv3
 
 
             var axis_x = (range[1] + range[2]) * 0.5 - (range[0] + range[3]) * 0.5;
-            var axis_y = (range[0] + range[1]) * 0.5 - (range[3] + range[2]) * 0.5;
+            //var axis_y = (range[0] + range[1]) * 0.5 - (range[3] + range[2]) * 0.5;
+            var axis_y = (range[3] + range[2]) * 0.5 - (range[0] + range[1]) * 0.5;
 
             var dis_x = Math.Sqrt(Utils.GetDistanceSquared(axis_x.Item0, axis_x.Item1));
             var dis_y = Math.Sqrt(Utils.GetDistanceSquared(axis_y.Item0, axis_y.Item1));
