@@ -9,7 +9,7 @@ namespace CameraTrackingAppv3
         static bool f_first = true;
       //  static bool f_control_mouse = true;
         static Vec2d pre_dx;
-        static float[] IncreaseFactor = new float[30];
+        static double[] IncreaseFactor = new double[31];
         static Vec2d location;
         static double speed;
         static Point mouse_vel;
@@ -18,8 +18,10 @@ namespace CameraTrackingAppv3
         static System.Diagnostics.Stopwatch dwell_time;
         static bool f_range_of_motion = false;
         static Vec2d[] range_of_motion;
-        static Vec2d cursor_magnification;
+        static Vec2d cursor_magnification = new Vec2d(14,14);
         static Vec2d[] cursor_normal_axis = new Vec2d[2];
+        static double velo_mag = 1;
+        static double move_threshold = 0.5;
         public static bool IsStay { get { return f_cursor_stay; } }
         public static bool IsStayImpulse { get; private set; }
 
@@ -32,9 +34,11 @@ namespace CameraTrackingAppv3
 
         static CursorControl()
         {
-            float factor1 = 1.5f;
-            float factor2 = 2f;
-            float factor3 = 2.5f;
+
+            /*
+            var factor1 = 1.5;
+            var factor2 = 2;
+            var factor3 = 2.5;
             for (int i = 0; i < IncreaseFactor.Length; i++)
                 IncreaseFactor[i] = 1;
 
@@ -45,9 +49,24 @@ namespace CameraTrackingAppv3
                 IncreaseFactor[i] *= factor2;
 
             for (int i = 13; i < IncreaseFactor.Length; i++)
-                IncreaseFactor[i] *= factor3;
-
+                IncreaseFactor[i] *= factor3;*/
+            SetIncreaseFactor(1.5, 2, 2.5);
             dwell_time = new System.Diagnostics.Stopwatch();
+        }
+
+        static void SetIncreaseFactor(double factor1,double factor2,double factor3)
+        {
+            for (int i = 0; i < IncreaseFactor.Length; i++)
+                IncreaseFactor[i] = 1;
+
+            for (int i = 3; i < IncreaseFactor.Length; i++)
+                IncreaseFactor[i] *= factor1;
+
+            for (int i = 10; i < IncreaseFactor.Length; i++)
+                IncreaseFactor[i] *= factor2;
+
+            for (int i = 13; i < IncreaseFactor.Length; i++)
+                IncreaseFactor[i] *= factor3;
         }
 
         static public void Init()
@@ -67,29 +86,39 @@ namespace CameraTrackingAppv3
             pre_dx = dx;
 
 
-            speed = Utils.GetDistanceSquared(dx.Item0, dx.Item1);
 
-            var k = Math.Min(0.8f * speed + 4f,14);
+            var k = 0.8f * speed  + 4f;
+      //      var k_x = Math.Min(k,cursor_magnification.Item0);
+      //      var k_y = Math.Min(k,cursor_magnification.Item1);
 
-            dx *= k;
+      //      var ik = Math.Min((int)speed, 30);
+         //   dx.Item0 *= IncreaseFactor[ik];//k_x;
+        //    dx *= IncreaseFactor[ik];//k_x;
+          //  dx.Item1 *= //k_y;
+            dx *= Math.Min(k,14) * velo_mag;
 
            // Utils.WriteLine("speed:" + k.ToString());
-            if(speed <= 0.5)
+           /* if(speed <= 0.5)
             {
                 dx.Item0 = 0;
                 dx.Item1 = 0;
-            }
+            }*/
 
             return dx;
         }
 
         static public void MoveCursor(Vec2d sensor_center,Vec2d sensor_velocity)
         {
-            if (f_range_of_motion)
+            speed = Utils.GetDistanceSquared(sensor_velocity.Item0, sensor_velocity.Item1);
+           // speed = Math.Sqrt(speed);
+
+
+          //  Utils.WriteLine("speed:" + speed.ToString());
+            if (f_range_of_motion)// && speed >=1)
             {
                 var Xx = cursor_normal_axis[0].Item0;
                 var Xy = cursor_normal_axis[0].Item1;
-                var Yx = cursor_normal_axis[1].Item0; 
+                var Yx = cursor_normal_axis[1].Item0;
                 var Yy = cursor_normal_axis[1].Item1;
 
                 var sx = sensor_center.Item0 - RangeOfMotionCenterPoint.Item0;
@@ -110,12 +139,49 @@ namespace CameraTrackingAppv3
 
                 var axisX = upa / lowa;
 
-                location.Item0 = axisX * cursor_magnification.Item0 + Utils.ScreenWidthHalf;
-                location.Item1 = axisY * cursor_magnification.Item1 + Utils.ScreenHeightHalf;
-                
+                var range_point = new Vec2d(axisX * cursor_magnification.Item0 + Utils.ScreenWidthHalf,
+                    axisY * cursor_magnification.Item1 + Utils.ScreenHeightHalf
+                    );
+
+                var range_dx = range_point - location;
+                //   location.Item0 = axisX * cursor_magnification.Item0 + Utils.ScreenWidthHalf;
+                //   location.Item1 = axisY * cursor_magnification.Item1 + Utils.ScreenHeightHalf;
+                if (speed > move_threshold)
+                {
+
+                    var dx = cvtSensor2Delta(sensor_velocity);
+
+                 //   location.Item0 += dx.Item0;
+                //    location.Item1 += dx.Item1;
+
+                    var n_range_dx = Utils.NormalizVec2d(range_dx);
+                    var n_dx = Utils.NormalizVec2d(dx);
+
+                    var n_range_inner_dx = n_dx * Math.Max(0,range_dx.Item0 * n_dx.Item0 + range_dx.Item1 * n_dx.Item1);
+                    //var cos = Math.Max(0,n_range_dx.Item0 * n_dx.Item0 + n_range_dx.Item1 * n_dx.Item1-0.5);
+
+
+                    var range_sp = Math.Sqrt(speed) / 10;
+                    //Utils.WriteLine("sp:" + sp.ToString());
+                    //range_sp = Utils.Grap(0, range_sp - 0.1 / velo_mag, 1);// * cos; //Math.Min(sp, 1);
+                    range_sp = Utils.Grap(0, range_sp - 0.1/velo_mag, 1);// * cos; //Math.Min(sp, 1);
+                                                          //   location = range_point * sp + location * (1 - sp);
+                   // range_sp = 0.2;
+                 //   location = range_point * range_sp + location * (1 - range_sp);
+
+                    location += n_range_inner_dx * range_sp + dx * (1 - range_sp);
+                }
+
+
+            //    location.Item0 =  * range_point.Item0 + 0.5 * location.Item0;
+             //   location.Item1 = 0.5 * range_point.Item1 + 0.5 * location.Item1;
+
             }
             else
             {
+                if (speed <= move_threshold)
+                    return;
+
                 var dx = cvtSensor2Delta(sensor_velocity);
 
                 location.Item0 += dx.Item0;
@@ -187,7 +253,9 @@ namespace CameraTrackingAppv3
 
             var axis_x = (range[1] + range[2]) * 0.5 - (range[0] + range[3]) * 0.5;
             //var axis_y = (range[0] + range[1]) * 0.5 - (range[3] + range[2]) * 0.5;
-            var axis_y = (range[3] + range[2]) * 0.5 - (range[0] + range[1]) * 0.5;
+            var axis_y = new Vec2d(axis_x.Item1,- axis_x.Item0);//(range[3] + range[2]) * 0.5 - (range[0] + range[1]) * 0.5;
+
+
 
             var dis_x = Math.Sqrt(Utils.GetDistanceSquared(axis_x.Item0, axis_x.Item1));
             var dis_y = Math.Sqrt(Utils.GetDistanceSquared(axis_y.Item0, axis_y.Item1));
@@ -210,8 +278,14 @@ namespace CameraTrackingAppv3
             cursor_magnification.Item1 = Utils.ScreenHeight /
               Math.Sqrt( Math.Min(Utils.GetDistanceSquared(range[0], range[3]), Utils.GetDistanceSquared(range[1], range[2])));
 
-
-
+            var k = Math.Max(cursor_magnification.Item0,cursor_magnification.Item1);
+           // cursor_magnification = new Vec2d(k, k);
+            Utils.WriteLine("k:" + k.ToString());
+            velo_mag = k / 15;
+            move_threshold = 0.3 / (velo_mag * velo_mag);
+           // k /= 20;
+           // 1.5, 2, 2.5
+           // SetIncreaseFactor(1.5*k, 2*k, 2.5*k);
         }
 
     }

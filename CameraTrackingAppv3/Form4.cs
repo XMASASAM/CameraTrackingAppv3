@@ -90,8 +90,10 @@ namespace CameraTrackingAppv3
                 Utils.Alert_Note("初期設定が完了していません");
                 return;
             }
+            CursorControl.Init();
             CursorControl.SetRangeOfMotion(range_of_motion);
             CursorControl.IsRangeOfMotion = true;
+
             var form = new Form3(form1);
 
             form.Show();

@@ -23,7 +23,11 @@ namespace CameraTrackingAppv3
         {
             InitializeComponent();
             this.form1 = form1;
+
+            CursorControl.Init();
             MouseControl.IsControl = true;
+            
+
         }
         private void Form3_Load(object sender, EventArgs e)
         {
@@ -31,6 +35,7 @@ namespace CameraTrackingAppv3
             //  form1.SetResizeParams(pictureBox1.Width, pictureBox1.Height);
             // Main.current_picture_control = userControl11;
             Main.ChangeDisplayCameraForm(this);
+            
             pre_form_height = this.Size.Height;
         }
         private void button2_Click(object sender, EventArgs e)

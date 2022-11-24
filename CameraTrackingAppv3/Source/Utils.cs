@@ -220,6 +220,11 @@ namespace CameraTrackingAppv3
             return a;
         }
 
+        public static Vec2d NormalizVec2d(Vec2d vec)
+        {
+            return vec / Math.Sqrt(GetDistanceSquared(vec.Item0, vec.Item1));
+        }
+
         public static double Grap(double min,double value,double max)
         {
             return Math.Max(Math.Min(value, max), min);
