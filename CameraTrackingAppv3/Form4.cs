@@ -52,7 +52,7 @@ namespace CameraTrackingAppv3
 
             if (!f_done)
             {
-                if (CursorControl.IsStayImpulse)
+                if (CursorControl.IsDwellImpulse)
                 {
                     range_of_motion[step_range_of_motion++] = Main.Tracker.CenterPoint;
                 }

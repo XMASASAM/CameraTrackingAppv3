@@ -16,7 +16,7 @@ namespace CameraTrackingAppv3
         bool f_control_active = false;
         bool f_tracker_visible = true;
         bool f_range_of_motion_visible = true;
-
+        Form5 form5;
         public UserControl1 UserControl { get { return userControl11; } }
 
         public Form3(Form1 form1)
@@ -26,8 +26,8 @@ namespace CameraTrackingAppv3
 
             CursorControl.Init();
             MouseControl.IsControl = true;
+            ControlBox = false;
             
-
         }
         private void Form3_Load(object sender, EventArgs e)
         {
@@ -66,7 +66,20 @@ namespace CameraTrackingAppv3
         private void button4_Click(object sender, EventArgs e)
         {
             //form1.BeginControl();
-            f_control_active = true;
+            f_control_active = !f_control_active;
+
+            if (f_control_active)
+            {
+                form5 = new Form5();
+                form5.Show();
+            }
+            else
+            {
+                if (form5 != null)
+                    form5.Close();
+            }
+
+
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -74,25 +87,42 @@ namespace CameraTrackingAppv3
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var r = MessageBox.Show("このソフトウェアを終了します", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
 
-            if(r == DialogResult.OK)
-            {
-                form1.Close();
-            }
-            else
-            {
-                e.Cancel = true;
-            }
         }
+        /*     private void Form3_FormClosing(object sender, FormClosingEventArgs e)
+             {
+
+                 var r = MessageBox.Show("このソフトウェアを終了します", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+
+                 if (r == DialogResult.OK)
+                 {
+                     form1.Close();
+                 }
+                 else
+                 {
+                     e.Cancel = true;
+                 }
+             }*/
 
         public void FormUpdate(ref Mat frame)
         {
+            MouseControl.IsCursorOnForm = ClientRectangle.Contains(
+                Form.MousePosition.X - Location.X,
+                Form.MousePosition.Y - Location.Y);
+
+        /*    if (temp_mof)
+            {
+                MouseControl.IsCursorOnForm = true;
+            }*/
 
             if (f_control_active)
             {
                 Main.Tracker.Update(frame);
                 CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CenterPoint ,Main.Tracker.Velocity);
+                if (form5 != null)
+                {
+                    form5.Update();
+                }
             }
 
             if (f_camera_visible)
@@ -130,6 +160,13 @@ namespace CameraTrackingAppv3
             frame.Circle(cp, 5, Scalar.Yellow, 4);
 
         }
+
+        private void Form3_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            form1.Close();
+        }
+
+
 
         /*  public void DisplayFPS(int fps)
           {

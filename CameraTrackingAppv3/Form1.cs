@@ -201,6 +201,7 @@ namespace CameraTrackingAppv3
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+
             Main.Update();
         }
 

@@ -8,6 +8,7 @@ namespace CameraTrackingAppv3
     {
         LeftClick = 0,
         RightClick,
+        DoubleClick,
         Drag,
         ScrollUp,
         ScrollDown

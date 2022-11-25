@@ -13,6 +13,12 @@ namespace CameraTrackingAppv3
         static Thread clicking;
         public static bool IsControl { get; set; }
         static public OpenCvSharp.Point GetLocation { get { return Utils.cvtPointForm2CV(System.Windows.Forms.Cursor.Position); } }
+
+        static bool f_drag = false;
+        static bool f_on_form = false;
+
+        public static bool IsCursorOnForm { get { return f_on_form; } set { f_on_form = value; } }
+
         static public void Move(int dx, int dy)
         {
             if (!IsControl) return;
@@ -32,12 +38,24 @@ namespace CameraTrackingAppv3
         {
             if (!IsControl) return;
 
-            if (clicking != null && clicking.IsAlive)
-                clicking.Abort();
+            if (f_drag)
+            {
+                f_drag = false;
+
+                if(!f_on_form)
+                    return;
+            }
 
 
             clicking = new Thread(new ParameterizedThreadStart(Clicking));
-            clicking.Start(state);
+
+            var input_state = state;
+            if (f_on_form)
+            {
+                input_state = MouseState.LeftClick;
+            }
+
+            clicking.Start(input_state);
         }
 
         private const int MOUSEEVENTF_LEFTDOWN = 0x2;
@@ -48,11 +66,11 @@ namespace CameraTrackingAppv3
         [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
         static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
-        static bool f_clicking_lock = false;
+
         static void Clicking(object state)
         {
             MouseState sub = (MouseState)state;
-            f_clicking_lock = true;
+           // f_clicking_lock = true;
             if (sub == MouseState.LeftClick)
             {
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -65,28 +83,41 @@ namespace CameraTrackingAppv3
                 Thread.Sleep(10);
                 mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
             }
+            else if(sub == MouseState.DoubleClick)
+            {
+                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                Thread.Sleep(10);
+                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+
+                Thread.Sleep(10);
+
+                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                Thread.Sleep(10);
+                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+            }
             else if (sub == MouseState.Drag)
             {
-                
+                f_drag = true;
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                while (f_clicking_lock) Thread.Sleep(1);
+                while (f_drag) Thread.Sleep(1);
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
             }
             else if (sub == MouseState.ScrollUp)
             {
-
-                while (f_clicking_lock)
+              //  f_clicking_lock = true;
+                while (CursorControl.IsDwell)
                 {
                     mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 10, 0);
                     Thread.Sleep(1);
                 }
             }
+
             else if (sub == MouseState.ScrollDown)
             {
-
-                while (f_clicking_lock)
+              //  f_clicking_lock = true;
+                while (CursorControl.IsDwell)
                 {
-                    mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -1, 0);
+                    mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -10, 0);
                     Thread.Sleep(1);
                 }
             }

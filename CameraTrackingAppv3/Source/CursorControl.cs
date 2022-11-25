@@ -23,7 +23,9 @@ namespace CameraTrackingAppv3
         static double velo_mag = 1;
         static double move_threshold = 0.5;
         public static bool IsStay { get { return f_cursor_stay; } }
-        public static bool IsStayImpulse { get; private set; }
+
+        public static bool IsDwell { get; private set; }
+        public static bool IsDwellImpulse { get; private set; }
 
         public static Vec2d[] RangeOfMotionNormalAxis { get { return cursor_normal_axis; } }
         public static Vec2d RangeOfMotionCenterPoint { get; private set; }
@@ -158,6 +160,7 @@ namespace CameraTrackingAppv3
                     var n_dx = Utils.NormalizVec2d(dx);
 
                     var n_range_inner_dx = n_dx * Math.Max(0,range_dx.Item0 * n_dx.Item0 + range_dx.Item1 * n_dx.Item1);
+
                     //var cos = Math.Max(0,n_range_dx.Item0 * n_dx.Item0 + n_range_dx.Item1 * n_dx.Item1-0.5);
 
 
@@ -220,7 +223,7 @@ namespace CameraTrackingAppv3
 
             f_cursor_stay = (mouse_vel.X == 0 && mouse_vel.Y == 0);
 
-            IsStayImpulse = false;
+            IsDwellImpulse = false;
 
             if (f_cursor_stay)
             {
@@ -229,14 +232,17 @@ namespace CameraTrackingAppv3
 
                 if (dwell_time.ElapsedMilliseconds > 500)
                 {
-                    IsStayImpulse = true;
+                    IsDwell = true;
+                    IsDwellImpulse = true;
+
                     dwell_time.Reset();
 
-                    MouseControl.Click(MouseState.LeftClick);
+                  //  MouseControl.Click(MouseState.LeftClick);
                 }
             }
             else
             {
+                IsDwell = false;
                 if (f_pre_stay)
                     dwell_time.Reset();
             }
