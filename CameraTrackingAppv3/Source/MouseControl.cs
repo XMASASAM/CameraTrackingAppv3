@@ -25,13 +25,23 @@ namespace CameraTrackingAppv3
             var p = System.Windows.Forms.Cursor.Position;
             p.X += dx;
             p.Y += dy;
-            System.Windows.Forms.Cursor.Position = p;
+            SetLocation(p.X,p.Y);
+            //System.Windows.Forms.Cursor.Position = p;
         }
+
+        [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern void SetCursorPos(int X, int Y);
+
+
 
         static public void SetLocation(int x,int y)
         {
             if (!IsControl) return;
-            System.Windows.Forms.Cursor.Position = new System.Drawing.Point(x, y);
+
+           // var point = button2.Parent.PointToScreen(button2.Location); // button2の座標取得
+            SetCursorPos(x, y);
+
+            //System.Windows.Forms.Cursor.Position = new System.Drawing.Point(x, y);
         }
 
         static public void Click(MouseState state)
@@ -73,26 +83,27 @@ namespace CameraTrackingAppv3
            // f_clicking_lock = true;
             if (sub == MouseState.LeftClick)
             {
+
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(10);
+                Thread.Sleep(50);
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
             }
             else if (sub == MouseState.RightClick)
             {
                 mouse_event(MOUSEEVENTF_RIGHTTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(10);
+                Thread.Sleep(50);
                 mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
             }
             else if(sub == MouseState.DoubleClick)
             {
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(10);
+                Thread.Sleep(50);
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 
-                Thread.Sleep(10);
+                Thread.Sleep(50);
 
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(10);
+                Thread.Sleep(50);
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
             }
             else if (sub == MouseState.Drag)

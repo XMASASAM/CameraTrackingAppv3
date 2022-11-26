@@ -25,16 +25,26 @@ namespace CameraTrackingAppv3
         string active_camera_id = "";
         Form3 form3;
         public UserControl1 UserControl { get { return userControl11; } }
+        public string GetActiveCameraID { get { return active_camera_id; } }
 
+        SettingsConfig save_data;
+        bool loaded_settings;
         public Form1()
         {
             InitializeComponent();
-            LoadDeviceList();
 
             userControl11.VisibleCameraName(false);
             userControl11.VisibleFPS(false);
             //Main.current_picture_control = userControl11;
             Main.ChangeDisplayCameraForm(this);
+
+            loaded_settings = SettingsConfig.Load(out save_data);
+            if (loaded_settings)
+            {
+                //active_camera_id = save_data.CameraID;
+                CursorControl.SetRangeOfMotion(save_data.Range_of_motion);
+                CursorControl.IsRangeOfMotion = true;
+            }
 
             WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
             insertWatcher = new ManagementEventWatcher(insertQuery);
@@ -46,6 +56,12 @@ namespace CameraTrackingAppv3
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
 
+
+
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            LoadDeviceList();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -165,7 +181,11 @@ namespace CameraTrackingAppv3
                 comboBox1.SelectedIndex = 0;
 
 
-            if (!active_camera_id.Equals(""))
+            var find_id = active_camera_id;
+            if (loaded_settings) find_id = save_data.CameraID;
+
+
+            if (!find_id.Equals(""))
             {
                 for (int i = 0; i < deviceID.Count; i++)
                     if (deviceID[i].Equals(active_camera_id))
@@ -174,6 +194,15 @@ namespace CameraTrackingAppv3
                         break;
                     }
             }
+
+            if (loaded_settings)
+            {
+                if (comboBox1.SelectedIndex >= 0)
+                {
+                    this.button1_Click(null, EventArgs.Empty);
+                }
+            }
+
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -196,6 +225,13 @@ namespace CameraTrackingAppv3
             userControl11.VisibleCameraName(true);
             userControl11.VisibleFPS(true);
             active_camera_id = deviceID[index];
+
+            if (loaded_settings)
+            {
+                button2_Click(null, EventArgs.Empty);
+                //button2_Click(null, null);
+            }
+
         }
 
 
@@ -213,7 +249,8 @@ namespace CameraTrackingAppv3
                 return;
             }
             Form form;
-            if (true)
+
+            if (!loaded_settings)
             {
                 form = new Form4(this);
             }
@@ -232,5 +269,7 @@ namespace CameraTrackingAppv3
         {
             Main.DisplayCamera(frame);
         }
+
+
     }
 }

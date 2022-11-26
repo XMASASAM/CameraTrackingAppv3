@@ -51,42 +51,10 @@ namespace CameraTrackingAppv3
         new public void Update()
         {
             label1.Text = "OnMouse:" + MouseControl.IsCursorOnForm.ToString();
-           // MouseControl.f_clicking_lock = false;
-
-          /*  if (current_state == MouseState.Drag && CursorControl.IsDwell)
-            {
-                MouseControl.f_clicking_lock = true;
-
-            }*/
 
             if (CursorControl.IsDwellImpulse)
             {
-              //  var input_state = current_state;
-            /*    
-                else
-                {
-                    lock_switch = false;
-                }*/
-
-
-
-             //   var use_lock = (input_state == MouseState.Drag || input_state == MouseState.ScrollUp || input_state == MouseState.ScrollDown);
-
-
-             /*   if (use_lock && lock_switch)
-                {
-                    MouseControl.f_clicking_lock = false;
-                }
-                else
-                {*/
-             //       MouseControl.f_clicking_lock = use_lock;
                     MouseControl.Click(current_state);
-            //    }
-                /*
-                if (use_lock)
-                {
-                    lock_switch = !lock_switch;
-                }*/
 
             }
 

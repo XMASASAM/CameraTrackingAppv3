@@ -94,10 +94,22 @@ namespace CameraTrackingAppv3
             CursorControl.SetRangeOfMotion(range_of_motion);
             CursorControl.IsRangeOfMotion = true;
 
+
+
             var form = new Form3(form1);
 
             form.Show();
 
+
+            SettingsConfig settings = new SettingsConfig(range_of_motion,form1.GetActiveCameraID);
+            if (settings.Save())
+            {
+                Utils.WriteLine("正常に設定をセーブできました");
+            }
+            else
+            {
+                Utils.WriteLine(Utils.PathResource + "がありませんでした。なので作成しました。セーブしました");
+            }
             Close();
         }
 

@@ -106,9 +106,9 @@ namespace CameraTrackingAppv3
 
         public void FormUpdate(ref Mat frame)
         {
-            MouseControl.IsCursorOnForm = ClientRectangle.Contains(
+          /*  MouseControl.IsCursorOnForm = ClientRectangle.Contains(
                 Form.MousePosition.X - Location.X,
-                Form.MousePosition.Y - Location.Y);
+                Form.MousePosition.Y - Location.Y);*/
 
         /*    if (temp_mof)
             {
@@ -164,6 +164,28 @@ namespace CameraTrackingAppv3
         private void Form3_FormClosed(object sender, FormClosedEventArgs e)
         {
             form1.Close();
+        }
+
+        private void Form3_MouseLeave(object sender, EventArgs e)
+        {
+            MouseControl.IsCursorOnForm = false;
+        }
+
+        private void Form3_MouseEnter(object sender, EventArgs e)
+        {
+            MouseControl.IsCursorOnForm = true;
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+          //  var r = MessageBox.Show("このソフトウェアを終了します", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+
+         //   if (r == DialogResult.OK)
+         //   {
+                form1.Close();
+        //    }
+
         }
 
 

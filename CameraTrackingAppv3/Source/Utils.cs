@@ -248,5 +248,8 @@ namespace CameraTrackingAppv3
         public static int CameraWidth { get; set; }
         public static int CameraHeight { get; set; }
 
+        public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
+        
+
     }
 }
