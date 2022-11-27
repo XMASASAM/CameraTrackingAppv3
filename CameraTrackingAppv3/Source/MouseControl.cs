@@ -84,9 +84,22 @@ namespace CameraTrackingAppv3
             if (sub == MouseState.LeftClick)
             {
 
-                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                // mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                var inp = new NativeMethods.Input();
+                inp.Type = 0;
+                inp.ui.Mouse.X = 0;
+                inp.ui.Mouse.Y = 0;
+                inp.ui.Mouse.Data = 0;
+                inp.ui.Mouse.Flags = 0x2;
+                inp.ui.Mouse.ExtraInfo = (System.IntPtr)68;
+
+                NativeMethods.SendInput(1,ref inp,Marshal.SizeOf(inp));
                 Thread.Sleep(50);
-                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+
+                inp.ui.Mouse.Flags = 0x4;
+                // mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                NativeMethods.SendInput(1, ref inp, Marshal.SizeOf(inp));
+
             }
             else if (sub == MouseState.RightClick)
             {
