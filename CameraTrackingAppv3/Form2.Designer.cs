@@ -58,7 +58,9 @@ namespace CameraTrackingAppv3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(164, 55);
+            this.ControlBox = false;
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form2";

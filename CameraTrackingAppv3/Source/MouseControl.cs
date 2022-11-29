@@ -10,8 +10,10 @@ namespace CameraTrackingAppv3
 {
     static class MouseControl
     {
+        static int wait_time = 10;
+        static int wait_time_double = 10;
         static Thread clicking;
-        public static bool IsControl { get; set; }
+        public static bool IsControl { get; set; } = false;
         static public OpenCvSharp.Point GetLocation { get { return Utils.cvtPointForm2CV(System.Windows.Forms.Cursor.Position); } }
 
         static bool f_drag = false;
@@ -29,8 +31,7 @@ namespace CameraTrackingAppv3
             //System.Windows.Forms.Cursor.Position = p;
         }
 
-        [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern void SetCursorPos(int X, int Y);
+
 
 
 
@@ -39,7 +40,7 @@ namespace CameraTrackingAppv3
             if (!IsControl) return;
 
            // var point = button2.Parent.PointToScreen(button2.Location); // button2の座標取得
-            SetCursorPos(x, y);
+            NativeMethods.SetCursorPos(x, y);
 
             //System.Windows.Forms.Cursor.Position = new System.Drawing.Point(x, y);
         }
@@ -68,13 +69,7 @@ namespace CameraTrackingAppv3
             clicking.Start(input_state);
         }
 
-        private const int MOUSEEVENTF_LEFTDOWN = 0x2;
-        private const int MOUSEEVENTF_LEFTUP = 0x4;
-        private const int MOUSEEVENTF_RIGHTTDOWN = 0x8;
-        private const int MOUSEEVENTF_RIGHTUP = 0x10;
-        private const int MOUSEEVENTF_WHEEL = 0x800;
-        [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
 
 
         static void Clicking(object state)
@@ -83,62 +78,44 @@ namespace CameraTrackingAppv3
            // f_clicking_lock = true;
             if (sub == MouseState.LeftClick)
             {
-
-                // mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                var inp = new NativeMethods.Input();
-                inp.Type = 0;
-                inp.ui.Mouse.X = 0;
-                inp.ui.Mouse.Y = 0;
-                inp.ui.Mouse.Data = 0;
-                inp.ui.Mouse.Flags = 0x3;
-                inp.ui.Mouse.ExtraInfo = (System.IntPtr)69;
-
-                NativeMethods.SendInput(1,ref inp,Marshal.SizeOf(inp));
-                Thread.Sleep(50);
-
-                var inp2 = new NativeMethods.Input();
-                inp2.Type = 0;
-                inp2.ui.Mouse.X = 0;
-                inp2.ui.Mouse.Y = 0;
-                inp2.ui.Mouse.Data = 0;
-                inp2.ui.Mouse.Flags = 0x3;
-                inp2.ui.Mouse.ExtraInfo = (System.IntPtr)69;
-                inp2.ui.Mouse.Flags = 0x5;
-                // mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                NativeMethods.SendInput(1, ref inp2, Marshal.SizeOf(inp2));
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
+                Thread.Sleep(wait_time);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
 
             }
             else if (sub == MouseState.RightClick)
             {
-                mouse_event(MOUSEEVENTF_RIGHTTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(50);
-                mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+                MouseInput(NativeMethods.MOUSEEVENT.RIGHTTDOWN);
+                Thread.Sleep(wait_time);
+                MouseInput(NativeMethods.MOUSEEVENT.RIGHTUP);
             }
             else if(sub == MouseState.DoubleClick)
             {
-                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(50);
-                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
+                Thread.Sleep(wait_time);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
 
-                Thread.Sleep(50);
+                Thread.Sleep(wait_time_double);
 
-                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                Thread.Sleep(50);
-                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
+                Thread.Sleep(wait_time);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
+
             }
             else if (sub == MouseState.Drag)
             {
                 f_drag = true;
-                mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
                 while (f_drag) Thread.Sleep(1);
-                mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
             }
             else if (sub == MouseState.ScrollUp)
             {
               //  f_clicking_lock = true;
                 while (CursorControl.IsDwell)
                 {
-                    mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 10, 0);
+                    MouseInput(NativeMethods.MOUSEEVENT.WHEEL, 10);
+                   // mouse_event(MOUSEEVENTF_WHEEL, 0, 0, 10, 0);
                     Thread.Sleep(1);
                 }
             }
@@ -148,10 +125,25 @@ namespace CameraTrackingAppv3
               //  f_clicking_lock = true;
                 while (CursorControl.IsDwell)
                 {
-                    mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -10, 0);
+                    //   mouse_event(MOUSEEVENTF_WHEEL, 0, 0, -10, 0);
+                    MouseInput(NativeMethods.MOUSEEVENT.WHEEL, -10);
+
                     Thread.Sleep(1);
                 }
             }
+        }
+
+        static void MouseInput(NativeMethods.MOUSEEVENT flags,int data=0){
+            var inp = new NativeMethods.Input();
+
+            inp.Type = 0;
+            inp.ui.Mouse.X = 0;
+            inp.ui.Mouse.Y = 0;
+            inp.ui.Mouse.Data = data;
+            inp.ui.Mouse.Flags = (int)flags | 1 ;
+            inp.ui.Mouse.ExtraInfo = (System.IntPtr)69;
+
+            NativeMethods.SendInput(1, ref inp, Marshal.SizeOf(inp));
         }
 
     }

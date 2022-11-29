@@ -8,5 +8,6 @@ namespace CameraTrackingAppv3
     {
         UserControl1 UserControl { get; }
         void FormUpdate(ref Mat frame);
+
     }
 }

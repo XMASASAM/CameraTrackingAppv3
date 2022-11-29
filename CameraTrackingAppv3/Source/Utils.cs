@@ -23,7 +23,7 @@ namespace CameraTrackingAppv3
         public delegate void InvokeInt(int send);
         public delegate void InvokeString(string send);
         public delegate void InvokeVoid();
-        public delegate void InvokeLoadAlert(string title,System.Drawing.Point start_point);
+        public delegate void InvokeLoadAlert(string title,string message,Image image,System.Drawing.Point start_point,bool bottom);
         public static readonly int ScreenWidthHalf;
         public static readonly int ScreenHeightHalf;
 
@@ -61,12 +61,12 @@ namespace CameraTrackingAppv3
         }
 
 
-        public static void ShowLoadAlert(string title,System.Drawing.Point center_locate)
+        public static void ShowLoadAlert(string title,string message,Image image,System.Drawing.Point center_locate,bool bottom)
         {
             if (loadalert.ContainsKey(title))
                 return;
 
-            loadalert.Add(title, new Form2(title,center_locate));
+            loadalert.Add(title, new Form2(title,message,image,center_locate,bottom));
             loadalert[title].Show();
             WriteLine("Load Start:" + title);
         }
@@ -102,6 +102,12 @@ namespace CameraTrackingAppv3
             int h = (int)(rect.Height * scaleY);
             return RectWide(rect, w, h);
         }
+        public static Rect2d RectScale2d(Rect2d rect, double scaleX, double scaleY)
+        {
+            var w = (rect.Width * scaleX);
+            var h = (rect.Height * scaleY);
+            return RectWide(rect, w, h);
+        }
 
         public static Rect RectWide(Rect rect,int wideX,int wideY)
         {
@@ -114,6 +120,17 @@ namespace CameraTrackingAppv3
             return rect;
         }
 
+        public static Rect2d RectWide(Rect2d rect, double wideX, double wideY)
+        {
+            var cp = RectCenter2Point(rect);
+
+            rect.X = cp.X - (wideX *.5);
+            rect.Y = cp.Y - (wideY *.5);
+            rect.Width = wideX;
+            rect.Height = wideY;
+            return rect;
+        }
+
         public static OpenCvSharp.Point RectCenter2Point(OpenCvSharp.Rect rect)
         {
             var ans = new OpenCvSharp.Point();
@@ -122,7 +139,20 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
+        public static OpenCvSharp.Point2d RectCenter2Point(OpenCvSharp.Rect2d rect)
+        {
+            var ans = new OpenCvSharp.Point2d();
+            ans.X = rect.X + (rect.Width *.5);
+            ans.Y = rect.Y + (rect.Height*.5);
+            return ans;
+        }
+
         public static OpenCvSharp.Vec2d RectCenter2Vec2d(OpenCvSharp.Rect rect)
+        {
+            return new Vec2d(rect.X + rect.Width * 0.5, rect.Y + rect.Height * 0.5);
+        }
+
+        public static OpenCvSharp.Vec2d RectCenter2Vec2d(OpenCvSharp.Rect2d rect)
         {
             return new Vec2d(rect.X + rect.Width * 0.5, rect.Y + rect.Height * 0.5);
         }
@@ -241,6 +271,21 @@ namespace CameraTrackingAppv3
             value.Height = bottom - value.Y ;
             return value;
         }
+
+        public static Rect2d RectGrap(Rect2d value, Rect2d range)
+        {
+            var right = Grap(range.X, value.Right, range.Right);
+            var bottom = Grap(range.Y, value.Bottom, range.Bottom);
+
+            value.X = Grap(range.X, value.X, range.Right);
+            value.Y = Grap(range.Y, value.Y, range.Bottom);
+
+            value.Width = right - value.X;
+            value.Height = bottom - value.Y;
+            return value;
+        }
+
+
         public static int ScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
         public static int ScreenHeight { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height; } }
         

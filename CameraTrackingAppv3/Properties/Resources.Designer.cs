@@ -92,5 +92,45 @@ namespace CameraTrackingAppv3.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap pc_bottomleft {
+            get {
+                object obj = ResourceManager.GetObject("pc_bottomleft", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap pc_bottomright {
+            get {
+                object obj = ResourceManager.GetObject("pc_bottomright", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap pc_topleft {
+            get {
+                object obj = ResourceManager.GetObject("pc_topleft", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap pc_topright {
+            get {
+                object obj = ResourceManager.GetObject("pc_topright", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace CameraTrackingAppv3
         static Vec2d[] cursor_normal_axis = new Vec2d[2];
         static double velo_mag = 1;
         static double move_threshold = 0.5;
+        static Vec2d pre_valid_point;
         public static bool IsStay { get { return f_cursor_stay; } }
 
         public static bool IsDwell { get; private set; }
@@ -34,24 +35,16 @@ namespace CameraTrackingAppv3
 
         public static bool IsRangeOfMotion { get { return f_range_of_motion; } set { f_range_of_motion = value; } }
 
+        public static void SettingMode()
+        {
+            move_threshold = 0.5;
+            IsRangeOfMotion = false;
+            MouseControl.IsControl = false;
+
+        }
+
         static CursorControl()
         {
-
-            /*
-            var factor1 = 1.5;
-            var factor2 = 2;
-            var factor3 = 2.5;
-            for (int i = 0; i < IncreaseFactor.Length; i++)
-                IncreaseFactor[i] = 1;
-
-            for (int i = 5; i < IncreaseFactor.Length; i++)
-                IncreaseFactor[i] *= factor1;
-
-            for (int i = 10; i < IncreaseFactor.Length; i++)
-                IncreaseFactor[i] *= factor2;
-
-            for (int i = 13; i < IncreaseFactor.Length; i++)
-                IncreaseFactor[i] *= factor3;*/
             SetIncreaseFactor(1.5, 2, 2.5);
             dwell_time = new System.Diagnostics.Stopwatch();
         }
@@ -111,8 +104,12 @@ namespace CameraTrackingAppv3
 
         static public void MoveCursor(Vec2d sensor_center,Vec2d sensor_velocity)
         {
-            speed = Utils.GetDistanceSquared(sensor_velocity.Item0, sensor_velocity.Item1);
-           // speed = Math.Sqrt(speed);
+
+            speed = Utils.GetDistanceSquared(sensor_center, pre_valid_point);//
+           // speed = Utils.GetDistanceSquared(sensor_velocity.Item0, sensor_velocity.Item1);
+            // speed = Math.Sqrt(speed);
+           // Utils.WriteLine("valied:" + Utils.GetDistanceSquared(sensor_center, pre_valid_point).ToString());
+          //  Utils.WriteLine("velici:" + speed.ToString());
 
 
           //  Utils.WriteLine("speed:" + speed.ToString());
@@ -150,7 +147,7 @@ namespace CameraTrackingAppv3
                 //   location.Item1 = axisY * cursor_magnification.Item1 + Utils.ScreenHeightHalf;
                 if (speed > move_threshold)
                 {
-
+                    pre_valid_point = sensor_center;
                     var dx = cvtSensor2Delta(sensor_velocity);
 
                  //   location.Item0 += dx.Item0;
@@ -209,6 +206,7 @@ namespace CameraTrackingAppv3
                 location.Item0 = MouseControl.GetLocation.X;
                 location.Item1 = MouseControl.GetLocation.Y;
                 pre_mouse_point = MouseControl.GetLocation;
+                pre_valid_point = center;
                 f_first = false;
             }
 
@@ -288,10 +286,47 @@ namespace CameraTrackingAppv3
            // cursor_magnification = new Vec2d(k, k);
             Utils.WriteLine("k:" + k.ToString());
             velo_mag = k / 15;
-            move_threshold = 0.3 / (velo_mag * velo_mag);
+            move_threshold = 0.4 / (velo_mag * velo_mag);
            // k /= 20;
            // 1.5, 2, 2.5
            // SetIncreaseFactor(1.5*k, 2*k, 2.5*k);
+        }
+
+        public static void DisplayRangeOfMotion(ref Mat frame,Vec2d[] ps=null,Vec2d[] ax=null)
+        {
+
+           // Vec2d[] ax;//CursorControl.RangeOfMotionNormalAxis;
+            Point cp;// = Utils.cvtVec2d2Point(CursorControl.RangeOfMotionCenterPoint);
+            if (ps == null || ax==null)
+            {
+                ps = CursorControl.RangeOfMotion;
+                ax = CursorControl.RangeOfMotionNormalAxis;
+                cp = Utils.cvtVec2d2Point(CursorControl.RangeOfMotionCenterPoint);
+            }
+            else
+            {
+                cp = Utils.cvtVec2d2Point((ps[0] + ps[1] + ps[2] + ps[3]) * 0.25);
+            }
+
+            for (int i = 0; i < ps.Length; i++)
+            {
+                frame.Circle((int)ps[i].Item0, (int)ps[i].Item1, 4, Scalar.Yellow, 4);
+            }
+
+            
+
+            var a_x = Utils.cvtVec2d2Point(ax[0] * 100);
+            var a_y = Utils.cvtVec2d2Point(ax[1] * 100);
+            
+
+            frame.Line(cp - a_x, cp, Scalar.Yellow, 4);
+            frame.Line(cp + a_x, cp, Scalar.Yellow, 4);
+
+            frame.Line(cp - a_y, cp, Scalar.Yellow, 4);
+            frame.Line(cp + a_y, cp, Scalar.Yellow, 4);
+
+            frame.Circle(cp, 5, Scalar.Yellow, 4);
+
         }
 
     }

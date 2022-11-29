@@ -12,6 +12,25 @@ namespace CameraTrackingAppv3
 {
     public static class NativeMethods
     {
+        public enum MOUSEEVENT
+        {
+            LEFTDOWN = 0x2,
+            LEFTUP = 0x4,
+            RIGHTTDOWN = 0x8,
+            RIGHTUP = 0x10,
+            WHEEL = 0x800
+        }
+     /*   public const int MOUSEEVENTF_LEFTDOWN = 0x2;
+        public const int MOUSEEVENTF_LEFTUP = 0x4;
+        public const int MOUSEEVENTF_RIGHTTDOWN = 0x8;
+        public const int MOUSEEVENTF_RIGHTUP = 0x10;
+        public const int MOUSEEVENTF_WHEEL = 0x800;*/
+        [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
+        public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+        [DllImport("USER32.dll", CallingConvention = CallingConvention.StdCall)]
+        public static extern void SetCursorPos(int X, int Y);
+
         [DllImport("user32.dll", SetLastError = true)]
         public extern static void SendInput(int nInputs,ref Input pInputs, int cbsize);
 

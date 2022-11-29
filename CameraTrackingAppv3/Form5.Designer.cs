@@ -36,6 +36,7 @@ namespace CameraTrackingAppv3
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.button7 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -119,12 +120,22 @@ namespace CameraTrackingAppv3
             this.label1.TabIndex = 6;
             this.label1.Text = "label1";
             // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(573, 12);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(93, 86);
+            this.button7.TabIndex = 7;
+            this.button7.Text = "中心点の変更";
+            this.button7.UseVisualStyleBackColor = true;
+            // 
             // Form5
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(556, 130);
+            this.ClientSize = new System.Drawing.Size(679, 130);
             this.ControlBox = false;
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
@@ -151,5 +162,6 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button7;
     }
 }

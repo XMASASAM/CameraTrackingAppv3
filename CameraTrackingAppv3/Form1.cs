@@ -121,7 +121,7 @@ namespace CameraTrackingAppv3
             p.X += userControl11.Location.X + cp.X;
             p.Y += userControl11.Location.Y + cp.Y;
 
-            Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert), "カメラを起動",p);
+            Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert), "カメラを起動", "ロード中...", Properties.Resources.icon_loader_c_ww_01_s1,p,false);
 
             userControl11.DisplayClear();//.PictureClear();
 

@@ -57,6 +57,7 @@ namespace CameraTrackingAppv3
                 this.Size = new System.Drawing.Size(this.Size.Width,pre_form_height);
                 //  form1.IsCameraVisible = true;
                 f_camera_visible = true;
+
                 //pictureBox1.Visible = true;
                 userControl11.VisibleCameraName(true);
                 userControl11.VisiblePictureBox(true);
@@ -70,20 +71,24 @@ namespace CameraTrackingAppv3
 
             if (f_control_active)
             {
+                MouseControl.IsControl = true;
                 form5 = new Form5();
                 form5.Show();
             }
             else
             {
+                MouseControl.IsControl = false;
                 if (form5 != null)
                     form5.Close();
             }
 
 
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
-
+            Form6 form6 = new Form6(this,form1);
+            form6.Show();
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -131,13 +136,14 @@ namespace CameraTrackingAppv3
                     Main.Tracker.Draw(ref frame);
 
                 if (f_range_of_motion_visible)
-                    Sub_DisplayRangeOfMotion(ref frame);
+                    CursorControl.DisplayRangeOfMotion(ref frame);
+                   // Sub_DisplayRangeOfMotion(ref frame);
 
                 Main.DisplayCamera(frame);
             }
         }
 
-        public void Sub_DisplayRangeOfMotion(ref Mat frame)
+    /*    public void Sub_DisplayRangeOfMotion(ref Mat frame)
         {
             var ps = CursorControl.RangeOfMotion;
             for (int i = 0; i < ps.Length; i++)
@@ -159,7 +165,7 @@ namespace CameraTrackingAppv3
 
             frame.Circle(cp, 5, Scalar.Yellow, 4);
 
-        }
+        }*/
 
         private void Form3_FormClosed(object sender, FormClosedEventArgs e)
         {

@@ -181,11 +181,11 @@ namespace CameraTrackingAppv3
     {
         CascadeClassifier face_cas;
         Mat pre_gray;
-        Rect face_rect;
+        Rect2d face_rect;
         Point2f[] pre_features;
-        Point2f face_rect_point;
-        int face_rect_width;
-        int face_rect_height;
+        Point2d face_rect_point;
+        double face_rect_width;
+        double face_rect_height;
         public TrackerOpticalFlow()
         {
             string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
@@ -200,24 +200,24 @@ namespace CameraTrackingAppv3
             if (rects.Length == 0)
                 return false;
 
-            face_rect = new Rect(0, 0, 0, 0);
+            face_rect = new Rect2d(0, 0, 0, 0);
             foreach (var rect in rects)
             {
                 gray.Rectangle(rect, new Scalar(0, 0, 255), 2);
                 if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
                 {
-                    face_rect = rect;
+                    face_rect = new Rect2d(rect.X,rect.Y,rect.Width,rect.Height);
                 }
             }
 
-            face_rect = Utils.RectScale(face_rect, 0.7, 0.8);
+            face_rect = Utils.RectScale2d(face_rect, 0.7, 0.8);
             center_point = Utils.RectCenter2Vec2d(face_rect);
-            face_rect_point = new Point2f(face_rect.X, face_rect.Y);
+            face_rect_point = new Point2d(face_rect.X, face_rect.Y);
             face_rect_width = face_rect.Width;
             face_rect_height = face_rect.Height;
 
 
-            using (var clip = new Mat(gray, face_rect)) {
+            using (var clip = new Mat(gray, face_rect.ToRect())) {
                 pre_features = GetGoodFeatures(clip);
 
                 foreach(var p in pre_features)
@@ -239,7 +239,7 @@ namespace CameraTrackingAppv3
             List<Point2f> next_ps = new List<Point2f>();
             Point2f vel = new Point2f(0, 0);
             
-            using (var clip = new Mat(gray, face_rect)) {
+            using (var clip = new Mat(gray, face_rect.ToRect())) {
                 
                 Cv2.CalcOpticalFlowPyrLK(pre_gray, clip, pre_features, ref features,out var status,out _);
 
@@ -261,19 +261,19 @@ namespace CameraTrackingAppv3
             vel.X *= div_count;
             vel.Y *= div_count;
 
-            face_rect_point += vel;
+            face_rect_point += new Point2d(vel.X,vel.Y);
 
-            face_rect.X = (int)face_rect_point.X;
-            face_rect.Y = (int)face_rect_point.Y;
+            face_rect.X = face_rect_point.X;
+            face_rect.Y = face_rect_point.Y;
 
             face_rect.Width = face_rect_width;
             face_rect.Height = face_rect_height;
-            face_rect = Utils.RectGrap(face_rect, new Rect(0, 0, Utils.CameraWidth, Utils.CameraHeight));
+            face_rect = Utils.RectGrap(face_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
 
 
             center_point = Utils.RectCenter2Vec2d(face_rect);
 
-            using(var clip = new Mat(gray, face_rect))
+            using(var clip = new Mat(gray, face_rect.ToRect()))
             {
                 pre_gray.Dispose();
                 pre_gray = clip.Clone();
@@ -294,7 +294,7 @@ namespace CameraTrackingAppv3
             }
 
 
-            Velocity =new Vec2d( -(double)vel.X , (double)vel.Y );
+            Velocity =new Vec2d( -vel.X , vel.Y );
 
 
             return true;
@@ -302,7 +302,7 @@ namespace CameraTrackingAppv3
 
         public override void Draw(Mat frame, Scalar color)
         {
-            frame.Rectangle(face_rect,color,4);
+            frame.Rectangle(face_rect.ToRect(),color,4);
             var offset = face_rect_point.ToPoint();
             foreach (var p in pre_features)
                 frame.Circle(p.ToPoint() + offset, 4, color, 4);
