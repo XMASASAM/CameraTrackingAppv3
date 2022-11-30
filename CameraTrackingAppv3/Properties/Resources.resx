@@ -136,4 +136,7 @@
   <data name="pc_topright" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pc_topright.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="se_saa06" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\se_saa06.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

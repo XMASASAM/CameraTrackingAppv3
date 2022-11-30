@@ -24,13 +24,35 @@ namespace CameraTrackingAppv3
         public delegate void InvokeString(string send);
         public delegate void InvokeVoid();
         public delegate void InvokeLoadAlert(string title,string message,Image image,System.Drawing.Point start_point,bool bottom);
-        public static readonly int ScreenWidthHalf;
-        public static readonly int ScreenHeightHalf;
+        public static readonly int PrimaryScreenWidthHalf;
+        public static readonly int PrimaryScreenHeightHalf;
+        public static int PrimaryScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
+        public static int PrimaryScreenHeight { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height; } }
 
+        public static readonly int AllScreenWidth;
+        public static readonly int AllScreenHeight;
+        public static readonly int AllScreenWidthHalf;
+        public static readonly int AllScreenHeightHalf;
         static Utils()
         {
-            ScreenWidthHalf = ScreenWidth >> 1;
-            ScreenHeightHalf = ScreenHeight >> 1;
+            PrimaryScreenWidthHalf = PrimaryScreenWidth >> 1;
+            PrimaryScreenHeightHalf = PrimaryScreenHeight >> 1;
+
+            int bottom = 0;
+            int right = 0;
+
+            foreach(var screen_data in Screen.AllScreens)
+            {
+                bottom = Math.Max(screen_data.Bounds.Bottom, bottom);
+                right = Math.Max(screen_data.Bounds.Right, right);
+            }
+
+            AllScreenWidth = right;
+            AllScreenHeight = bottom;
+
+            AllScreenWidthHalf = AllScreenWidth >> 1;
+            AllScreenHeightHalf = AllScreenHeight >> 1;
+
         }
 
         public static void WriteLine(string msg)
@@ -250,9 +272,14 @@ namespace CameraTrackingAppv3
             return a;
         }
 
-        public static Vec2d NormalizVec2d(Vec2d vec)
+        public static Vec2d NormalizVec2d(Vec2d vec,out double distance)
         {
-            return vec / Math.Sqrt(GetDistanceSquared(vec.Item0, vec.Item1));
+            distance = Math.Sqrt(GetDistanceSquared(vec.Item0, vec.Item1));
+            if (distance == 0)
+            {
+                return new Vec2d(0, 0);
+            }
+            return vec / distance;
         }
 
         public static double Grap(double min,double value,double max)
@@ -286,8 +313,7 @@ namespace CameraTrackingAppv3
         }
 
 
-        public static int ScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
-        public static int ScreenHeight { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height; } }
+
         
 
         public static int CameraWidth { get; set; }

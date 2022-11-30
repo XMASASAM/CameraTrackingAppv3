@@ -78,28 +78,17 @@ namespace CameraTrackingAppv3
            // f_clicking_lock = true;
             if (sub == MouseState.LeftClick)
             {
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
-                Thread.Sleep(wait_time);
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
-
+                LeftClick();
             }
             else if (sub == MouseState.RightClick)
             {
-                MouseInput(NativeMethods.MOUSEEVENT.RIGHTTDOWN);
-                Thread.Sleep(wait_time);
-                MouseInput(NativeMethods.MOUSEEVENT.RIGHTUP);
+                RightClick();
             }
             else if(sub == MouseState.DoubleClick)
             {
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
-                Thread.Sleep(wait_time);
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
-
+                LeftClick();
                 Thread.Sleep(wait_time_double);
-
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
-                Thread.Sleep(wait_time);
-                MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
+                LeftClick();
 
             }
             else if (sub == MouseState.Drag)
@@ -144,6 +133,20 @@ namespace CameraTrackingAppv3
             inp.ui.Mouse.ExtraInfo = (System.IntPtr)69;
 
             NativeMethods.SendInput(1, ref inp, Marshal.SizeOf(inp));
+        }
+
+        static void LeftClick()
+        {
+            MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);
+            Thread.Sleep(wait_time);
+            MouseInput(NativeMethods.MOUSEEVENT.LEFTUP);
+        }
+
+        static void RightClick()
+        {
+            MouseInput(NativeMethods.MOUSEEVENT.RIGHTTDOWN);
+            Thread.Sleep(wait_time);
+            MouseInput(NativeMethods.MOUSEEVENT.RIGHTUP);
         }
 
     }

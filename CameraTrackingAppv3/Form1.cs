@@ -33,6 +33,7 @@ namespace CameraTrackingAppv3
         {
             InitializeComponent();
 
+
             userControl11.VisibleCameraName(false);
             userControl11.VisibleFPS(false);
             //Main.current_picture_control = userControl11;
@@ -62,6 +63,8 @@ namespace CameraTrackingAppv3
         private void Form1_Load(object sender, EventArgs e)
         {
             LoadDeviceList();
+            new DisplayInformation(this);
+
         }
 
         private void button1_Click(object sender, EventArgs e)

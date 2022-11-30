@@ -132,5 +132,14 @@ namespace CameraTrackingAppv3.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   System.IO.MemoryStream に類似した型 System.IO.UnmanagedMemoryStream のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream se_saa06 {
+            get {
+                return ResourceManager.GetStream("se_saa06", resourceCulture);
+            }
+        }
     }
 }

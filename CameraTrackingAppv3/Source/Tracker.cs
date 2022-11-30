@@ -210,22 +210,34 @@ namespace CameraTrackingAppv3
                 }
             }
 
+
+
+            var findfeatures_rect = Utils.RectScale2d(face_rect, .5, .5).ToRect();
+            using (var clip = new Mat(gray,findfeatures_rect)) {
+                pre_features = GetGoodFeatures(clip);
+
+            /*    foreach(var p in pre_features)
+                {
+                    clip.Circle((int)p.X,(int)p.Y, 2, Scalar.White, 2);
+                }*/
+            }
+
             face_rect = Utils.RectScale2d(face_rect, 0.7, 0.8);
             center_point = Utils.RectCenter2Vec2d(face_rect);
             face_rect_point = new Point2d(face_rect.X, face_rect.Y);
             face_rect_width = face_rect.Width;
             face_rect_height = face_rect.Height;
 
-
-            using (var clip = new Mat(gray, face_rect.ToRect())) {
-                pre_features = GetGoodFeatures(clip);
-
-                foreach(var p in pre_features)
-                {
-                    clip.Circle((int)p.X,(int)p.Y, 2, Scalar.White, 2);
-                }
-
+            using (var clip = new Mat(gray,face_rect.ToRect()))
+            {
                 pre_gray = clip.Clone();
+            }
+
+            var t = findfeatures_rect.Location - face_rect.Location;
+            Point2f dis =  new Point2f((float)t.X,(float)t.Y );
+            for(int i = 0; i<pre_features.Length; i++)
+            {
+                pre_features[i] += dis;
 
             }
 
@@ -283,7 +295,7 @@ namespace CameraTrackingAppv3
                 next_ps[i] -= vel;
 
 
-            if (next_ps.Count <= 10)
+            if (next_ps.Count <= 5)
             {
                 return false;
                // pre_features = GetGoodFeatures(pre_gray);
@@ -311,7 +323,7 @@ namespace CameraTrackingAppv3
 
         Point2f[] GetGoodFeatures(Mat mat)
         {
-            return Cv2.GoodFeaturesToTrack(mat, 80, 0.001, 10, null, 20, true, 1);
+            return Cv2.GoodFeaturesToTrack(mat, 20, 0.001, 10, null, 20, true, 1);
         }
 
     }
