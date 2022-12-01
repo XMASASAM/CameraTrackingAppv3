@@ -128,18 +128,26 @@ namespace CameraTrackingAppv3
                     var dx = cvtSensor2Delta(sensor_velocity);
 
 
-                    var n_dx = Utils.NormalizVec2d(dx,out var distance);
+                    //   var n_dx = Utils.NormalizVec2d(dx,out var distance);
+                    Vec2d n_dx_s;
+                    if (dx.Item0 == 0 && dx.Item1 == 0)
+                        n_dx_s = new Vec2d(0,0);
+                    else
+                        n_dx_s = dx / Utils.GetDistanceSquared(dx.Item0,dx.Item1);
 
                 //    var n_range_inner_dx = n_dx * Math.Max(0, range_dx.Item0 * n_dx.Item0 + range_dx.Item1 * n_dx.Item1);
-                    var n_range_inner = Math.Max(0, range_dx.Item0 * n_dx.Item0 + range_dx.Item1 * n_dx.Item1);
+                
+                    //    var n_range_inner = Math.Max(0, range_dx.Item0 * n_dx.Item0 + range_dx.Item1 * n_dx.Item1);
 
+                    var n_range_inner_s = Math.Max(0, range_dx.Item0 * n_dx_s.Item0 + range_dx.Item1 * n_dx_s.Item1);
 
                     var range_sp = speed / 100;
 
-                    range_sp = Utils.Grap(0, range_sp - 0.08 / velo_mag, 1);
+                    range_sp = Utils.Grap(0, range_sp - 0.08 / (velo_mag * velo_mag), 1);
 
 
-                    var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);
+                  //  var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);
+                    var k = Math.Max(n_range_inner_s * range_sp + (1 - range_sp),1);
 
                     //   var add_vel = n_range_inner_dx * range_sp + dx * (1 - range_sp);
                     //  var add_vel = k * n_dx;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
@@ -150,7 +158,7 @@ namespace CameraTrackingAppv3
                     //add_vel.Item0 = Math.Max(add_vel.Item0, dx.Item0);
                     //add_vel.Item1 = Math.Max(add_vel.Item1, dx.Item1);
 
-                    location += n_dx * k;//add_vel;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
+                    location += dx * k;//add_vel;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
                 }
 
 
