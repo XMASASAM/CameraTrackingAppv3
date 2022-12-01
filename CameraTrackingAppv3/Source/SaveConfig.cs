@@ -7,12 +7,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace CameraTrackingAppv3
 {
     [Serializable()]
-    public class SettingsConfig
+    public class SettingsConfig:IDisposable
     {
         static readonly string save_path = Utils.PathResource + "\\settings.config";
-        public Vec2d[] Range_of_motion { get; private set; }
+        public Vec2d[] Range_of_motion { get; set; } = null;
 
-        public string CameraID { get; private set; }
+        public string CameraID { get; set; } = "";
 
         static public string GetPathSave { get { return save_path; } }
 
@@ -26,6 +26,18 @@ namespace CameraTrackingAppv3
             this.Range_of_motion = range_of_motion;
             this.CameraID = camera_id;
         }
+
+        public SettingsConfig(SettingsConfig config)
+        {
+            Set(config);
+        }
+
+        public void Set(SettingsConfig config)
+        {
+            this.Range_of_motion = config.Range_of_motion;
+            this.CameraID = config.CameraID;
+        }
+
 
         public bool Save()
         {
@@ -64,6 +76,33 @@ namespace CameraTrackingAppv3
 
 
             return ok;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is SettingsConfig)) return false;
+
+            SettingsConfig a = (SettingsConfig)obj;
+
+            return (CameraID.Equals(a.CameraID) && Range_of_motion.Equals(a.Range_of_motion));
+                
+
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public void Dispose()
+        {
+        }
+
+
+        public void Adapt()
+        {
+            CursorControl.SetRangeOfMotion(Utils.Config.Range_of_motion);
+            CursorControl.IsRangeOfMotion = true;
         }
 
     }

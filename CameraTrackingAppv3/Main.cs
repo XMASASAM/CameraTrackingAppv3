@@ -24,7 +24,6 @@ namespace CameraTrackingAppv3
 
         static bool f_infrared_mode = true;
         static bool f_first_camera = true;
-        static bool f_set_range_of_motion = false;
 
         static UserControl1 current_picture_control;
        // static Form current_form;
@@ -36,7 +35,6 @@ namespace CameraTrackingAppv3
         static public GeneralTracker Tracker { get { return mouse_tracker; } }
 
         static Vec2d[] range_of_motion = new Vec2d[4];
-        static int step_range_of_motion = 0;
 
         static Main()
         {
@@ -46,19 +44,22 @@ namespace CameraTrackingAppv3
 
         public static void Update()
         {
+
             if (!f_set_up)
             {
                 if (current_picture_control != null)
                     current_picture_control.DisplayClear();
-                    //CurrentPictureControl.VisibleCameraName(false);
+                //CurrentPictureControl.VisibleCameraName(false);
                 return;
             }
 
 
             if (camera_frame != null)
                 camera_frame.Dispose();
-            
+
             camera_frame = new Mat();
+
+
 
             if (capture.Read(camera_frame))
             {
@@ -66,10 +67,10 @@ namespace CameraTrackingAppv3
 
                 current_picture_control.SetFPS(countFPS.Get);
 
-                f_infrared_mode = DetectColorORGray(camera_frame);
+             //   f_infrared_mode = DetectColorORGray(camera_frame);
 
                 if (f_first_camera)
-                    Sub_FirstCamera();
+                    Sub_FirstCamera(camera_frame);
 
 
                 if (form_update != null)
@@ -82,14 +83,29 @@ namespace CameraTrackingAppv3
                 current_picture_control.PictureClear();
                 capture.Release();
                 capture.Dispose();
-                capture = null;
+                //capture = null;
                 Utils.Alert_Error("カメラからの画像読み取りができませんでした");
             }
+                
+            
         }
 
         static public void SetUpVideoCapture(VideoCapture cap,int pictureBoxW,int pictureBoxH)
         {
-            capture = cap;
+            if (capture != null && !capture.IsDisposed)
+            {
+                lock (capture)
+                {
+                    capture.Release();
+                    capture.Dispose();
+                    capture = cap;
+                }
+            }
+            else
+            {
+                capture = cap;
+            }
+
             int w = capture.FrameWidth;
             int h = capture.FrameHeight;
             Utils.ZoomFitSize(w, h, pictureBoxW, pictureBoxH, out int ox, out int oy, out int rw, out int rh, out double _);
@@ -102,32 +118,10 @@ namespace CameraTrackingAppv3
 
         static public void ReSetVideoCapture()
         {
-            if (capture != null)
-            {
-                lock (capture)
-                {
-                    capture.Release();
-                    capture.Dispose();
-                }
-            }
             f_set_up = false;
         }
 
-        static public bool DetectColorORGray(Mat frame)
-        {
-            using (var resize = frame.Resize(new OpenCvSharp.Size(10, 10)))
-            {
-                var bgr = resize.Mean();
-                if (Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+
 
         public static void ChangeDisplayCameraForm<T>(T form)where T:IFormUpdate
         {
@@ -136,28 +130,12 @@ namespace CameraTrackingAppv3
             current_picture_control = form.UserControl;//userControl1;
         }
 
-        public static void SetRangeOfMotion()
+        static void Sub_FirstCamera(Mat frame)
         {
-            f_set_range_of_motion = true;
-            step_range_of_motion = 0;
-        }
-
-        public static void CloseSetRangeOfMotion()
-        {
-            f_set_range_of_motion = false;
-            step_range_of_motion = 0;
-        }
-
-        static void Sub_FirstCamera()
-        {
-            mouse_tracker = new GeneralTracker(f_infrared_mode);
+            mouse_tracker = new GeneralTracker(frame);
             f_first_camera = false;
         }
 
-        static void Sub_ControlActive()
-        {
-
-        }
 
         public static void DisplayCamera(Mat frame)
         {
@@ -166,12 +144,6 @@ namespace CameraTrackingAppv3
                 current_picture_control.DrawImage(bitmap, comform_picture_offset, comform_picture_size);
         }
 
-        
-        static void Sub_SetRangeOfMotion()
-        {
-
-
-        }
 
     }
 }

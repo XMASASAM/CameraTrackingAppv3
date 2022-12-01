@@ -143,7 +143,7 @@ namespace CameraTrackingAppv3
 
                     var range_sp = speed / 100;
 
-                    range_sp = Utils.Grap(0, range_sp - 0.08 / (velo_mag * velo_mag), 1);
+                    range_sp = Utils.Grap(0, range_sp - 0.1 / (velo_mag * velo_mag ), 1);
 
 
                   //  var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);

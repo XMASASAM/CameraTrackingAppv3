@@ -45,14 +45,14 @@ namespace CameraTrackingAppv3
             return BlobFilter_2(binary, rect, threshold);
         }
 
-        static public bool Rect(Mat gray, int threshold, out Rect blob_rect, int iteration = 1)
+        static public bool Rect(Mat gray, int threshold, out Vec2d center_point, out Rect blob_rect, int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
             ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
 
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
-
+            Point[] ans_ps = new Point[0];
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
@@ -60,24 +60,31 @@ namespace CameraTrackingAppv3
                 {
                     ans = true;
                     blob_rect = rect;
+                    ans_ps = contour;
                 }
             }
 
             binary.Dispose();
             erode.Dispose();
+
+            center_point = new Vec2d(0, 0);
+            if (ans)
+                center_point = GetCenterPoint(ans_ps);
+
+
             return ans;
         }
 
-        static public bool Rect(Mat gray, int threshold, int pre_area, out Rect blob_rect,int iteration = 1)
+        static public bool Rect(Mat gray, int threshold, int pre_area,out Vec2d center_point, out Rect blob_rect,int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
             int min_diff = int.MaxValue;
             ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
-            Cv2.ImShow("binaryyyy", binary);
-            Cv2.ImShow("erode", erode);
+          //  Cv2.ImShow("binaryyyy", binary);
+         //   Cv2.ImShow("erode", erode);
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
-
+            Point[] ans_ps = new Point[0];
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
@@ -90,25 +97,30 @@ namespace CameraTrackingAppv3
                     {
                         blob_rect = rect;
                         min_diff = diff;
+                        ans_ps = contour;
                     }
                 }
             }
 
             binary.Dispose();
             erode.Dispose();
+            center_point = new Vec2d(0, 0);
+            if (ans)
+                center_point = GetCenterPoint(ans_ps);
+            
             return ans;
         }
 
-        static public bool Rect(Mat gray, int threshold, int pre_area,Point pre_point,Point clip_topleft, out Rect blob_rect, int iteration = 1)
+        static public bool Rect(Mat gray, int threshold, int pre_area,Point pre_point,Point clip_topleft,out Vec2d center_point, out Rect blob_rect, int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
             double min_diff = double.MaxValue;
             ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode, iteration);
-            Cv2.ImShow("binaryyyy", binary);
-            Cv2.ImShow("erode", erode);
+       //     Cv2.ImShow("binaryyyy", binary);
+      //      Cv2.ImShow("erode", erode);
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
-
+            Point[] ans_ps = new Point[0];
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
@@ -124,13 +136,36 @@ namespace CameraTrackingAppv3
                     {
                         blob_rect = rect;
                         min_diff = diff;
+                        ans_ps = contour;
                     }
                 }
             }
 
             binary.Dispose();
             erode.Dispose();
+
+            center_point = new Vec2d(0, 0);
+            if (ans)
+                center_point = GetCenterPoint(ans_ps);
+
+
             return ans;
         }
+
+        static Vec2d GetCenterPoint(Point[] ps)
+        {
+            Vec2d ans = new Vec2d(0, 0);
+            foreach (var i in ps)
+            {
+                ans.Item0 += i.X;
+                ans.Item1 += i.Y;
+            }
+            var div_l = 1 / (double)ps.Length;
+            ans.Item0 *= div_l;
+            ans.Item1 *= div_l;
+
+            return ans;
+        }
+
     }
 }

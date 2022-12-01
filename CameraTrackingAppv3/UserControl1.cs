@@ -73,7 +73,7 @@ namespace CameraTrackingAppv3
         {
             VisibleCameraName(false);
             VisibleFPS(false);
-            //PictureClear();
+            PictureClear();
         }
 
     }

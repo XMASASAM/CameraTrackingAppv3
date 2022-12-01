@@ -29,10 +29,8 @@ namespace CameraTrackingAppv3
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.userControl11 = new CameraTrackingAppv3.UserControl1();
@@ -57,12 +55,6 @@ namespace CameraTrackingAppv3
             this.button2.Text = "決定";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 10;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // label2
             // 
@@ -94,6 +86,7 @@ namespace CameraTrackingAppv3
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(330, 375);
+            this.ControlBox = false;
             this.Controls.Add(this.button2);
             this.Controls.Add(this.userControl11);
             this.Controls.Add(this.comboBox1);
@@ -112,7 +105,6 @@ namespace CameraTrackingAppv3
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox1;
         private UserControl1 userControl11;

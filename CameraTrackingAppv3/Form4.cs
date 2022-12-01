@@ -11,15 +11,15 @@ namespace CameraTrackingAppv3
 {
     public partial class Form4: Form,IFormUpdate
     {
-        Form3 form3 = null;
-        Form1 form1 = null;
+        //Form3 form3 = null;
+        //Form1 form1 = null;
         
         Vec2d[] range_of_motion;
         Vec2d[] axis = new Vec2d[2];
         int step_range_of_motion;
         bool f_done = false;
-        bool f_event1 = false;
-        bool f_event2 = false;
+        bool f_first_event = false;
+   //     bool f_event2 = false;
         bool f_pre_config_range_of_motion = true;
         bool f_pre_congig_control = true;
         string dialog_title = "メッセージ";
@@ -27,15 +27,14 @@ namespace CameraTrackingAppv3
         Image[] dialog_icon = new Image[] { Properties.Resources.pc_topleft, Properties.Resources.pc_topright, Properties.Resources.pc_bottomright, Properties.Resources.pc_bottomleft };
         public UserControl1 UserControl { get { return userControl11; } }
 
+        SettingsConfig config;
 
         public Form4(Form1 form1)
         {
             InitializeComponent();
-            this.form1 = form1;
+       //     this.form1 = form1;
             Init();
-            f_event1 = true;
-
-
+            f_first_event = true;
         }
 
         public Form4(Form3 form3,Form1 form1)
@@ -55,17 +54,36 @@ namespace CameraTrackingAppv3
 
         }
 
+        public Form4(ref SettingsConfig config,bool first_event)
+        {
+            InitializeComponent();
+
+            Main.ChangeDisplayCameraForm(this);
+            CursorControl.SettingMode();
+
+
+            f_done = false;
+            f_first_event = first_event;
+            this.config = config;
+
+            if (this.config.Range_of_motion == null)
+            {
+                range_of_motion = new Vec2d[4];
+                step_range_of_motion = 0;
+            }
+            else
+            {
+                range_of_motion = config.Range_of_motion;
+                step_range_of_motion = range_of_motion.Length;
+            }
+
+        }
+
 
 
         void Init()
         {
-            Main.ChangeDisplayCameraForm(this);
-
-            range_of_motion = new Vec2d[4];
             
-            step_range_of_motion = 0;
-
-            CursorControl.SettingMode();
         }
 
 
@@ -167,19 +185,23 @@ namespace CameraTrackingAppv3
 
 
 
-            SettingsConfig settings = new SettingsConfig(range_of_motion,form1.GetActiveCameraID);
-            if (settings.Save())
-            {
-                Utils.WriteLine("正常に設定をセーブできました");
-            }
-            else
-            {
-                Utils.WriteLine(Utils.PathResource + "がありませんでした。なので作成しました。セーブしました");
-            }
+            //SettingsConfig settings = new SettingsConfig(range_of_motion,form1.GetActiveCameraID);
 
 
-            if (f_event1)
+            config.Range_of_motion = range_of_motion;
+
+
+            if (f_first_event)
             {
+                if (config.Save())
+                {
+                    Utils.WriteLine("正常に設定をセーブできました");
+                }
+                else
+                {
+                    Utils.WriteLine(Utils.PathResource + "がありませんでした。なので作成しました。セーブしました");
+                }
+
                 CursorControl.IsRangeOfMotion = true;
                 var form = new Form3(form1);
                 form.Show();
@@ -190,7 +212,7 @@ namespace CameraTrackingAppv3
               //  CursorControl.Init();
                 CursorControl.IsRangeOfMotion = f_pre_config_range_of_motion;
                 MouseControl.IsControl = f_pre_congig_control;
-                Main.ChangeDisplayCameraForm(form3);
+             //   Main.ChangeDisplayCameraForm(form3);
             }
 
             Close();
@@ -198,13 +220,16 @@ namespace CameraTrackingAppv3
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (f_event1)
+            if (f_first_event)
             {
-                form1.Visible = true;
-                Main.ChangeDisplayCameraForm(form1);
+                form1.Formstart(ref config);
+               // form1.Visible = true;
+               // Main.ChangeDisplayCameraForm(form1);
             }else if (f_event2)
             {
-                Main.ChangeDisplayCameraForm(form3);
+                form3.Formstart(ref config);
+
+                // Main.ChangeDisplayCameraForm(form3);
             }
             Close();
         }
@@ -214,6 +239,12 @@ namespace CameraTrackingAppv3
             var p = Location;
             p.X += Size.Width >> 1;
             Utils.ShowLoadAlert(dialog_title, message[i], dialog_icon[i], p, true);
+        }
+
+        public void FormStart(ref SettingsConfig config)
+        {
+            this.config = config;
+            Main.ChangeDisplayCameraForm(this);
         }
     }
 }

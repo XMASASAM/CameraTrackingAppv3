@@ -10,7 +10,7 @@ namespace CameraTrackingAppv3
 {
     public partial class Form3 : Form,IFormUpdate
     {
-        Form1 form1;
+       // Form1 form1;
         int pre_form_height;
         bool f_camera_visible = true;
         bool f_control_active = false;
@@ -19,25 +19,43 @@ namespace CameraTrackingAppv3
         Form5 form5;
         public UserControl1 UserControl { get { return userControl11; } }
 
-        public Form3(Form1 form1)
+        public Form3()
         {
             InitializeComponent();
-            this.form1 = form1;
+
+        }
+
+        //ここからスタート
+        private void Form3_Load(object sender, EventArgs e)
+        {
+            Utils.MainForm = this;
+            var loaded_settings = SettingsConfig.Load(out Utils.Config);
+
+            if (loaded_settings)
+            {
+                Utils.Config.Adapt();
+                var form = new Form1(ref Utils.Config, true);
+                FormStart(ref Utils.Config);
+
+            }
+            else
+            {
+                Visible = false;
+                var form = new Form1(ref Utils.Config,false);
+            }
+        }
+
+        public void FormStart(ref SettingsConfig config)
+        {
+            Main.ChangeDisplayCameraForm(this);
+            pre_form_height = this.Size.Height;
 
             CursorControl.Init();
             MouseControl.IsControl = true;
-            ControlBox = false;
-            
+
         }
-        private void Form3_Load(object sender, EventArgs e)
-        {
-            //  form1.SetCameraOutPut(pictureBox1.CreateGraphics());
-            //  form1.SetResizeParams(pictureBox1.Width, pictureBox1.Height);
-            // Main.current_picture_control = userControl11;
-            Main.ChangeDisplayCameraForm(this);
-            
-            pre_form_height = this.Size.Height;
-        }
+
+
         private void button2_Click(object sender, EventArgs e)
         {
 //            if (form1.IsCameraVisible)
@@ -169,7 +187,7 @@ namespace CameraTrackingAppv3
 
         private void Form3_FormClosed(object sender, FormClosedEventArgs e)
         {
-            form1.Close();
+            //form1.Close();
         }
 
         private void Form3_MouseLeave(object sender, EventArgs e)
@@ -189,7 +207,7 @@ namespace CameraTrackingAppv3
 
          //   if (r == DialogResult.OK)
          //   {
-                form1.Close();
+              //  form1.Close();
         //    }
 
         }
@@ -198,6 +216,12 @@ namespace CameraTrackingAppv3
         {
 
         }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Main.Update();
+        }
+
 
 
 

@@ -24,6 +24,12 @@ namespace CameraTrackingAppv3
         public delegate void InvokeString(string send);
         public delegate void InvokeVoid();
         public delegate void InvokeLoadAlert(string title,string message,Image image,System.Drawing.Point start_point,bool bottom);
+
+        public static SettingsConfig Config;
+        public static SettingsConfig Temp_Config;
+
+        public static Form3 MainForm;
+
         public static readonly int PrimaryScreenWidthHalf;
         public static readonly int PrimaryScreenHeightHalf;
         public static int PrimaryScreenWidth { get { return System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width; } }
@@ -312,6 +318,10 @@ namespace CameraTrackingAppv3
             return value;
         }
 
+        public static Rect2d Rect2Rect2d(Rect rect)
+        {
+            return new Rect2d(rect.X,rect.Y, rect.Width,rect.Height);
+        }
 
 
         

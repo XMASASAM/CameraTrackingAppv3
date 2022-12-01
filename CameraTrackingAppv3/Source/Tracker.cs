@@ -11,18 +11,39 @@ namespace CameraTrackingAppv3
     {
         Tracker tracker;
         bool f_infrared = false;
-        public GeneralTracker(bool infrared_mode)
+        int step_detect = 0;
+        public GeneralTracker(Mat frame)
         {
-            f_infrared = infrared_mode;
+            f_infrared = DetectColorORGray(frame);
             if (f_infrared)
                 tracker = new TrackerInfrared();
             else
-                tracker = new TrackerOpticalFlow();//TrackerNormal();
+                tracker = new TrackerOpticalFlow();
 
         }
 
         public bool Update(Mat frame)
         {
+
+            if (step_detect++ > 15)
+            {
+                step_detect = 0;
+                bool f_pre_infrared = f_infrared;
+                f_infrared = DetectColorORGray(frame);
+
+                if (f_infrared && !f_pre_infrared)
+                {
+                    tracker.Dispose();
+                    tracker = new TrackerInfrared();
+                }
+                else if (!f_infrared && f_pre_infrared)
+                {
+                    tracker.Dispose();
+                    tracker = new TrackerOpticalFlow();
+                }
+            }
+
+
             return tracker.Update(frame);
         }
 
@@ -47,9 +68,25 @@ namespace CameraTrackingAppv3
 
         public bool IsError { get { return tracker.IsError; } }
 
+        public bool DetectColorORGray(Mat frame)
+        {
+            using (var resize = frame.Resize(new OpenCvSharp.Size(10, 10)))
+            {
+                var bgr = resize.Mean();
+                if (Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
     }
 
-    abstract class Tracker
+    abstract class Tracker:IDisposable
     {
         bool f_first = true;
       //  bool f_first2 = true;
@@ -103,12 +140,8 @@ namespace CameraTrackingAppv3
         protected abstract bool Process(Mat gray);
 
         public abstract void Draw(Mat frame, Scalar color);
-        
-        
-        
 
-
-
+        public abstract void Dispose();
     }
 
 
@@ -116,17 +149,18 @@ namespace CameraTrackingAppv3
     class TrackerInfrared:Tracker
     {
         int wide = 50;
-        Rect pre_rect;
-        int pre_area;
+        Rect2d pre_rect;
+        double pre_area;
      //   Vec2d center_point;
         Vec2d pre_center_point;
         protected override bool First(Mat gray)
         {
-            if(FindBlob.Rect(gray,180, out var rect))
+            if(FindBlob.Rect(gray,180,out pre_center_point, out var rect))
             {
-                pre_rect = Utils.RectWide(rect, wide, wide);
+
+                pre_rect = Utils.RectWide(Utils.Rect2Rect2d(rect), wide, wide);
                 pre_area = rect.Width * rect.Height;
-                pre_center_point = Utils.RectCenter2Vec2d(pre_rect);
+                //pre_center_point = Utils.RectCenter2Vec2d(pre_rect);
                 return true;
             }
             return false;
@@ -135,15 +169,15 @@ namespace CameraTrackingAppv3
         protected override bool Process(Mat gray)
         {
             bool ok = false;
-            using (var roi = new Mat(gray, pre_rect))
+            using (var roi = new Mat(gray, pre_rect.ToRect()))
             {
-                ok = FindBlob.Rect(roi, 200, pre_area, out var rect);
+                ok = FindBlob.Rect(roi, 200, (int)pre_area,out center_point ,out var rect);
 
                 if (!ok) return false;
-
-                rect.X += pre_rect.X;
-                rect.Y += pre_rect.Y;
-                pre_rect = Utils.RectWide(rect, wide, wide);
+                var rect2d = Utils.Rect2Rect2d(rect);
+                rect2d.X += pre_rect.X;
+                rect2d.Y += pre_rect.Y;
+                pre_rect = Utils.RectWide(rect2d, wide, wide);
                 pre_area = rect.Width * rect.Height;
 
                 //  gray.Rectangle(pre_rect, new Scalar(255, 255, 0), 2);
@@ -151,9 +185,9 @@ namespace CameraTrackingAppv3
 
             }
 
-            pre_rect = Utils.RectGrap(pre_rect, new Rect(0, 0, Utils.CameraWidth, Utils.CameraHeight));
+            pre_rect = Utils.RectGrap(pre_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
 
-            center_point = Utils.RectCenter2Vec2d(pre_rect);
+           // center_point = Utils.RectCenter2Vec2d(pre_rect);
 
             var vel = center_point - pre_center_point;
 
@@ -168,12 +202,17 @@ namespace CameraTrackingAppv3
 
         public override void Draw(Mat frame, Scalar color)
         {
-            frame.Rectangle(pre_rect, color, 4);
+            frame.Rectangle(pre_rect.ToRect(), color, 4);
             // OpenCvSharp.Point cp = Utils.RectCenter(pre_rect);
             frame.Circle((int)center_point.Item0, (int)center_point.Item1, 4, color, 4);
         }
 
         public Vec2d GetCenterPoint { get { return center_point; } }
+
+        public override void Dispose()
+        {
+
+        }
 
     }
 
@@ -325,6 +364,17 @@ namespace CameraTrackingAppv3
         {
             return Cv2.GoodFeaturesToTrack(mat, 20, 0.001, 10, null, 20, true, 1);
         }
+
+
+        public override void Dispose()
+        {
+            if (face_cas != null && !face_cas.IsDisposed)
+                face_cas.Dispose();
+
+            if (pre_gray != null && !pre_gray.IsDisposed)
+                pre_gray.Dispose();
+        }
+
 
     }
 
