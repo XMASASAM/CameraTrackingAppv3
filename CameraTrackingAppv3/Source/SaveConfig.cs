@@ -6,38 +6,56 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 namespace CameraTrackingAppv3
 {
+
     [Serializable()]
+    public class SettingProps
+    {
+        public RangeOfMotionProps RangeOfMotion;
+        public string CameraID = "";
+
+        public void  Set(SettingProps props)
+        {
+            this.RangeOfMotion = props.RangeOfMotion;
+            this.CameraID = props.CameraID;
+        }
+
+    }
+
+    
     public class SettingsConfig:IDisposable
     {
         static readonly string save_path = Utils.PathResource + "\\settings.config";
-        public Vec2d[] Range_of_motion { get; set; } = null;
 
-        public string CameraID { get; set; } = "";
+        public SettingProps Property;
+
+        public VideoCapture VideoCapture { get; set; } = null;
 
         static public string GetPathSave { get { return save_path; } }
 
         
         public SettingsConfig()
         {
-
+            Property = new SettingProps();
         }
-        public SettingsConfig(Vec2d[] range_of_motion,string camera_id)
+
+        public SettingsConfig(SettingProps props)
         {
-            this.Range_of_motion = range_of_motion;
-            this.CameraID = camera_id;
+            Property = props;
+           // RangeOfMotion = new RangeOfMotionProps(Property.RangeOfMotionPoints);
         }
-
         public SettingsConfig(SettingsConfig config)
         {
+            Property = new SettingProps();
             Set(config);
+            //RangeOfMotion = new RangeOfMotionProps(Property.RangeOfMotionPoints);
+
         }
 
         public void Set(SettingsConfig config)
         {
-            this.Range_of_motion = config.Range_of_motion;
-            this.CameraID = config.CameraID;
+            Property.Set(config.Property);
+            this.VideoCapture = config.VideoCapture;
         }
-
 
         public bool Save()
         {
@@ -46,7 +64,7 @@ namespace CameraTrackingAppv3
 
             System.IO.FileStream fs1 = new System.IO.FileStream(save_path, System.IO.FileMode.Create);
 
-            bf1.Serialize(fs1, this);
+            bf1.Serialize(fs1, Property);
             fs1.Close();
             return ok;
         }
@@ -62,7 +80,8 @@ namespace CameraTrackingAppv3
             System.IO.FileStream fs2 = new System.IO.FileStream(save_path, System.IO.FileMode.Open);
             try
             {
-                settings = (SettingsConfig)bf2.Deserialize(fs2);
+                var prop = (SettingProps)bf2.Deserialize(fs2);
+                settings = new SettingsConfig(prop);
                 Utils.WriteLine("正常に設定をロードできました");
 
             }
@@ -78,31 +97,33 @@ namespace CameraTrackingAppv3
             return ok;
         }
 
-        public override bool Equals(object obj)
+      /*  public override bool Equals(object obj)
         {
             if (!(obj is SettingsConfig)) return false;
 
             SettingsConfig a = (SettingsConfig)obj;
 
-            return (CameraID.Equals(a.CameraID) && Range_of_motion.Equals(a.Range_of_motion));
+            return (Property.CameraID.Equals(a.Property.CameraID) && Property.RangeOfMotion.Equals(a.Property.RangeOfMotion));
                 
 
-        }
+        }*/
 
-        public override int GetHashCode()
+     /*   public override int GetHashCode()
         {
             return base.GetHashCode();
-        }
+        }*/
 
         public void Dispose()
         {
         }
 
 
-        public void Adapt()
+        static public void Adapt(SettingsConfig config)
         {
-            CursorControl.SetRangeOfMotion(Utils.Config.Range_of_motion);
+            CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
             CursorControl.IsRangeOfMotion = true;
+            var form = new Form1(ref config, true,true);
+            form.Show();
         }
 
     }

@@ -144,7 +144,7 @@ namespace CameraTrackingAppv3
             binary.Dispose();
             erode.Dispose();
 
-            center_point = new Vec2d(0, 0);
+            center_point = new Vec2d(blob_rect.Location.X, blob_rect.Location.Y);
             if (ans)
                 center_point = GetCenterPoint(ans_ps);
 

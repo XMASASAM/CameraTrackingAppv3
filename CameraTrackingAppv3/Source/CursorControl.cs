@@ -17,9 +17,11 @@ namespace CameraTrackingAppv3
         static bool f_cursor_stay;
         static System.Diagnostics.Stopwatch dwell_time;
         static bool f_range_of_motion = false;
-        static Vec2d[] range_of_motion;
+
+
         static Vec2d cursor_magnification = new Vec2d(14,14);
-        static Vec2d[] cursor_normal_axis = new Vec2d[2];
+
+
         static double velo_mag = 1;
         static double move_threshold = 0.5;
         static Vec2d pre_valid_point;
@@ -30,15 +32,14 @@ namespace CameraTrackingAppv3
         static  double screen_motion_scale_min;
         static  double screen_motion_scale_max;
 
+        static RangeOfMotionProps range_of_motion;
+
         public static bool IsStay { get { return f_cursor_stay; } }
 
         public static bool IsDwell { get; private set; }
         public static bool IsDwellImpulse { get; private set; }
 
-        public static Vec2d[] RangeOfMotionNormalAxis { get { return cursor_normal_axis; } }
-        public static Vec2d RangeOfMotionCenterPoint { get; private set; }
 
-        public static Vec2d[] RangeOfMotion { get { return range_of_motion; } }
 
         public static bool IsRangeOfMotion { get { return f_range_of_motion; } set { f_range_of_motion = value; } }
 
@@ -60,6 +61,12 @@ namespace CameraTrackingAppv3
         {
             f_first = true;
             f_cursor_stay = false;
+        }
+
+        static public void Init(SettingsConfig config)
+        {
+            Init();
+
         }
 
 
@@ -93,13 +100,14 @@ namespace CameraTrackingAppv3
 
             if (f_range_of_motion)
             {
-                var Xx = cursor_normal_axis[0].Item0;
-                var Xy = cursor_normal_axis[0].Item1;
-                var Yx = cursor_normal_axis[1].Item0;
-                var Yy = cursor_normal_axis[1].Item1;
+                
+                var Xx = range_of_motion.NormalAxi[0].Item0;
+                var Xy = range_of_motion.NormalAxi[0].Item1;
+                var Yx = range_of_motion.NormalAxi[1].Item0;
+                var Yy = range_of_motion.NormalAxi[1].Item1;
 
-                var sx = sensor_center.Item0 - RangeOfMotionCenterPoint.Item0;
-                var sy = sensor_center.Item1 - RangeOfMotionCenterPoint.Item1;
+                var sx = sensor_center.Item0 - range_of_motion.CenterPoint.Item0;
+                var sy = sensor_center.Item1 - range_of_motion.CenterPoint.Item1;
 
                 var lowb = Yy * Xx - Yx * Xy;
                 if (lowb == .0)
@@ -224,8 +232,7 @@ namespace CameraTrackingAppv3
                     var player = new System.Media.SoundPlayer(Properties.Resources.se_saa06);
                     player.Play();
 
-                    //  Properties.Resources.se
-                    //  MouseControl.Click(MouseState.LeftClick);
+
                 }
             }
             else
@@ -238,33 +245,13 @@ namespace CameraTrackingAppv3
 
         }
 
-        static public void SetRangeOfMotion(Vec2d[] range)
+        static public void SetRangeOfMotion(RangeOfMotionProps prop)
         {
-            range_of_motion = range;
 
-            RangeOfMotionCenterPoint = (range[0] + range[1] + range[2] + range[3]) * 0.25;
-
-
-            var axis_x = (range[1] + range[2]) * 0.5 - (range[0] + range[3]) * 0.5;
-            //var axis_y = (range[0] + range[1]) * 0.5 - (range[3] + range[2]) * 0.5;
-            var axis_y = new Vec2d(axis_x.Item1,- axis_x.Item0);//(range[3] + range[2]) * 0.5 - (range[0] + range[1]) * 0.5;
+            range_of_motion = prop;
 
 
-
-            var dis_x = Math.Sqrt(Utils.GetDistanceSquared(axis_x.Item0, axis_x.Item1));
-            var dis_y = Math.Sqrt(Utils.GetDistanceSquared(axis_y.Item0, axis_y.Item1));
-
-            if (dis_x == 0) dis_x += 0.0001;
-            if (dis_y == 0) dis_y += 0.0001;
-
-            cursor_normal_axis[0] = axis_x / dis_x;
-            cursor_normal_axis[1] = axis_y / dis_y;
-
-            if (cursor_normal_axis[0].Item0 == 0) cursor_normal_axis[0].Item0 += 0.0001;
-            if (cursor_normal_axis[0].Item1 == 0) cursor_normal_axis[0].Item1 += 0.0001;
-            if (cursor_normal_axis[1].Item0 == 0) cursor_normal_axis[1].Item0 += 0.0001;
-            if (cursor_normal_axis[1].Item1 == 0) cursor_normal_axis[1].Item1 += 0.0001;
-
+            var range = range_of_motion.Points;
 
             cursor_magnification.Item0 = Utils.AllScreenWidth /
             Math.Sqrt(Math.Min(Utils.GetDistanceSquared(range[0], range[1]), Utils.GetDistanceSquared(range[2], range[3])));
@@ -279,41 +266,53 @@ namespace CameraTrackingAppv3
             screen_motion_scale_min = Math.Min(cursor_magnification.Item0,cursor_magnification.Item1);
 
             var k = screen_motion_scale_max;
-           // cursor_magnification = new Vec2d(k, k);
+
+
             Utils.WriteLine("k:" + k.ToString());
             velo_mag = k / 20;
             move_threshold = 2 / (velo_mag * velo_mag);
-           // k /= 20;
-           // 1.5, 2, 2.5
-           // SetIncreaseFactor(1.5*k, 2*k, 2.5*k);
+
+
         }
 
-        public static void DisplayRangeOfMotion(ref Mat frame,Vec2d[] ps=null,Vec2d[] ax=null)
+        static public Vec2d[] GetCursorNormalAxis(Vec2d[] range)
+        {
+            Vec2d[] ans = new Vec2d[2];
+            var axis_x = (range[1] + range[2]) * 0.5 - (range[0] + range[3]) * 0.5;
+            var axis_y = new Vec2d(axis_x.Item1, -axis_x.Item0);
+            var dis_x = Math.Sqrt(Utils.GetDistanceSquared(axis_x.Item0, axis_x.Item1));
+            var dis_y = Math.Sqrt(Utils.GetDistanceSquared(axis_y.Item0, axis_y.Item1));
+
+            if (dis_x == 0) dis_x += 0.0001;
+            if (dis_y == 0) dis_y += 0.0001;
+
+            ans[0] = axis_x / dis_x;
+            ans[1] = axis_y / dis_y;
+
+            if (ans[0].Item0 == 0) ans[0].Item0 += 0.0001;
+            if (ans[0].Item1 == 0) ans[0].Item1 += 0.0001;
+            if (ans[1].Item0 == 0) ans[1].Item0 += 0.0001;
+            if (ans[1].Item1 == 0) ans[1].Item1 += 0.0001;
+
+            return ans;
+        }
+
+        public static void DisplayRangeOfMotion(ref Mat frame,RangeOfMotionProps prop)//Vec2d[] ps=null,Vec2d[] ax=null)
         {
 
-           // Vec2d[] ax;//CursorControl.RangeOfMotionNormalAxis;
-            Point cp;// = Utils.cvtVec2d2Point(CursorControl.RangeOfMotionCenterPoint);
-            if (ps == null || ax==null)
-            {
-                ps = CursorControl.RangeOfMotion;
-                ax = CursorControl.RangeOfMotionNormalAxis;
-                cp = Utils.cvtVec2d2Point(CursorControl.RangeOfMotionCenterPoint);
-            }
-            else
-            {
-                cp = Utils.cvtVec2d2Point((ps[0] + ps[1] + ps[2] + ps[3]) * 0.25);
-            }
-
+            var ps = prop.Points;
             for (int i = 0; i < ps.Length; i++)
             {
                 frame.Circle((int)ps[i].Item0, (int)ps[i].Item1, 4, Scalar.Yellow, 4);
             }
 
-            
+            var ax = prop.NormalAxi;
 
             var a_x = Utils.cvtVec2d2Point(ax[0] * 100);
             var a_y = Utils.cvtVec2d2Point(ax[1] * 100);
-            
+
+
+            var cp = Utils.cvtVec2d2Point(prop.CenterPoint);
 
             frame.Line(cp - a_x, cp, Scalar.Yellow, 4);
             frame.Line(cp + a_x, cp, Scalar.Yellow, 4);

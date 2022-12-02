@@ -169,6 +169,7 @@ namespace CameraTrackingAppv3
         protected override bool Process(Mat gray)
         {
             bool ok = false;
+            pre_rect = Utils.RectGrap(pre_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
             using (var roi = new Mat(gray, pre_rect.ToRect()))
             {
                 ok = FindBlob.Rect(roi, 200, (int)pre_area,out center_point ,out var rect);
@@ -289,7 +290,8 @@ namespace CameraTrackingAppv3
             List<Point2f> pre_fp = new List<Point2f>();
             List<Point2f> next_ps = new List<Point2f>();
             Point2f vel = new Point2f(0, 0);
-            
+
+            face_rect = Utils.RectGrap(face_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
             using (var clip = new Mat(gray, face_rect.ToRect())) {
                 
                 Cv2.CalcOpticalFlowPyrLK(pre_gray, clip, pre_features, ref features,out var status,out _);

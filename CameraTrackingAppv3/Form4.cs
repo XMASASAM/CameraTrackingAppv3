@@ -11,15 +11,13 @@ namespace CameraTrackingAppv3
 {
     public partial class Form4: Form,IFormUpdate
     {
-        //Form3 form3 = null;
-        //Form1 form1 = null;
-        
-        Vec2d[] range_of_motion;
-        Vec2d[] axis = new Vec2d[2];
+        RangeOfMotionProps range;
+        Vec2d[] points;
+
         int step_range_of_motion;
         bool f_done = false;
         bool f_first_event = false;
-   //     bool f_event2 = false;
+
         bool f_pre_config_range_of_motion = true;
         bool f_pre_congig_control = true;
         string dialog_title = "メッセージ";
@@ -29,73 +27,43 @@ namespace CameraTrackingAppv3
 
         SettingsConfig config;
 
-        public Form4(Form1 form1)
-        {
-            InitializeComponent();
-       //     this.form1 = form1;
-            Init();
-            f_first_event = true;
-        }
-
-        public Form4(Form3 form3,Form1 form1)
-        {
-            InitializeComponent();
-            this.form3 = form3;
-            this.form1 = form1;
-            f_pre_config_range_of_motion = CursorControl.IsRangeOfMotion;
-            f_pre_congig_control = MouseControl.IsControl;
-            Init();
-            f_event2 = true;
-            f_done = true;
-            range_of_motion = CursorControl.RangeOfMotion;
-            axis = CursorControl.RangeOfMotionNormalAxis;
-            step_range_of_motion = 4;
-            
-
-        }
 
         public Form4(ref SettingsConfig config,bool first_event)
         {
             InitializeComponent();
-
-            Main.ChangeDisplayCameraForm(this);
-            CursorControl.SettingMode();
-
-
+            this.config = config;
             f_done = false;
             f_first_event = first_event;
-            this.config = config;
+            Main.ChangeDisplayCameraForm(this);
 
-            if (this.config.Range_of_motion == null)
+            if (this.config.Property.RangeOfMotion.Points == null)
             {
-                range_of_motion = new Vec2d[4];
+                points = new Vec2d[4];
                 step_range_of_motion = 0;
             }
             else
             {
-                range_of_motion = config.Range_of_motion;
-                step_range_of_motion = range_of_motion.Length;
+                points = config.Property.RangeOfMotion.Points;
+                range = config.Property.RangeOfMotion;
+               // range_of_motion = config.Property.RangeOfMotion;
+                step_range_of_motion = points.Length;
+                f_pre_config_range_of_motion = CursorControl.IsRangeOfMotion;
+                f_pre_congig_control = MouseControl.IsControl;
+                f_done = true;
             }
 
+            CursorControl.SettingMode();
+
+
         }
 
 
-
-        void Init()
-        {
-            
-        }
 
 
         private void Form4_Load(object sender, EventArgs e)
         {
             this.Text = "可動域の設定";
             DisplayMessage(0);
-            //CursorControl.Init();
-
-            // form1.BeginControl();
-            //    Main.f_control_active = true;
-            // Utils.WriteLine("Cursor::" + CursorControl.IsControlMouse.ToString());
         }
 
 
@@ -109,7 +77,7 @@ namespace CameraTrackingAppv3
             {
                 if (CursorControl.IsDwellImpulse)
                 {
-                    range_of_motion[step_range_of_motion++] = Main.Tracker.CenterPoint;
+                    points[step_range_of_motion++] = Main.Tracker.CenterPoint;
 
                     Utils.CloseLoadAlert(dialog_title);
 
@@ -124,19 +92,7 @@ namespace CameraTrackingAppv3
                 if (step_range_of_motion >= 4)
                 {
                     f_done = true;
-                    var range = range_of_motion;
-                    var axis_x = (range[1] + range[2]) * 0.5 - (range[0] + range[3]) * 0.5;
-                    //var axis_y = (range[0] + range[1]) * 0.5 - (range[3] + range[2]) * 0.5;
-                    var axis_y = new Vec2d(axis_x.Item1, -axis_x.Item0);//(range[3] + range[2]) * 0.5 - (range[0] + range[1]) * 0.5;
-
-                    var dis_x = Math.Sqrt(Utils.GetDistanceSquared(axis_x.Item0, axis_x.Item1));
-                    var dis_y = Math.Sqrt(Utils.GetDistanceSquared(axis_y.Item0, axis_y.Item1));
-
-                    if (dis_x == 0) dis_x += 0.0001;
-                    if (dis_y == 0) dis_y += 0.0001;
-
-                    axis[0] = axis_x / dis_x;
-                    axis[1] = axis_y / dis_y;
+                    range = new RangeOfMotionProps(points);
 
                 }
             }
@@ -145,15 +101,15 @@ namespace CameraTrackingAppv3
 
             if (f_done)
             {
-                CursorControl.DisplayRangeOfMotion(ref frame,range_of_motion,axis);
+                CursorControl.DisplayRangeOfMotion(ref frame,range);
             }
             else
             {
                 for (int i = 0; i < step_range_of_motion; i++)
                 {
                     frame.Circle(
-                        (int)range_of_motion[i].Item0,
-                        (int)range_of_motion[i].Item1,
+                        (int)points[i].Item0,
+                        (int)points[i].Item1,
                         4, Scalar.Yellow, 4);
                 }
             }
@@ -165,7 +121,7 @@ namespace CameraTrackingAppv3
         {
             f_done = false;
             step_range_of_motion = 0;
-
+            points = new Vec2d[4];
             DisplayMessage(0);
 
 
@@ -179,16 +135,9 @@ namespace CameraTrackingAppv3
                 return;
             }
             CursorControl.Init();
-            CursorControl.SetRangeOfMotion(range_of_motion);
 
 
-
-
-
-            //SettingsConfig settings = new SettingsConfig(range_of_motion,form1.GetActiveCameraID);
-
-
-            config.Range_of_motion = range_of_motion;
+            config.Property.RangeOfMotion = range;
 
 
             if (f_first_event)
@@ -203,33 +152,32 @@ namespace CameraTrackingAppv3
                 }
 
                 CursorControl.IsRangeOfMotion = true;
-                var form = new Form3(form1);
-                form.Show();
-            }
 
-            if (f_event2)
+
+                Utils.MainForm.FormStart(ref Utils.Config);
+            }
+            else 
             {
-              //  CursorControl.Init();
                 CursorControl.IsRangeOfMotion = f_pre_config_range_of_motion;
                 MouseControl.IsControl = f_pre_congig_control;
-             //   Main.ChangeDisplayCameraForm(form3);
+                Utils.MainForm.FormStart(ref Utils.Config);
             }
 
             Close();
+
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            
             if (f_first_event)
             {
-                form1.Formstart(ref config);
-               // form1.Visible = true;
-               // Main.ChangeDisplayCameraForm(form1);
-            }else if (f_event2)
-            {
-                form3.Formstart(ref config);
+                var form = new Form1(ref config, false,false);
 
-                // Main.ChangeDisplayCameraForm(form3);
+            }else
+            {
+                Utils.MainForm.FormStart(ref Utils.Config);
+
             }
             Close();
         }
@@ -241,10 +189,11 @@ namespace CameraTrackingAppv3
             Utils.ShowLoadAlert(dialog_title, message[i], dialog_icon[i], p, true);
         }
 
-        public void FormStart(ref SettingsConfig config)
+        private void Form4_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.config = config;
-            Main.ChangeDisplayCameraForm(this);
+            foreach (var i in dialog_icon)
+                i.Dispose();
+            Dispose();
         }
     }
 }

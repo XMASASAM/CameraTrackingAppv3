@@ -21,25 +21,36 @@ namespace CameraTrackingAppv3
         ManagementEventWatcher removeWatcher;
         List<string> deviceID = new List<string>();
         bool f_start_up = false;
-    //    bool f_more_show = false;
+        bool f_first = false;
+
         delegate void ControlFormDelegate();
         string active_camera_id = "";
-        Form3 form3;
         public UserControl1 UserControl { get { return userControl11; } }
         public string GetActiveCameraID { get { return active_camera_id; } }
 
-        //SettingsConfig save_data;
-        bool f_first_event = false;
-        
-      //  SettingsConfig save_data;
+        bool f_jump2form3 = false;
+        bool f_decide_skip = false;
+
+
         SettingsConfig config;
 
-        public Form1(ref SettingsConfig config,bool first_event)
+        public Form1(ref SettingsConfig config,bool jump2Form3,bool decide_skip)
         {
             InitializeComponent();
             this.config = config;
-            f_first_event = first_event;
 
+
+            if (config.VideoCapture != null)
+            {
+                capture = this.config.VideoCapture;
+                active_camera_id = this.config.Property.CameraID;
+                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
+
+            }
+
+            f_jump2form3 = jump2Form3;
+            f_decide_skip = decide_skip;
+            f_first = !this.config.Property.CameraID.Equals("");
             WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
             insertWatcher = new ManagementEventWatcher(insertQuery);
             insertWatcher.EventArrived += new EventArrivedEventHandler(DeviceInsertedEvent);
@@ -62,7 +73,7 @@ namespace CameraTrackingAppv3
 
 
             Main.ChangeDisplayCameraForm(this);
-            if (config.CameraID.Equals(""))
+            if (config.Property.CameraID.Equals(""))
             {
                 userControl11.VisibleCameraName(false);
                 userControl11.VisibleFPS(false);
@@ -80,8 +91,10 @@ namespace CameraTrackingAppv3
                 return;
             }
 
-            if (f_start_up || active_camera_id.Equals(deviceID[comboBox1.SelectedIndex]))
+            //if (f_start_up || (!f_first && active_camera_id.Equals(deviceID[comboBox1.SelectedIndex])))
+            if (f_start_up || (active_camera_id.Equals(deviceID[comboBox1.SelectedIndex])))
                 return;
+            
             f_start_up = true;
             var thread = new Thread(new ParameterizedThreadStart(ComformCamera));
             thread.Start(selected_index);
@@ -132,19 +145,20 @@ namespace CameraTrackingAppv3
 
             Main.ReSetVideoCapture();
 
-            if (capture != null && !capture.IsDisposed)
+            if (capture != null && capture.IsEnabledDispose)
             {
                 lock (capture)
                 {
                     capture.Release();
                     capture.Dispose();
-                    capture = new VideoCapture((int)index);
+
                 }
             }
-            else
-            {
+
+            string id = deviceID[(int)index];
+
                 capture = new VideoCapture((int)index);
-            }
+         //   }
 
             if (!capture.IsOpened())
             {
@@ -160,10 +174,6 @@ namespace CameraTrackingAppv3
 
 
             
-            Main.SetUpVideoCapture(capture, userControl11.PictureWidth, userControl11.PictureHeight);
-
-         //   Main.f_set_up = true;
-         //   Main.SetVideoCapture(capture);
             
             Utils.WriteLine("確認プロセス完了");
          //   Invoke(new Utils.InvokeString(Utils.CloseLoadAlert), "カメラを起動");
@@ -177,6 +187,8 @@ namespace CameraTrackingAppv3
 
             GetAllConnectedCameras(out var cameralist,out deviceID);
 
+
+
             foreach (var i in cameralist)
                 comboBox1.Items.Add(i);
 
@@ -185,25 +197,26 @@ namespace CameraTrackingAppv3
 
 
             var find_id = active_camera_id;
-            if (f_first_event) find_id = config.CameraID;
+            if (f_first) find_id = config.Property.CameraID;
 
 
             if (!find_id.Equals(""))
             {
                 for (int i = 0; i < deviceID.Count; i++)
-                    if (deviceID[i].Equals(active_camera_id))
+                    if (deviceID[i].Equals(find_id))
                     {
                         comboBox1.SelectedIndex = i;
                         break;
                     }
             }
 
-            if (f_first_event)
+            if (f_first)
             {
                 if (comboBox1.SelectedIndex >= 0)
                 {
                     this.button1_Click(null, EventArgs.Empty);
                 }
+                f_first = false;
             }
 
         }
@@ -212,30 +225,28 @@ namespace CameraTrackingAppv3
         {
             insertWatcher.Dispose();
             removeWatcher.Dispose();
-            if (capture != null)
-            {
-                capture.Release();
-                capture.Dispose();
-            }
+            Dispose();
         }
 
 
         void DisplayActiveCamera(int index)
         {
-            //   label1.Text = "起動中:" + comboBox1.Items[index];
-            //    label1.Visible = true;
+            active_camera_id = deviceID[index];
+
+
+            Main.SetUpVideoCapture(capture, userControl11.PictureWidth, userControl11.PictureHeight);
+
             userControl11.SetCameraName((string)comboBox1.Items[index]);
             userControl11.VisibleCameraName(true);
             userControl11.VisibleFPS(true);
-            active_camera_id = deviceID[index];
 
             f_start_up = false;
             Utils.CloseLoadAlert("カメラを起動");
 
-            if (f_first_event)
+            if (f_decide_skip)
             {
                 button2_Click(null, EventArgs.Empty);
-                //button2_Click(null, null);
+
             }
 
         }
@@ -249,40 +260,30 @@ namespace CameraTrackingAppv3
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if(capture==null || !capture.IsOpened())
+            if(capture ==null || !capture .IsOpened())
             {
                 Utils.Alert_Note("カメラを起動してください");
                 return;
             }
-            //Form form;
 
-            //      if (!f_more_show)
-            //      {
-            if (f_first_event)
+
+            config.Property.CameraID = active_camera_id;
+            config.VideoCapture = capture ;
+
+            if (f_jump2form3)
             {
-                Utils.MainForm.FormStart(ref Utils.Config);
-
+                if(!f_decide_skip)
+                    config.Save();
+                Utils.MainForm.FormStart(ref config);
             }
             else
             {
-                var form = new Form4(this);
+                var form = new Form4(ref config, true);
                 form.Show();
-                //form3 = new Form3(this);
-                // form = form3;
             }
-                // form3 = new Form3(this);
-              //  form.Show();
-   //         }
-    //        else
-    //        {
-              //  form3.FormStart(ref Utils.Config);
-               // .CameraID = active_camera_id;
-               // Main.ChangeDisplayCameraForm(form3);
-     //       }
             insertWatcher.Stop();
             removeWatcher.Stop();
            // this.Visible = false;
-            config.CameraID = active_camera_id;
             Close();
             
         }
@@ -293,9 +294,5 @@ namespace CameraTrackingAppv3
             Main.DisplayCamera(frame);
         }
 
-     /*   public void FormStart(ref SettingsConfig config)
-        {
-            save_data = config;
-        }*/
     }
 }

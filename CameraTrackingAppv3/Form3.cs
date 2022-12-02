@@ -10,48 +10,54 @@ namespace CameraTrackingAppv3
 {
     public partial class Form3 : Form,IFormUpdate
     {
-       // Form1 form1;
         int pre_form_height;
         bool f_camera_visible = true;
         bool f_control_active = false;
         bool f_tracker_visible = true;
         bool f_range_of_motion_visible = true;
         Form5 form5;
+        SettingsConfig config;
         public UserControl1 UserControl { get { return userControl11; } }
 
         public Form3()
         {
             InitializeComponent();
+            pre_form_height = this.Size.Height;
 
         }
 
         //ここからスタート
         private void Form3_Load(object sender, EventArgs e)
         {
+
             Utils.MainForm = this;
+            //var loaded_settings = SettingsConfig.Load(out Utils.Config);
             var loaded_settings = SettingsConfig.Load(out Utils.Config);
 
             if (loaded_settings)
             {
-                Utils.Config.Adapt();
-                var form = new Form1(ref Utils.Config, true);
-                FormStart(ref Utils.Config);
+                SettingsConfig.Adapt(Utils.Config);
 
             }
             else
             {
-                Visible = false;
-                var form = new Form1(ref Utils.Config,false);
+                Utils.Config = new SettingsConfig();
+                var form = new Form1(ref Utils.Config,false,false);
+                form.Show();
             }
+
+
         }
 
         public void FormStart(ref SettingsConfig config)
         {
+            this.config = config;
+
+            Visible = true;
             Main.ChangeDisplayCameraForm(this);
-            pre_form_height = this.Size.Height;
 
             CursorControl.Init();
-            MouseControl.IsControl = true;
+            CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
 
         }
 
@@ -105,7 +111,7 @@ namespace CameraTrackingAppv3
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form6 form6 = new Form6(this,form1);
+            Form6 form6 = new Form6();
             form6.Show();
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
@@ -129,14 +135,6 @@ namespace CameraTrackingAppv3
 
         public void FormUpdate(ref Mat frame)
         {
-          /*  MouseControl.IsCursorOnForm = ClientRectangle.Contains(
-                Form.MousePosition.X - Location.X,
-                Form.MousePosition.Y - Location.Y);*/
-
-        /*    if (temp_mof)
-            {
-                MouseControl.IsCursorOnForm = true;
-            }*/
 
             if (f_control_active)
             {
@@ -154,36 +152,13 @@ namespace CameraTrackingAppv3
                     Main.Tracker.Draw(ref frame);
 
                 if (f_range_of_motion_visible)
-                    CursorControl.DisplayRangeOfMotion(ref frame);
+                    CursorControl.DisplayRangeOfMotion(ref frame,config.Property.RangeOfMotion);
                    // Sub_DisplayRangeOfMotion(ref frame);
 
                 Main.DisplayCamera(frame);
             }
         }
 
-    /*    public void Sub_DisplayRangeOfMotion(ref Mat frame)
-        {
-            var ps = CursorControl.RangeOfMotion;
-            for (int i = 0; i < ps.Length; i++)
-            {
-                frame.Circle((int)ps[i].Item0,(int)ps[i].Item1, 4, Scalar.Yellow, 4);
-            }
-            
-            var ax = CursorControl.RangeOfMotionNormalAxis;
-
-            var a_x = Utils.cvtVec2d2Point(ax[0] * 100);
-            var a_y = Utils.cvtVec2d2Point(ax[1] * 100);
-            var cp = Utils.cvtVec2d2Point(CursorControl.RangeOfMotionCenterPoint);
-
-            frame.Line(cp - a_x , cp, Scalar.Yellow, 4);
-            frame.Line(cp + a_x , cp, Scalar.Yellow, 4);
-
-            frame.Line(cp - a_y, cp, Scalar.Yellow, 4);
-            frame.Line(cp + a_y, cp, Scalar.Yellow, 4);
-
-            frame.Circle(cp, 5, Scalar.Yellow, 4);
-
-        }*/
 
         private void Form3_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -222,13 +197,10 @@ namespace CameraTrackingAppv3
             Main.Update();
         }
 
+        private void Form3_Shown(object sender, EventArgs e)
+        {
+            Visible = false;
 
-
-
-        /*  public void DisplayFPS(int fps)
-          {
-              label1.Text = "FPS:" + fps.ToString();
-          }*/
-
+        }
     }
 }
