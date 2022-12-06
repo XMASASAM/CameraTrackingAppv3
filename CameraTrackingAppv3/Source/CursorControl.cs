@@ -8,7 +8,7 @@ namespace CameraTrackingAppv3
     {
         static bool f_first = true;
       //  static bool f_control_mouse = true;
-        static Vec2d pre_dx;
+     //   static Vec2d pre_dx;
 
         static Vec2d location;
         static double speed;
@@ -45,11 +45,14 @@ namespace CameraTrackingAppv3
 
         public static void SettingMode()
         {
-            move_threshold = 0.5;
+            Init();
+          //  move_threshold = 0.5;
             IsRangeOfMotion = false;
             MouseControl.IsControl = false;
-
         }
+
+
+
 
         static CursorControl()
         {
@@ -72,9 +75,9 @@ namespace CameraTrackingAppv3
 
         static public Vec2d cvtSensor2Delta(Vec2d dx)
         {
-            dx = pre_dx * 0.4 + dx * 0.6;
+         //   dx = pre_dx * 0.4 + dx * 0.6;
 
-            pre_dx = dx;
+       //     pre_dx = dx;
 
             var k = 0.8f * speed  + 4f;
 
@@ -173,7 +176,7 @@ namespace CameraTrackingAppv3
             }
             else
             {
-                if (speed <= move_threshold)
+                if (speed <= 0.5)//move_threshold)
                     return;
 
                 var dx = cvtSensor2Delta(sensor_velocity);
@@ -190,21 +193,21 @@ namespace CameraTrackingAppv3
 
 
 
-        static public void Update(bool error,Vec2d center, Vec2d vel)
+        static public void Update(bool error,Vec2d corrected_center, Vec2d corrected_vel)
         {
             if (error) return;
 
             if (f_first)
             {
-                pre_dx = vel;
+             //   pre_dx = corrected_vel;
                 location.Item0 = MouseControl.GetLocation.X;
                 location.Item1 = MouseControl.GetLocation.Y;
                 pre_mouse_point = MouseControl.GetLocation;
-                pre_valid_point = center;
+                pre_valid_point = corrected_center;
                 f_first = false;
             }
 
-            MoveCursor(center,vel);
+            MoveCursor(corrected_center,corrected_vel);
 
             Point now_location = new Point((int)location.Item0, (int)location.Item1);
             mouse_vel = now_location - pre_mouse_point;//MouseControl.GetLocation - pre_mouse_point;

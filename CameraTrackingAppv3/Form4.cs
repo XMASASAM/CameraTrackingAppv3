@@ -71,7 +71,7 @@ namespace CameraTrackingAppv3
         {
             Main.Tracker.Update(frame);
             //  Utils.WriteLine("Cursor::" + CursorControl.IsControlMouse.ToString());
-            CursorControl.Update(Main.Tracker.IsError, Main.Tracker.CenterPoint, Main.Tracker.Velocity);
+            CursorControl.Update(Main.Tracker.IsError, Main.Tracker.CorrectedCenterPoint, Main.Tracker.CorrectedVelocity);
 
             if (!f_done)
             {

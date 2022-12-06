@@ -14,10 +14,12 @@ namespace CameraTrackingAppv3
         static int wait_time_double = 10;
         static Thread clicking;
         public static bool IsControl { get; set; } = false;
+        public static bool CanClick { get; set; } = true;
         static public OpenCvSharp.Point GetLocation { get { return Utils.cvtPointForm2CV(System.Windows.Forms.Cursor.Position); } }
 
         static bool f_drag = false;
         static bool f_on_form = false;
+        
 
         public static bool IsCursorOnForm { get { return f_on_form; } set { f_on_form = value; } }
 
@@ -48,6 +50,8 @@ namespace CameraTrackingAppv3
         static public void Click(MouseState state)
         {
             if (!IsControl) return;
+
+            if (!CanClick) return;
 
             if (f_drag)
             {

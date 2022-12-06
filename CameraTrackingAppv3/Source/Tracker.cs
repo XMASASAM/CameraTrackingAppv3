@@ -11,7 +11,11 @@ namespace CameraTrackingAppv3
     {
         Tracker tracker;
         bool f_infrared = false;
+        bool f_first = true;
         int step_detect = 0;
+      //  Vec2d pre_vel;
+        Vec2d corrected_vel;
+        Vec2d corrected_center_point;
         public GeneralTracker(Mat frame)
         {
             f_infrared = DetectColorORGray(frame);
@@ -35,14 +39,33 @@ namespace CameraTrackingAppv3
                 {
                     tracker.Dispose();
                     tracker = new TrackerInfrared();
+                    f_first = true;
                 }
                 else if (!f_infrared && f_pre_infrared)
                 {
                     tracker.Dispose();
                     tracker = new TrackerOpticalFlow();
+                    f_first = true;
                 }
             }
 
+            var ok = tracker.Update(frame);
+
+            if (ok)
+            {
+                if (f_first)
+                {
+                    corrected_center_point = tracker.CenterPoint;
+                    corrected_vel = tracker.Velocity;
+                    f_first = false;
+                }
+                corrected_center_point = corrected_center_point * 0.4 + tracker.CenterPoint * 0.6;
+                corrected_vel = corrected_vel * 0.4 + tracker.Velocity * 0.6;
+            }
+            else
+            {
+                f_first = true;
+            }
 
             return tracker.Update(frame);
         }
@@ -65,6 +88,10 @@ namespace CameraTrackingAppv3
         public Vec2d CenterPoint{ get { return tracker.CenterPoint; } }
 
         public Vec2d Velocity { get { return tracker.Velocity; } }
+
+        public Vec2d CorrectedVelocity { get { return corrected_vel; } }
+
+        public Vec2d CorrectedCenterPoint { get { return corrected_center_point; } }
 
         public bool IsError { get { return tracker.IsError; } }
 

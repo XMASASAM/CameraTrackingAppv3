@@ -15,10 +15,11 @@ namespace CameraTrackingAppv3
         bool f_control_active = false;
         bool f_tracker_visible = true;
         bool f_range_of_motion_visible = true;
+        bool f_wait_mode = false;
         Form5 form5;
         SettingsConfig config;
         public UserControl1 UserControl { get { return userControl11; } }
-
+        WaitProcess wait_process;
         public Form3()
         {
             InitializeComponent();
@@ -95,18 +96,34 @@ namespace CameraTrackingAppv3
 
             if (f_control_active)
             {
-                MouseControl.IsControl = true;
-                form5 = new Form5();
-                form5.Show();
+                StartCursorControl();
             }
             else
             {
-                MouseControl.IsControl = false;
-                if (form5 != null)
-                    form5.Close();
+                StopCursorControl();
             }
 
 
+        }
+
+
+        void StartCursorControl()
+        {
+            f_control_active = true;
+            MouseControl.IsControl = true;
+            if (form5 == null)
+            {
+                form5 = new Form5();
+                form5.Show();
+            }
+        }
+
+        void StopCursorControl()
+        {
+            f_control_active = false;
+            MouseControl.IsControl = false;
+            if (form5 != null)
+                form5.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -139,11 +156,25 @@ namespace CameraTrackingAppv3
             if (f_control_active)
             {
                 Main.Tracker.Update(frame);
-                CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CenterPoint ,Main.Tracker.Velocity);
+                CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CorrectedCenterPoint ,Main.Tracker.CorrectedVelocity);
                 if (form5 != null)
                 {
                     form5.Update();
                 }
+            }
+
+
+            if (f_wait_mode)
+            {
+                if (wait_process.Update(frame))
+                {
+                    wait_process.Dispose();
+                    f_wait_mode = false;
+                    StartCursorControl();
+                }
+                //Main.Tracker.Update(frame);
+
+
             }
 
             if (f_camera_visible)
@@ -190,6 +221,9 @@ namespace CameraTrackingAppv3
         private void button5_Click(object sender, EventArgs e)
         {
 
+            f_wait_mode = true;
+            StopCursorControl();
+            wait_process = new WaitProcess();
         }
 
         private void timer1_Tick(object sender, EventArgs e)

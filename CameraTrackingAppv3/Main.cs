@@ -36,14 +36,28 @@ namespace CameraTrackingAppv3
         static public VideoCapture VideoCapture { get { return capture; } }
         static Vec2d[] range_of_motion = new Vec2d[4];
 
+        static System.Diagnostics.Stopwatch stopwatch;
+        static long interval_wait_time;
         static Main()
         {
             current_picture_control = null;
             countFPS = new CountFPS();
+            stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+            SetFPS(1000);
+        }
+
+        static public void SetFPS(int fps)
+        {
+            interval_wait_time = 1000 / fps;
         }
 
         public static void Update()
         {
+
+            if (stopwatch.ElapsedMilliseconds < interval_wait_time)
+                return;
+            stopwatch.Restart();
 
             if (!f_set_up)
             {
