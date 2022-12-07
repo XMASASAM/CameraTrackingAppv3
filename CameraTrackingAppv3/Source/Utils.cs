@@ -39,6 +39,11 @@ namespace CameraTrackingAppv3
         public static readonly int AllScreenHeight;
         public static readonly int AllScreenWidthHalf;
         public static readonly int AllScreenHeightHalf;
+
+        public const int PortNum = 62355;
+        public const string Password = "F6WqdvHwPY0wDiQ2SbTQDx8IlEvwyUhx";
+
+
         static Utils()
         {
             PrimaryScreenWidthHalf = PrimaryScreenWidth >> 1;
@@ -332,5 +337,24 @@ namespace CameraTrackingAppv3
         public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
         
 
+        public static bool CheckPortNumber(int port_num)
+        {
+            var p = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();//.GetActiveTcpListeners();
+            
+            foreach(var i in p.GetActiveTcpListeners())
+            {
+                if (i.Port == port_num)
+                    return false;
+            }
+
+            foreach(var i in p.GetActiveUdpListeners())
+            {
+                if (i.Port == port_num)
+                    return false;
+            }
+
+            return true;
+        }
+        
     }
 }
