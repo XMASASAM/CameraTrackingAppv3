@@ -10,7 +10,7 @@ namespace CameraTrackingAppv3
 {
     class Connect
     {
-
+        List<IPAddress> other_computer = new List<IPAddress>();
         public void FirstSend()
         {
             if (!CheckPort()) return;
@@ -18,7 +18,9 @@ namespace CameraTrackingAppv3
             UDP.SendBroadcastMessage(Utils.Password);
 
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, Utils.PortNum);
-            TCP.ReceiveMessage(ip, out string text);
+            TCP.ReceiveMessage(ip,out var end_ip , out string text);
+            other_computer.Add(end_ip.Address);
+
         }
 
         public void FirstReceive()
@@ -26,7 +28,7 @@ namespace CameraTrackingAppv3
             if (!CheckPort()) return;
 
             UDP.ListenBroadcastMessage(out var ip);
-
+            other_computer.Add(ip.Address);
             ip.Port = Utils.PortNum;
             TCP.SendMessage(ip, "data");
 
@@ -165,13 +167,14 @@ namespace CameraTrackingAppv3
 
         }
 
-        static public bool ReceiveMessage(IPEndPoint target,out string text)
+        static public bool ReceiveMessage(IPEndPoint target,out IPEndPoint end_point ,out string text)
         {
          //   IPAddress host1 = IPAddress.Any;//System.Net.Dns.GetHostEntry("localhost").AddressList[0];;
         //    int port1 = PortNum;
         //    IPEndPoint ipe1 = new IPEndPoint(host1, port1);
             TcpListener server;
             string recvline, sendline = null;
+
             int num, i = 0;
             Boolean outflg = false;
             byte[] buf = new byte[1024];
@@ -187,6 +190,7 @@ namespace CameraTrackingAppv3
 
                 using (var client = server.AcceptTcpClient())
                 {
+                    end_point = client.Client.RemoteEndPoint as IPEndPoint;
                     using (var stream = client.GetStream())
                     {
                         if (stream.Read(buf, 0, buf.Length) > 0)

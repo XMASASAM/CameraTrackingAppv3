@@ -337,24 +337,6 @@ namespace CameraTrackingAppv3
         public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
         
 
-        public static bool CheckPortNumber(int port_num)
-        {
-            var p = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();//.GetActiveTcpListeners();
-            
-            foreach(var i in p.GetActiveTcpListeners())
-            {
-                if (i.Port == port_num)
-                    return false;
-            }
-
-            foreach(var i in p.GetActiveUdpListeners())
-            {
-                if (i.Port == port_num)
-                    return false;
-            }
-
-            return true;
-        }
         
     }
 }
