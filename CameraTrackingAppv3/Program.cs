@@ -17,6 +17,9 @@ namespace CameraTrackingAppv3
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            Utils.UserName = Environment.UserName;
+
             Application.Run(new Form3());
         }
     }

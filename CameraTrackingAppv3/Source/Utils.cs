@@ -12,13 +12,15 @@ using System.Windows.Forms;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 namespace CameraTrackingAppv3
 {
     static class Utils
     {
 
-        
 
+        public static string UserName;
         static Dictionary<string, Form2> loadalert = new Dictionary<string, Form2>();//   Form2 loadalert = null;
         public delegate void InvokeInt(int send);
         public delegate void InvokeString(string send);
@@ -335,8 +337,34 @@ namespace CameraTrackingAppv3
         public static int CameraHeight { get; set; }
 
         public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
-        
 
-        
+        static public byte[] ObjectToByteArray(object obj)
+        {
+            if (obj == null)
+                return null;
+            
+            var bf = new BinaryFormatter();
+            using (var  ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        static public object ByteArrayToObject(byte[] arrBytes)
+        {
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                BinaryFormatter binForm = new BinaryFormatter();
+                memStream.Write(arrBytes, 0, arrBytes.Length);
+                memStream.Seek(0, SeekOrigin.Begin);
+                object obj = binForm.Deserialize(memStream);
+                return obj;
+                
+            }
+
+        }
+
+
     }
 }
