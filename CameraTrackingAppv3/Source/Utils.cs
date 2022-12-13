@@ -14,6 +14,7 @@ using OpenCvSharp.Extensions;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Net.NetworkInformation;
 namespace CameraTrackingAppv3
 {
     static class Utils
@@ -365,6 +366,36 @@ namespace CameraTrackingAppv3
 
         }
 
+        static public List<string> GetActivePhysicalAddress()
+        {
+            var list = new List<string>();
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (var adapter in interfaces)
+            {
+                if (OperationalStatus.Up == adapter.OperationalStatus)
+                {
+                    if ((NetworkInterfaceType.Unknown != adapter.NetworkInterfaceType) &&
+                        (NetworkInterfaceType.Loopback != adapter.NetworkInterfaceType))
+                    {
+                        list.Add(adapter.GetPhysicalAddress().ToString());
+                    }
+                }
+            }
+            return list;
+        }
+
+        static public List<string> GetAllPhysicalAddress()
+        {
+            var list = new List<string>();
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (var adapter in interfaces)
+            {
+                list.Add(adapter.GetPhysicalAddress().ToString());
+            }
+            return list;
+        }
 
     }
 }

@@ -15,7 +15,10 @@ namespace CameraTrackingAppv3
         FirstSend,
         FirstReceive,
         AddIP,
-        Broadcast
+        LoadIP,
+        Broadcast,
+        Active,
+        Correction
     }
 
     [Serializable]
@@ -24,6 +27,24 @@ namespace CameraTrackingAppv3
         public string UserName;
         public string MachineName;
         public string IPAddress;
+        public string MACAddress;
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is RecodeUser)) return false;
+            var a = (RecodeUser)obj;
+
+            return UserName.Equals(a.UserName) && 
+                   MachineName.Equals(a.MachineName) && 
+                   IPAddress.Equals(a.IPAddress);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+
     }
 
     class Connect
@@ -37,12 +58,16 @@ namespace CameraTrackingAppv3
         bool f_connect = false;
         List<string> other_computer = new List<string>();
         List<RecodeUser> users = new List<RecodeUser>();
+        RecodeUser myself;
         double timeout_reload = 0.5;
         double timeout_found_ip = 0.5;
 
 
         public bool Init()
         {
+
+            ReloadMyRecode();
+
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, Utils.PortNum);
             bool ok = CheckPort();
             if (ok)
@@ -53,6 +78,25 @@ namespace CameraTrackingAppv3
             }
             return ok;
         }
+
+        public bool ReloadMyRecode()
+        {
+            var a = Utils.GetActivePhysicalAddress();
+            if (a.Count == 0) {
+                Utils.Alert_Error("インターネットアダプタがありません");
+                return false;
+            }
+
+            myself = new RecodeUser()
+            {
+                UserName = Utils.UserName,
+                MachineName = Environment.MachineName,
+                IPAddress = "",//Dns.GetHostEntry("localhost").AddressList[0].ToString(),
+                MACAddress = a[0]
+            };
+            return true;
+        }
+
 
         public void ReLoadIPAddress()
         {
@@ -155,7 +199,9 @@ namespace CameraTrackingAppv3
             
             if (type == ConnectType.AddIP)
             {
-                users.Add((RecodeUser)Utils.ByteArrayToObject(data));
+                var a = (RecodeUser)Utils.ByteArrayToObject(data);
+                a.IPAddress = sender_ip;
+                users.Add(a);
                // var temp = (List<string>)Utils.ByteArrayToObject(data);
 
                // foreach (var i in temp)
@@ -168,14 +214,50 @@ namespace CameraTrackingAppv3
             {
                 string a = (string)Utils.ByteArrayToObject(data);
 
-                var recode = new RecodeUser()
-                {
-                    UserName = Utils.UserName,
-                    MachineName = Environment.MachineName,
-                    IPAddress = Dns.GetHostEntry("localhost").AddressList[0].ToString()
-                };
+                var head = a.Substring(0, 1);
+                var body = a.Substring(1, a.Length - 1);
 
-                TCP.SendMessage(sender_ip, ConnectType.AddIP,Utils.ObjectToByteArray(recode));
+                if (head.Equals("1"))
+                {
+                    TCP.SendMessage(sender_ip, ConnectType.AddIP, Utils.ObjectToByteArray(myself));
+                }else
+                if (head.Equals("2"))
+                {
+                    if (Utils.GetAllPhysicalAddress().Contains(body))
+                    {
+                        //ReloadMyRecode();
+                        //アクティブになる処理
+                        TCP.SendMessage(sender_ip, ConnectType.Correction, Utils.ObjectToByteArray(body));
+                    }
+                }
+            }
+
+
+            if(type == ConnectType.LoadIP)
+            {
+                object[] a = (object[])Utils.ByteArrayToObject(data);
+                RecodeUser b = (RecodeUser)a[1];
+                b.IPAddress = sender_ip;
+                users = (List<RecodeUser>)a[0];
+                users.Add(b);
+            }
+
+            if(type == ConnectType.Active)
+            {
+                //アクティブになる処理
+            }
+
+            if(type == ConnectType.Correction)
+            {
+                var mac = (string)Utils.ByteArrayToObject(data);
+                for(int i = 0; i < users.Count; i++)
+                {
+                    if (mac.Equals(users[i].MACAddress))
+                    {
+                        users[i].IPAddress = sender_ip;
+                        break;
+                    }
+                }
             }
 
         }
@@ -197,16 +279,16 @@ namespace CameraTrackingAppv3
         }
 
 
-        void T01()
+        void TCPReceive()
         {
             while (f_connect)
             {
-                var thre = new Thread(new ParameterizedThreadStart(T02));
+                var thre = new Thread(new ParameterizedThreadStart(TCPReadData));
                 thre.Start(tcpListener.AcceptTcpClient());
             }
         }
 
-        void T02(object sender)
+        void TCPReadData(object sender)
         {
             TcpClient client = sender as TcpClient;
             using (var stream = client.GetStream())
@@ -234,7 +316,7 @@ namespace CameraTrackingAppv3
             client.Dispose();
         }
 
-        void D01()
+        void UDPReceive()
         {
             while (f_connect)
             {
@@ -250,13 +332,43 @@ namespace CameraTrackingAppv3
             }
         }
 
-        void TEMP1()
+        //更新ボタンを押したときの処理
+        void BroadcastConnectSignal()
         {
+            users.Clear();
+            //users.Add(myself);
             UDP.SendBroadcastMessage("1");
-
-
-
         }
+
+        //一定時間が経過した後、他のパソコンへデータを送信する処理
+        void SequenceLoadSignal()
+        {
+            //  var temp = new List<RecodeUser>(users);
+            //   temp.Add(myself);
+            object[] send = new object[2];
+            send[0] = users;
+            send[1] = myself;
+            foreach(var i in users)
+            {
+              //  if (i.Equals(myself)) continue;
+                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, Utils.ObjectToByteArray(send));
+            }
+        }
+
+        //起動/待機の切り替え
+        void SendActiveSignal(int selected_index)
+        {
+            //暫定
+            var a = users[selected_index];
+            var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, Utils.ObjectToByteArray("1"));
+            if (!ok)
+            {
+                UDP.SendBroadcastMessage("2" + a.MACAddress);
+
+            } 
+        }
+
+
 
     }
 
@@ -335,11 +447,11 @@ namespace CameraTrackingAppv3
                     client.Connect(ip);
                     using (var stream = client.GetStream())
                     {
-                        Utils.WriteLine("パスワードの送信");
+                     //   Utils.WriteLine("パスワードの送信");
 
-                        buf1 = Encoding.UTF8.GetBytes(Utils.Password);
-                        stream.Write(buf1, 0, buf1.Length);
-                        Console.WriteLine("以下サーバへ送信");
+                     //   buf1 = Encoding.UTF8.GetBytes(Utils.Password);
+                     //   stream.Write(buf1, 0, buf1.Length);
+                     //   Console.WriteLine("以下サーバへ送信");
 
 
                         buf1 = Utils.ObjectToByteArray(type);//Encoding.UTF8.GetBytes(type);
