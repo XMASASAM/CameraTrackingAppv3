@@ -435,7 +435,7 @@ namespace CameraTrackingAppv3
             var port = Utils.PortNum;
 
             // 送信データ
-            var buffer = Encoding.UTF8.GetBytes(data);
+            var buffer = Utils.ObjectToByteArray(data);//Encoding.UTF8.GetBytes(data);
 
             // ブロードキャスト送信
             using (var client = new UdpClient())

@@ -95,7 +95,7 @@ namespace CameraTrackingAppv3
 
             speed = Utils.GetDistanceSquared(sensor_center, pre_valid_point);
             bool f_more_threshold = speed > move_threshold;
-            if (speed > move_threshold)
+            if (f_more_threshold)
             {
                 pre_valid_point = sensor_center;
             }
@@ -134,7 +134,7 @@ namespace CameraTrackingAppv3
                 var range_dx = range_point - location;
 
 
-                if (speed > move_threshold)
+                if (f_more_threshold)
                 {
                     var dx = cvtSensor2Delta(sensor_velocity);
 
