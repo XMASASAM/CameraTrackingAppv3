@@ -234,13 +234,7 @@ namespace CameraTrackingAppv3
                 var a = (RecodeUser)(data);
                 a.IPAddress = sender_ip;
                 users.Add(a);
-
-                Utils.WriteLine("AddRecodeUsers:--------");
-                foreach (var i in users)
-                {
-                    Utils.WriteLine(i.ToString());
-                }
-                Utils.WriteLine("EndRecodeUsers:--------");
+                ShowUsers();
                 // var temp = (List<string>)Utils.ByteArrayToObject(data);
 
                 // foreach (var i in temp)
@@ -284,13 +278,7 @@ namespace CameraTrackingAppv3
              //   b.IPAddress = sender_ip;
               //  users = (List<RecodeUser>)a[0];
                 users = (List<RecodeUser>)data;
-                //   users.Add(b);
-                Utils.WriteLine("AddRecodeUsers:--------");
-                foreach(var i in users)
-                {
-                    Utils.WriteLine(i.ToString());
-                }
-                Utils.WriteLine("EndRecodeUsers:--------");
+                ShowUsers();
 
             }
 
@@ -437,7 +425,18 @@ namespace CameraTrackingAppv3
             } 
         }
 
-
+        void ShowUsers()
+        {
+            Utils.WriteLine("AddRecodeUsers:--------");
+            lock (users)
+            {
+                foreach (var i in users)
+                {
+                    Utils.WriteLine(i.ToString());
+                }
+                Utils.WriteLine("EndRecodeUsers:--------");
+            }
+        }
 
     }
 
