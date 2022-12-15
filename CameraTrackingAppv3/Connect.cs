@@ -202,17 +202,16 @@ namespace CameraTrackingAppv3
 
             string sender_ip;
             ConnectType type;
-            byte[] data;
-
+            object data;
 
             {
                 object[] a = sender as object[];
                 sender_ip = a[0] as string;
                 type = (ConnectType)a[1];
-                data = a[2] as byte[];
+                data = a[2];// as byte[];
             }
 
-            if (type == ConnectType.FirstSend)
+         /*   if (type == ConnectType.FirstSend)
             {
 
                 TCP.SendMessage(sender_ip,ConnectType.FirstReceive,Utils.ObjectToByteArray(other_computer));
@@ -224,14 +223,15 @@ namespace CameraTrackingAppv3
             if(type == ConnectType.FirstReceive)
             {
                 SendOtherComputer(sender_ip, data);
-            }
+            }*/
             
             
             if (type == ConnectType.AddIP)
             {
                 Utils.WriteLine("AddIP受け取りました!!!");
 
-                var a = (RecodeUser)Utils.ByteArrayToObject(data);
+             //   var a = (RecodeUser)Utils.ByteArrayToObject(data);
+                var a = (RecodeUser)(data);
                 a.IPAddress = sender_ip;
                 users.Add(a);
 
@@ -251,7 +251,8 @@ namespace CameraTrackingAppv3
 
             if(type == ConnectType.Broadcast)
             {
-                string a = (string)Utils.ByteArrayToObject(data);
+                //string a = (string)Utils.ByteArrayToObject(data);
+                string a = (string)(data);
 
                 var head = a.Substring(0, 1);
                 var body = a.Substring(1, a.Length - 1);
@@ -275,7 +276,8 @@ namespace CameraTrackingAppv3
 
             if(type == ConnectType.LoadIP)
             {
-                object[] a = (object[])Utils.ByteArrayToObject(data);
+                //object[] a = (object[])Utils.ByteArrayToObject(data);
+                object[] a = (object[])(data);
                 RecodeUser b = (RecodeUser)a[1];
                 b.IPAddress = sender_ip;
                 users = (List<RecodeUser>)a[0];
@@ -296,7 +298,8 @@ namespace CameraTrackingAppv3
 
             if(type == ConnectType.Correction)
             {
-                var mac = (string)Utils.ByteArrayToObject(data);
+              //  var mac = (string)Utils.ByteArrayToObject(data);
+                var mac = (string)(data);
                 for(int i = 0; i < users.Count; i++)
                 {
                     if (mac.Equals(users[i].MACAddress))
@@ -340,28 +343,35 @@ namespace CameraTrackingAppv3
 
         void TCPReadData(object sender)
         {
+            Utils.WriteLine("TCPを読み取る");
             TcpClient client = sender as TcpClient;
             using (var stream = client.GetStream())
             {
                 byte[] buf = new byte[1024];
-                ConnectType type = ConnectType.None;
+              //  ConnectType type = ConnectType.None;
 
-                if (stream.Read(buf, 0, buf.Length) > 0)
-                {
-                    type = (ConnectType)Utils.ByteArrayToObject(buf);
-                    Array.Clear(buf, 0, buf.Length);
-                }
+              //  if (stream.Read(buf, 0, buf.Length) > 0)
+             //   {
+
+                   // type = (ConnectType)Utils.ByteArrayToObject(buf);
+                   // Array.Clear(buf, 0, buf.Length);
+             //   }
 
                 if (stream.Read(buf, 0, buf.Length) > 0)
                 {
                     var thre = new Thread(new ParameterizedThreadStart(Event));
+                    object[] data = (object[])Utils.ByteArrayToObject(buf);
                     object[] a = new object[3];
 
                     a[0] = (client.Client.RemoteEndPoint as IPEndPoint).Address.ToString();
-                    a[1] = type;
-                    a[2] = buf;
+                    a[1] = (ConnectType)data[0];//type;
+                    a[2] = data[1];//buf;
                     thre.Start(a);
                 }
+
+
+              //  stream.Write(new byte[] { 1 }, 0, 1);
+                stream.Close();
             }
             client.Dispose();
         }
@@ -374,7 +384,7 @@ namespace CameraTrackingAppv3
                 Utils.WriteLine("UDP受け取り待ち");
 
                 byte[] buf = udpListener.Receive(ref ip);
-                Utils.WriteLine("TCP受け取りました!!!!");
+                Utils.WriteLine("UDP受け取りました!!!!");
 
                 var thre = new Thread(new ParameterizedThreadStart(Event));
                 object[] a = new object[3];
@@ -501,19 +511,19 @@ namespace CameraTrackingAppv3
                     client.Connect(ip);
                     using (var stream = client.GetStream())
                     {
-                     //   Utils.WriteLine("パスワードの送信");
+                        //   Utils.WriteLine("パスワードの送信");
 
-                     //   buf1 = Encoding.UTF8.GetBytes(Utils.Password);
-                     //   stream.Write(buf1, 0, buf1.Length);
-                     //   Console.WriteLine("以下サーバへ送信");
-
-
-                        buf1 = Utils.ObjectToByteArray(type);//Encoding.UTF8.GetBytes(type);
+                        //   buf1 = Encoding.UTF8.GetBytes(Utils.Password);
+                        //   stream.Write(buf1, 0, buf1.Length);
+                        //   Console.WriteLine("以下サーバへ送信");
+                        object[] send_data = new object[2];
+                        send_data[0] = type;
+                        send_data[1] = data;
+                        buf1 = Utils.ObjectToByteArray(send_data);//Encoding.UTF8.GetBytes(type);
                         stream.Write(buf1, 0, buf1.Length);
 
                       //  buf1 = Encoding.UTF8.GetBytes(type);
-                        stream.Write(data, 0, data.Length);
-
+                      //  stream.Write(data, 0, data.Length);
 
                         ok = true;
 
