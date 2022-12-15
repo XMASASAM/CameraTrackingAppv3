@@ -15,7 +15,7 @@ namespace CameraTrackingAppv3
         static Mat camera_frame;
         static VideoCapture capture;
         static SettingsConfig config;
-
+        static Connect connect;
         static System.Drawing.Point comform_picture_offset;
         static System.Drawing.Point comform_picture_size;
 
@@ -51,6 +51,17 @@ namespace CameraTrackingAppv3
         {
             interval_wait_time = 1000 / fps;
         }
+
+        static public void SetConnect(Connect co)
+        {
+            connect = co;
+        }
+
+        static public Connect GetConnect()
+        {
+            return connect;
+        }
+
 
         public static void Update()
         {

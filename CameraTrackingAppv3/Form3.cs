@@ -20,11 +20,13 @@ namespace CameraTrackingAppv3
         SettingsConfig config;
         public UserControl1 UserControl { get { return userControl11; } }
         WaitProcess wait_process;
+        Connect connect;
         public Form3()
         {
             InitializeComponent();
             pre_form_height = this.Size.Height;
-
+            connect = new Connect();
+            Main.SetConnect(connect);
         }
 
         //ここからスタート

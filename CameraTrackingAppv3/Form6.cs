@@ -5,13 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
+using System.Threading;
 namespace CameraTrackingAppv3
 {
     public partial class Form6 : Form
     {
        // Form3 form3;
        // Form1 form1;
+        
         public Form6()//Form3 form3,Form1 form1)
         {
             InitializeComponent();
@@ -43,5 +44,31 @@ namespace CameraTrackingAppv3
             Utils.Config.Save();
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Utils.WriteLine("ConnectStart!!!!!!!");
+            Main.GetConnect().Start();
+            Utils.WriteLine("StartBroadcast!!!!!!!");
+            Main.GetConnect().BroadcastConnectSignal();
+
+            Thread thread = new Thread(TEMP01);
+            thread.Start();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Utils.WriteLine("ConnectStart2!!!!!!!");
+            Main.GetConnect().Start();
+        }
+
+        void TEMP01()
+        {
+            Utils.WriteLine("StartWait500!!!!!!!");
+            Thread.Sleep(500);
+            Utils.WriteLine("StartSequenceLoad!!!!!!!");
+            Main.GetConnect().SequenceLoadSignal();
+        }
+
     }
 }

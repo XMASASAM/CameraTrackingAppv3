@@ -20,7 +20,6 @@ namespace CameraTrackingAppv3
     static class Utils
     {
 
-
         public static string UserName;
         static Dictionary<string, Form2> loadalert = new Dictionary<string, Form2>();//   Form2 loadalert = null;
         public delegate void InvokeInt(int send);

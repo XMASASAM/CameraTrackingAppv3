@@ -44,6 +44,10 @@ namespace CameraTrackingAppv3
             return base.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return "UserName: " + UserName + " , MachineName: " + MachineName + " , IPAddress: " + IPAddress + " , MACAddress: " + MACAddress;
+        }
 
     }
 
@@ -62,6 +66,15 @@ namespace CameraTrackingAppv3
         double timeout_reload = 0.5;
         double timeout_found_ip = 0.5;
 
+        public Connect()
+        {
+            Init();
+        }
+
+        public List<RecodeUser> GetRecodeUsers()
+        {
+            return users;
+        }
 
         public bool Init()
         {
@@ -78,6 +91,23 @@ namespace CameraTrackingAppv3
             }
             return ok;
         }
+
+        public void Start()
+        {
+            if (f_connect) return;
+            f_connect = true;
+            Thread tcp_thread = new Thread(new ThreadStart(TCPReceive));
+            tcp_thread.Start();
+
+            Thread udp_thread = new Thread(new ThreadStart(UDPReceive));
+            udp_thread.Start();
+        }
+
+        public void End()
+        {
+            f_connect = false;
+        }
+
 
         public bool ReloadMyRecode()
         {
@@ -199,13 +229,22 @@ namespace CameraTrackingAppv3
             
             if (type == ConnectType.AddIP)
             {
+                Utils.WriteLine("AddIP受け取りました!!!");
+
                 var a = (RecodeUser)Utils.ByteArrayToObject(data);
                 a.IPAddress = sender_ip;
                 users.Add(a);
-               // var temp = (List<string>)Utils.ByteArrayToObject(data);
 
-               // foreach (var i in temp)
-               //     other_computer.Add(i);
+                Utils.WriteLine("AddRecodeUsers:--------");
+                foreach (var i in users)
+                {
+                    Utils.WriteLine(i.ToString());
+                }
+                Utils.WriteLine("EndRecodeUsers:--------");
+                // var temp = (List<string>)Utils.ByteArrayToObject(data);
+
+                // foreach (var i in temp)
+                //     other_computer.Add(i);
 
             }
 
@@ -216,6 +255,7 @@ namespace CameraTrackingAppv3
 
                 var head = a.Substring(0, 1);
                 var body = a.Substring(1, a.Length - 1);
+                Utils.WriteLine("Broadcast受け取りました!!!");
 
                 if (head.Equals("1"))
                 {
@@ -240,9 +280,16 @@ namespace CameraTrackingAppv3
                 b.IPAddress = sender_ip;
                 users = (List<RecodeUser>)a[0];
                 users.Add(b);
+                Utils.WriteLine("AddRecodeUsers:--------");
+                foreach(var i in users)
+                {
+                    Utils.WriteLine(i.ToString());
+                }
+                Utils.WriteLine("EndRecodeUsers:--------");
+
             }
 
-            if(type == ConnectType.Active)
+            if (type == ConnectType.Active)
             {
                 //アクティブになる処理
             }
@@ -284,7 +331,10 @@ namespace CameraTrackingAppv3
             while (f_connect)
             {
                 var thre = new Thread(new ParameterizedThreadStart(TCPReadData));
+                Utils.WriteLine("TCP受け取り待ち");
                 thre.Start(tcpListener.AcceptTcpClient());
+                Utils.WriteLine("TCP受け取けとりました!!!!");
+
             }
         }
 
@@ -321,7 +371,11 @@ namespace CameraTrackingAppv3
             while (f_connect)
             {
                 IPEndPoint ip = null;//new IPEndPoint(IPAddress.Any,Utils.PortNum);
+                Utils.WriteLine("UDP受け取り待ち");
+
                 byte[] buf = udpListener.Receive(ref ip);
+                Utils.WriteLine("TCP受け取りました!!!!");
+
                 var thre = new Thread(new ParameterizedThreadStart(Event));
                 object[] a = new object[3];
 
@@ -333,7 +387,7 @@ namespace CameraTrackingAppv3
         }
 
         //更新ボタンを押したときの処理
-        void BroadcastConnectSignal()
+        public void BroadcastConnectSignal()
         {
             users.Clear();
             //users.Add(myself);
@@ -341,7 +395,7 @@ namespace CameraTrackingAppv3
         }
 
         //一定時間が経過した後、他のパソコンへデータを送信する処理
-        void SequenceLoadSignal()
+        public void SequenceLoadSignal()
         {
             //  var temp = new List<RecodeUser>(users);
             //   temp.Add(myself);
