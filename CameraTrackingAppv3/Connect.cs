@@ -278,12 +278,13 @@ namespace CameraTrackingAppv3
 
             if(type == ConnectType.LoadIP)
             {
-                //object[] a = (object[])Utils.ByteArrayToObject(data);
-                object[] a = (object[])(data);
-                RecodeUser b = (RecodeUser)a[1];
-                b.IPAddress = sender_ip;
-                users = (List<RecodeUser>)a[0];
-                users.Add(b);
+              //  object[] a = (object[])Utils.ByteArrayToObject(data);
+              //  object[] a = (object[])(data);
+             //   RecodeUser b = (RecodeUser)a[1];
+             //   b.IPAddress = sender_ip;
+              //  users = (List<RecodeUser>)a[0];
+                users = (List<RecodeUser>)data;
+                //   users.Add(b);
                 Utils.WriteLine("AddRecodeUsers:--------");
                 foreach(var i in users)
                 {
@@ -411,14 +412,14 @@ namespace CameraTrackingAppv3
         {
             //  var temp = new List<RecodeUser>(users);
             //   temp.Add(myself);
-            object[] send = new object[2];
-            send[0] = users;
-            send[1] = myself;
+           // object[] send = new object[2];
+          //  send[0] = users;
+          //  send[1] = myself;
             foreach(var i in users)
             {
               //  if (i.Equals(myself)) continue;
               //  TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, Utils.ObjectToByteArray(send));
-                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, send);
+                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP,users);
             }
         }
 
