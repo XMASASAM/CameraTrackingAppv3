@@ -15,6 +15,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Net;
 namespace CameraTrackingAppv3
 {
     static class Utils
@@ -363,6 +365,29 @@ namespace CameraTrackingAppv3
                 
             }
 
+        }
+
+
+        static List<string> GetIPv4Address()
+        {
+            //IPアドレス用変数
+            var ip = new List<string>();
+
+            //自身のIPアドレスの一覧を取得する
+            string hostname = Dns.GetHostName();
+            IPAddress[] ips = Dns.GetHostAddresses(hostname);
+
+            //一覧からIPv4アドレスのみ抽出する
+            foreach (IPAddress a in ips)
+            {
+                //IPv4を対象とする
+                if (a.AddressFamily.Equals(AddressFamily.InterNetwork))
+                {
+                    ip.Add(a.ToString());
+                }
+            }
+
+            return ip;
         }
 
         static public List<string> GetActivePhysicalAddress()
