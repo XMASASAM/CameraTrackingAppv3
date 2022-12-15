@@ -391,7 +391,7 @@ namespace CameraTrackingAppv3
 
                 a[0] = ip.Address.ToString();
                 a[1] = ConnectType.Broadcast;
-                a[2] = buf;
+                a[2] = Utils.ByteArrayToObject(buf);
                 thre.Start(a);
             }
         }
