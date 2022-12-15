@@ -260,7 +260,8 @@ namespace CameraTrackingAppv3
 
                 if (head.Equals("1"))
                 {
-                    TCP.SendMessage(sender_ip, ConnectType.AddIP, Utils.ObjectToByteArray(myself));
+                  //  TCP.SendMessage(sender_ip, ConnectType.AddIP, Utils.ObjectToByteArray(myself));
+                    TCP.SendMessage(sender_ip, ConnectType.AddIP, myself);
                 }else
                 if (head.Equals("2"))
                 {
@@ -268,7 +269,8 @@ namespace CameraTrackingAppv3
                     {
                         //ReloadMyRecode();
                         //アクティブになる処理
-                        TCP.SendMessage(sender_ip, ConnectType.Correction, Utils.ObjectToByteArray(body));
+                        //TCP.SendMessage(sender_ip, ConnectType.Correction, Utils.ObjectToByteArray(body));
+                        TCP.SendMessage(sender_ip, ConnectType.Correction, body);
                     }
                 }
             }
@@ -313,7 +315,7 @@ namespace CameraTrackingAppv3
         }
 
 
-        void SendOtherComputer(string sender_ip, byte[] data)
+       /* void SendOtherComputer(string sender_ip, byte[] data)
         {
             var temp = (List<string>)Utils.ByteArrayToObject(data);
             temp.Add(sender_ip);
@@ -326,7 +328,7 @@ namespace CameraTrackingAppv3
 
             foreach (var i in temp)
                 other_computer.Add(i);
-        }
+        }*/
 
 
         void TCPReceive()
@@ -415,7 +417,8 @@ namespace CameraTrackingAppv3
             foreach(var i in users)
             {
               //  if (i.Equals(myself)) continue;
-                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, Utils.ObjectToByteArray(send));
+              //  TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, Utils.ObjectToByteArray(send));
+                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, send);
             }
         }
 
@@ -424,7 +427,8 @@ namespace CameraTrackingAppv3
         {
             //暫定
             var a = users[selected_index];
-            var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, Utils.ObjectToByteArray("1"));
+          //  var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, Utils.ObjectToByteArray("1"));
+            var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, "1");
             if (!ok)
             {
                 UDP.SendBroadcastMessage("2" + a.MACAddress);
@@ -494,7 +498,8 @@ namespace CameraTrackingAppv3
 
     static class TCP
     {
-        static public bool SendMessage(string target_ip,ConnectType type,byte[] data)
+        //static public bool SendMessage(string target_ip,ConnectType type,byte[] data)
+        static public bool SendMessage(string target_ip,ConnectType type,object data)
         {
             
             byte[] buf1;// = new byte[1024];
