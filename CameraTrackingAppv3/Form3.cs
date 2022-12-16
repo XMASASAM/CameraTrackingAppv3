@@ -124,7 +124,7 @@ namespace CameraTrackingAppv3
             }
         }
 
-        void StopCursorControl()
+        public void StopCursorControl()
         {
             f_control_active = false;
             MouseControl.IsControl = false;
@@ -229,10 +229,14 @@ namespace CameraTrackingAppv3
 
         private void button5_Click(object sender, EventArgs e)
         {
+            WaitCursor(false);
+        }
 
+        public void WaitCursor(bool change_machine)
+        {
             f_wait_mode = true;
             StopCursorControl();
-            wait_process = new WaitProcess();
+            wait_process = new WaitProcess(change_machine);
         }
 
         private void timer1_Tick(object sender, EventArgs e)

@@ -412,7 +412,7 @@ namespace CameraTrackingAppv3
         }
 
         //起動/待機の切り替え
-        void SendActiveSignal(int selected_index)
+        public bool SendActiveSignal(int selected_index)
         {
             //暫定
             var a = users[selected_index];
@@ -422,7 +422,8 @@ namespace CameraTrackingAppv3
             {
                 UDP.SendBroadcastMessage("2" + a.MACAddress);
 
-            } 
+            }
+            return ok;
         }
 
         void ShowUsers()

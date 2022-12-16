@@ -70,5 +70,26 @@ namespace CameraTrackingAppv3
         {
             MouseControl.IsCursorOnForm = true;
         }
+
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            var users = Main.GetConnect().GetRecodeUsers();
+            if (users.Count == 2)
+            {
+                var macs = Utils.GetAllPhysicalAddress();
+                var index = 0;
+                if (macs.Contains(users[index].MACAddress))
+                    index = 1;
+
+
+                if (Main.GetConnect().SendActiveSignal(index))
+                {
+                    Utils.MainForm.WaitCursor(true);
+                }
+
+            }
+
+        }
     }
 }

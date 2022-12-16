@@ -40,14 +40,6 @@ namespace CameraTrackingAppv3
             this.config = config;
 
 
-            if (config.VideoCapture != null)
-            {
-                capture = this.config.VideoCapture;
-                active_camera_id = this.config.Property.CameraID;
-                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
-
-            }
-
             f_jump2form3 = jump2Form3;
             f_decide_skip = decide_skip;
             f_first = !this.config.Property.CameraID.Equals("");
@@ -296,7 +288,14 @@ namespace CameraTrackingAppv3
             Main.DisplayCamera(frame);
         }
 
-
-
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            if (config.VideoCapture != null)
+            {
+                capture = this.config.VideoCapture;
+                active_camera_id = this.config.Property.CameraID;
+                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
+            }
+        }
     }
 }

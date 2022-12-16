@@ -12,12 +12,17 @@ namespace CameraTrackingAppv3
         bool f_confirm = false;
         int step_wait = 0;
         Form7 form7;
-        public WaitProcess()
+        bool f_change_machine;
+        public WaitProcess(bool change_machine)
         {
             //   stopwatch = new Stopwatch();
             Main.SetFPS(1);
             CursorControl.SettingMode();
             stopwatch = new Stopwatch();
+            f_change_machine = change_machine;
+
+            if (change_machine)
+                System.Windows.Forms.Cursor.Hide();
 
         }
 
@@ -30,6 +35,12 @@ namespace CameraTrackingAppv3
         // public void Update(Vec2d tracker_corrected_vel)
         public bool Update(Mat frame)
         {
+            if (f_change_machine)
+            {
+                return false;
+            }
+
+
             Main.Tracker.Update(frame);
             CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CorrectedCenterPoint, Main.Tracker.CorrectedVelocity);
 

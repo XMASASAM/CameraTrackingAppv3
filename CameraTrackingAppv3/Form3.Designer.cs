@@ -33,7 +33,6 @@ namespace CameraTrackingAppv3
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.userControl11 = new CameraTrackingAppv3.UserControl1();
             this.button3 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -69,13 +68,6 @@ namespace CameraTrackingAppv3
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // userControl11
-            // 
-            this.userControl11.Location = new System.Drawing.Point(11, 275);
-            this.userControl11.Name = "userControl11";
-            this.userControl11.Size = new System.Drawing.Size(306, 285);
-            this.userControl11.TabIndex = 5;
-            // 
             // button3
             // 
             this.button3.Location = new System.Drawing.Point(12, 105);
@@ -92,7 +84,7 @@ namespace CameraTrackingAppv3
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(306, 47);
             this.button5.TabIndex = 7;
-            this.button5.Text = "待機";
+            this.button5.Text = "休憩";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
@@ -110,7 +102,6 @@ namespace CameraTrackingAppv3
             this.ControlBox = false;
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button3);
-            this.Controls.Add(this.userControl11);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);

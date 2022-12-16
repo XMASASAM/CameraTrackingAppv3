@@ -35,7 +35,7 @@ namespace CameraTrackingAppv3
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
-            this.userControl21 = new CameraTrackingAppv3.UserControl2();
+            this.button7 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -90,26 +90,29 @@ namespace CameraTrackingAppv3
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(32, 241);
+            this.button6.Location = new System.Drawing.Point(138, 141);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(75, 23);
             this.button6.TabIndex = 5;
             this.button6.Text = "ポート番号の変更";
             this.button6.UseVisualStyleBackColor = true;
             // 
-            // userControl21
+            // button7
             // 
-            this.userControl21.Location = new System.Drawing.Point(459, 22);
-            this.userControl21.Name = "userControl21";
-            this.userControl21.Size = new System.Drawing.Size(329, 172);
-            this.userControl21.TabIndex = 6;
+            this.button7.Location = new System.Drawing.Point(32, 248);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(75, 23);
+            this.button7.TabIndex = 6;
+            this.button7.Text = "待機";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
             // Form6
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.userControl21);
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -131,5 +134,6 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
         private UserControl2 userControl21;
+        private System.Windows.Forms.Button button7;
     }
 }
