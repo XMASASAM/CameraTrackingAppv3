@@ -122,8 +122,7 @@ namespace CameraTrackingAppv3
         {
             CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
             CursorControl.IsRangeOfMotion = true;
-            var form = new Form1(ref config, true,true);
-            form.Show();
+
         }
 
     }

@@ -43,7 +43,8 @@ namespace CameraTrackingAppv3
             if (loaded_settings)
             {
                 SettingsConfig.Adapt(Utils.Config);
-
+                var form = new Form1(ref Utils.Config, true, true);
+                form.Show();
             }
             else
             {

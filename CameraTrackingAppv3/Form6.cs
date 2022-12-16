@@ -42,7 +42,7 @@ namespace CameraTrackingAppv3
             Utils.Config.Set(Utils.Temp_Config);
 
             Utils.Config.Save();
-
+            SettingsConfig.Adapt(Utils.Config);
         }
 
         private void button4_Click(object sender, EventArgs e)
