@@ -50,7 +50,7 @@ namespace CameraTrackingAppv3
 
         new public void Update()
         {
-            label1.Text = "OnMouse:" + MouseControl.IsCursorOnForm.ToString();
+            //label1.Text = "OnMouse:" + MouseControl.IsCursorOnForm.ToString();
 
             if (CursorControl.IsDwellImpulse)
             {

@@ -22,7 +22,7 @@ namespace CameraTrackingAppv3
     }
 
     [Serializable]
-    class RecodeUser
+    public class RecodeUser
     {
         public string UserName;
         public string MachineName;

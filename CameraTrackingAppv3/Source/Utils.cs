@@ -25,6 +25,7 @@ namespace CameraTrackingAppv3
         public static string UserName;
         static Dictionary<string, Form2> loadalert = new Dictionary<string, Form2>();//   Form2 loadalert = null;
         public delegate void InvokeInt(int send);
+        public delegate void InvokeBool(bool send);
         public delegate void InvokeString(string send);
         public delegate void InvokeVoid();
         public delegate void InvokeLoadAlert(string title,string message,Image image,System.Drawing.Point start_point,bool bottom);
@@ -368,7 +369,7 @@ namespace CameraTrackingAppv3
         }
 
 
-        static List<string> GetIPv4Address()
+        public static List<string> GetIPv4Address()
         {
             //IPアドレス用変数
             var ip = new List<string>();

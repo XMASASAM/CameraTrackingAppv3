@@ -22,7 +22,7 @@ namespace CameraTrackingAppv3
         List<string> deviceID = new List<string>();
         bool f_start_up = false;
         bool f_first = false;
-
+        Mat frame;
         delegate void ControlFormDelegate();
         string active_camera_id = "";
         public UserControl1 UserControl { get { return userControl11; } }
@@ -252,11 +252,6 @@ namespace CameraTrackingAppv3
         }
 
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-
-            Main.Update();
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -289,10 +284,19 @@ namespace CameraTrackingAppv3
         }
 
 
+
+
         public void FormUpdate(ref Mat frame)
+        {
+            this.frame = frame;
+        }
+
+        public void FormDraw()
         {
             Main.DisplayCamera(frame);
         }
+
+
 
     }
 }

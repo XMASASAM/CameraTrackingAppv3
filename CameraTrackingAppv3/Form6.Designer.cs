@@ -35,6 +35,7 @@ namespace CameraTrackingAppv3
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
+            this.userControl21 = new CameraTrackingAppv3.UserControl2();
             this.SuspendLayout();
             // 
             // button1
@@ -96,11 +97,19 @@ namespace CameraTrackingAppv3
             this.button6.Text = "ポート番号の変更";
             this.button6.UseVisualStyleBackColor = true;
             // 
+            // userControl21
+            // 
+            this.userControl21.Location = new System.Drawing.Point(459, 22);
+            this.userControl21.Name = "userControl21";
+            this.userControl21.Size = new System.Drawing.Size(329, 172);
+            this.userControl21.TabIndex = 6;
+            // 
             // Form6
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.userControl21);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -121,5 +130,6 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
+        private UserControl2 userControl21;
     }
 }

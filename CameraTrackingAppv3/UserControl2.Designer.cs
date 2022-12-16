@@ -29,44 +29,80 @@ namespace CameraTrackingAppv3
         /// </summary>
         private void InitializeComponent()
         {
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
+            "",
+            ""}, -1);
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.ユーザ名 = new System.Windows.Forms.ColumnHeader();
+            this.機種名 = new System.Windows.Forms.ColumnHeader();
+            this.IPアドレス = new System.Windows.Forms.ColumnHeader();
+            this.MACアドレス = new System.Windows.Forms.ColumnHeader();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
-            // listBox1
+            // listView1
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 15;
-            this.listBox1.Location = new System.Drawing.Point(0, 18);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(99, 109);
-            this.listBox1.TabIndex = 0;
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ユーザ名,
+            this.機種名,
+            this.IPアドレス,
+            this.MACアドレス});
+            this.listView1.FullRowSelect = true;
+            this.listView1.GridLines = true;
+            this.listView1.HideSelection = false;
+            this.listView1.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
+            listViewItem1});
+            this.listView1.Location = new System.Drawing.Point(0, 0);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(328, 168);
+            this.listView1.TabIndex = 7;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
             // 
-            // label1
+            // ユーザ名
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 15);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "label1";
+            this.ユーザ名.Text = "ユーザ名";
+            this.ユーザ名.Width = 82;
+            // 
+            // 機種名
+            // 
+            this.機種名.Text = "機種名";
+            this.機種名.Width = 82;
+            // 
+            // IPアドレス
+            // 
+            this.IPアドレス.Text = "IPアドレス";
+            this.IPアドレス.Width = 82;
+            // 
+            // MACアドレス
+            // 
+            this.MACアドレス.Text = "MACアドレス";
+            this.MACアドレス.Width = 82;
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // UserControl2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.listView1);
             this.Name = "UserControl2";
-            this.Size = new System.Drawing.Size(99, 128);
+            this.Size = new System.Drawing.Size(328, 168);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ColumnHeader ユーザ名;
+        private System.Windows.Forms.ColumnHeader 機種名;
+        private System.Windows.Forms.ColumnHeader IPアドレス;
+        private System.Windows.Forms.ColumnHeader MACアドレス;
+        private System.Windows.Forms.Timer timer1;
     }
 }

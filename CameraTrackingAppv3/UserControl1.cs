@@ -71,8 +71,11 @@ namespace CameraTrackingAppv3
 
         public void DisplayClear()
         {
-            VisibleCameraName(false);
-            VisibleFPS(false);
+           // Invoke(new Utils.InvokeBool(VisibleCameraName),false);
+             VisibleCameraName(false);
+         //   Invoke(new Utils.InvokeBool(VisibleFPS),false));
+             VisibleFPS(false);
+          //  Invoke(new Utils.InvokeVoid(PictureClear));
             PictureClear();
         }
 

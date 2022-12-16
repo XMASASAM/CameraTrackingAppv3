@@ -21,10 +21,13 @@ namespace CameraTrackingAppv3
         public UserControl1 UserControl { get { return userControl11; } }
         WaitProcess wait_process;
         Connect connect;
+        Mat frame;
         public Form3()
         {
             InitializeComponent();
             pre_form_height = this.Size.Height;
+
+            Main.Start(this);
             connect = new Connect();
             Main.SetConnect(connect);
         }
@@ -154,7 +157,7 @@ namespace CameraTrackingAppv3
 
         public void FormUpdate(ref Mat frame)
         {
-
+            this.frame = frame;
             if (f_control_active)
             {
                 Main.Tracker.Update(frame);
@@ -178,15 +181,18 @@ namespace CameraTrackingAppv3
 
 
             }
+        }
 
+        public void FormDraw()
+        {
             if (f_camera_visible)
             {
-                if(f_control_active&&f_tracker_visible)
+                if (f_control_active && f_tracker_visible)
                     Main.Tracker.Draw(ref frame);
 
                 if (f_range_of_motion_visible)
-                    CursorControl.DisplayRangeOfMotion(ref frame,config.Property.RangeOfMotion);
-                   // Sub_DisplayRangeOfMotion(ref frame);
+                    CursorControl.DisplayRangeOfMotion(ref frame, config.Property.RangeOfMotion);
+                // Sub_DisplayRangeOfMotion(ref frame);
 
                 Main.DisplayCamera(frame);
             }
@@ -230,7 +236,7 @@ namespace CameraTrackingAppv3
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Main.Update();
+            //Main.Update();
         }
 
         private void Form3_Shown(object sender, EventArgs e)

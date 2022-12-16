@@ -5,6 +5,24 @@ using OpenCvSharp;
 using System.Drawing;
 using OpenCvSharp.Extensions;
 using System.Windows.Forms;
+using System.Threading;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
+using System.Runtime.InteropServices;
+using System.Management;
+using System.Threading;
+
+
 namespace CameraTrackingAppv3
 {
 
@@ -31,13 +49,17 @@ namespace CameraTrackingAppv3
         static CountFPS countFPS;
 
         delegate void FormUpdate(ref Mat frame);
+        delegate void FormDraw();
         static FormUpdate form_update = null;
+        static FormDraw form_draw = null;
         static public GeneralTracker Tracker { get { return mouse_tracker; } }
         static public VideoCapture VideoCapture { get { return capture; } }
         static Vec2d[] range_of_motion = new Vec2d[4];
 
         static System.Diagnostics.Stopwatch stopwatch;
         static long interval_wait_time;
+        static bool f_active = false;
+        static Control control;
         static Main()
         {
             current_picture_control = null;
@@ -45,6 +67,21 @@ namespace CameraTrackingAppv3
             stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
             SetFPS(1000);
+            
+        }
+
+        public static void Start(Control cont)
+        {
+            if (f_active) return;
+            f_active  = true;
+            control = cont;
+            Thread thread = new Thread(new ThreadStart(Loop));
+            thread.Start();
+        }
+
+        public static void End()
+        {
+            f_active = false;
         }
 
         static public void SetFPS(int fps)
@@ -62,10 +99,17 @@ namespace CameraTrackingAppv3
             return connect;
         }
 
-
-        public static void Update()
+        static void Loop()
         {
+            while (f_active)
+            {
+               // control.Invoke(new Utils.InvokeVoid(Update));
+                Update();
+            }
+        }
 
+        static void Update()
+        {
             if (stopwatch.ElapsedMilliseconds < interval_wait_time)
                 return;
             stopwatch.Restart();
@@ -73,24 +117,35 @@ namespace CameraTrackingAppv3
             if (!f_set_up)
             {
                 if (current_picture_control != null)
-                    current_picture_control.DisplayClear();
+                    control.Invoke(new Utils.InvokeVoid(current_picture_control.DisplayClear));
                 //CurrentPictureControl.VisibleCameraName(false);
                 return;
             }
 
+            bool ok;
 
             if (camera_frame != null)
-                camera_frame.Dispose();
+            {
+                lock (camera_frame)
+                {
+                    camera_frame.Dispose();
 
-            camera_frame = new Mat();
+                    camera_frame = new Mat();
+                    ok = capture.Read(camera_frame);
+                }
+            }
+            else
+            {
+                camera_frame = new Mat();
+                ok = capture.Read(camera_frame);
+            }
 
 
-
-            if (capture.Read(camera_frame))
+            if (ok)
             {
                 countFPS.Update();
 
-                current_picture_control.SetFPS(countFPS.Get);
+                control.Invoke(new Utils.InvokeInt(current_picture_control.SetFPS),countFPS.Get);
 
              //   f_infrared_mode = DetectColorORGray(camera_frame);
 
@@ -100,12 +155,15 @@ namespace CameraTrackingAppv3
 
                 if (form_update != null)
                     form_update(ref camera_frame);
+                if (form_draw != null)
+                    control.Invoke(new Utils.InvokeVoid(form_draw));
+
 
             }
             else
             {
                // f_set_up = false;
-                current_picture_control.PictureClear();
+                control.Invoke(new Utils.InvokeVoid(current_picture_control.PictureClear));
              //   capture.Release();
              //   capture.Dispose();
                 //capture = null;
@@ -167,6 +225,7 @@ namespace CameraTrackingAppv3
         {
             //current_form = form;
             form_update = form.FormUpdate;
+            form_draw = form.FormDraw;
             current_picture_control = form.UserControl;//userControl1;
          //   config = set_config;
          //   if (capture != set_config.VideoCapture)
@@ -186,9 +245,12 @@ namespace CameraTrackingAppv3
 
         public static void DisplayCamera(Mat frame)
         {
-            using (Bitmap bitmap = BitmapConverter.ToBitmap(frame))
-          //  using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size.X, comform_picture_size.Y))
-                current_picture_control.DrawImage(bitmap, comform_picture_offset, comform_picture_size);
+            lock (frame)
+            {
+                using (Bitmap bitmap = BitmapConverter.ToBitmap(frame))
+                    //  using (var resize_bitmap = new Bitmap(bitmap, comform_picture_size.X, comform_picture_size.Y))
+                    current_picture_control.DrawImage(bitmap, comform_picture_offset, comform_picture_size);
+            }
         }
 
 

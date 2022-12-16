@@ -27,7 +27,7 @@ namespace CameraTrackingAppv3
 
         SettingsConfig config;
 
-
+        Mat frame;
         public Form4(ref SettingsConfig config,bool first_event)
         {
             InitializeComponent();
@@ -69,9 +69,15 @@ namespace CameraTrackingAppv3
 
         public void FormUpdate(ref Mat frame)
         {
+            this.frame = frame;
             Main.Tracker.Update(frame);
             //  Utils.WriteLine("Cursor::" + CursorControl.IsControlMouse.ToString());
             CursorControl.Update(Main.Tracker.IsError, Main.Tracker.CorrectedCenterPoint, Main.Tracker.CorrectedVelocity);
+
+        }
+
+        public void FormDraw()
+        {
 
             if (!f_done)
             {
@@ -101,7 +107,7 @@ namespace CameraTrackingAppv3
 
             if (f_done)
             {
-                CursorControl.DisplayRangeOfMotion(ref frame,range);
+                CursorControl.DisplayRangeOfMotion(ref frame, range);
             }
             else
             {
@@ -113,9 +119,10 @@ namespace CameraTrackingAppv3
                         4, Scalar.Yellow, 4);
                 }
             }
-        
+
             Main.DisplayCamera(frame);
         }
+
 
         private void button3_Click(object sender, EventArgs e)
         {
