@@ -60,17 +60,30 @@ namespace CameraTrackingAppv3
         private void Form1_Load(object sender, EventArgs e)
         {
 
-            LoadDeviceList();
+            
             new DisplayInformation(this);
 
 
-            Main.ChangeDisplayCameraForm(this);
+            
             if (config.Property.CameraID.Equals(""))
             {
                 userControl11.VisibleCameraName(false);
                 userControl11.VisibleFPS(false);
             }
 
+        }
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            Main.ChangeDisplayCameraForm(this);
+
+            LoadDeviceList();
+
+            if (config.VideoCapture != null)
+            {
+                capture = this.config.VideoCapture;
+                active_camera_id = this.config.Property.CameraID;
+                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -288,14 +301,6 @@ namespace CameraTrackingAppv3
             Main.DisplayCamera(frame);
         }
 
-        private void Form1_Shown(object sender, EventArgs e)
-        {
-            if (config.VideoCapture != null)
-            {
-                capture = this.config.VideoCapture;
-                active_camera_id = this.config.Property.CameraID;
-                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
-            }
-        }
+
     }
 }

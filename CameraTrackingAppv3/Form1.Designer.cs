@@ -33,6 +33,7 @@ namespace CameraTrackingAppv3
             this.button2 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.userControl11 = new CameraTrackingAppv3.UserControl1();
             this.SuspendLayout();
             // 
             // button1
@@ -73,6 +74,13 @@ namespace CameraTrackingAppv3
             this.comboBox1.Size = new System.Drawing.Size(220, 23);
             this.comboBox1.TabIndex = 6;
             // 
+            // userControl11
+            // 
+            this.userControl11.Location = new System.Drawing.Point(12, 56);
+            this.userControl11.Name = "userControl11";
+            this.userControl11.Size = new System.Drawing.Size(306, 285);
+            this.userControl11.TabIndex = 7;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -83,6 +91,7 @@ namespace CameraTrackingAppv3
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.button1);
+            this.Controls.Add(this.userControl11);
             this.Name = "Form1";
             this.Text = "Form1";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -100,6 +109,7 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox1;
         private UserControl1 userControl11;
+       // private UserControl1 userControl12;
     }
 }
 

@@ -36,6 +36,7 @@ namespace CameraTrackingAppv3
             this.button3 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.userControl11 = new CameraTrackingAppv3.UserControl1();
             this.SuspendLayout();
             // 
             // button1
@@ -94,12 +95,20 @@ namespace CameraTrackingAppv3
             this.timer1.Interval = 10;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // userControl11
+            // 
+            this.userControl11.Location = new System.Drawing.Point(13, 276);
+            this.userControl11.Name = "userControl11";
+            this.userControl11.Size = new System.Drawing.Size(306, 285);
+            this.userControl11.TabIndex = 8;
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(330, 572);
             this.ControlBox = false;
+            this.Controls.Add(this.userControl11);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button4);
@@ -118,9 +127,10 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button4;
-        private UserControl1 userControl11;
+      //  private UserControl1 userControl11;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Timer timer1;
+        private UserControl1 userControl11;
     }
 }

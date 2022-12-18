@@ -55,6 +55,7 @@ namespace CameraTrackingAppv3
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if(Main.GetConnect()!=null)
             SetRecodes(Main.GetConnect().GetRecodeUsers());
         }
     }
