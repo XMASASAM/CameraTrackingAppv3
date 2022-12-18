@@ -11,7 +11,7 @@ namespace CameraTrackingAppv3
         bool f_first = true;
         bool f_confirm = false;
         int step_wait = 0;
-        Form7 form7;
+        Form7 form7 = null;
         bool f_change_machine;
         bool f_active_signal=false;
         public WaitProcess(bool change_machine)
@@ -29,8 +29,11 @@ namespace CameraTrackingAppv3
 
         public void Dispose()
         {
-            form7.Close();
-            form7.Dispose();
+            if (form7 != null)
+            {
+                form7.Close();
+                form7.Dispose();
+            }
         }
         public void ReceiveActiveSignal()
         {
