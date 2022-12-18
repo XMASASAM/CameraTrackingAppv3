@@ -126,6 +126,7 @@ namespace CameraTrackingAppv3
 
         private void button3_Click(object sender, EventArgs e)
         {
+            Utils.CloseLoadAlert(dialog_title);
             f_done = false;
             step_range_of_motion = 0;
             points = new Vec2d[4];
@@ -201,6 +202,16 @@ namespace CameraTrackingAppv3
             foreach (var i in dialog_icon)
                 i.Dispose();
             Dispose();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            Main.SetRotate(trackBar1.Value);
+        }
+
+        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Utils.CloseLoadAlert(dialog_title);
         }
     }
 }

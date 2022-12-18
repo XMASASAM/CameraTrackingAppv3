@@ -36,7 +36,8 @@ namespace CameraTrackingAppv3
         static Connect connect;
         static System.Drawing.Point comform_picture_offset;
         static System.Drawing.Point comform_picture_size;
-
+        static int rotate = 0;
+        static Mat rotate_mat;
         static bool f_set_up = false;
 
 
@@ -87,6 +88,13 @@ namespace CameraTrackingAppv3
         static public void SetFPS(int fps)
         {
             interval_wait_time = 1000 / fps;
+        }
+
+        static public void SetRotate(int degree)
+        {
+            rotate = degree;
+            var cp = new Point2f(Utils.CameraWidth *.5f, Utils.CameraHeight * .5f);
+            rotate_mat = Cv2.GetRotationMatrix2D(cp, degree, 1);
         }
 
         static public void SetConnect(Connect co)
@@ -143,6 +151,14 @@ namespace CameraTrackingAppv3
 
             if (ok)
             {
+
+                if (rotate != 0)
+                {
+                    //var size = new Size()
+                    camera_frame = camera_frame.WarpAffine(rotate_mat, camera_frame.Size());
+                    
+                }
+
                 countFPS.Update();
 
                 control.Invoke(new Utils.InvokeInt(current_picture_control.SetFPS),countFPS.Get);

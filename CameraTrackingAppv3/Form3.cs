@@ -116,6 +116,7 @@ namespace CameraTrackingAppv3
 
         void StartCursorControl()
         {
+            Main.SetFPS(1000);
             f_control_active = true;
             MouseControl.IsControl = true;
             if (form5 == null)
