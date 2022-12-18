@@ -234,7 +234,7 @@ namespace CameraTrackingAppv3
                 var a = (RecodeUser)(data);
                 a.IPAddress = sender_ip;
                 users.Add(a);
-                ShowUsers();
+              //  ShowUsers();
                 // var temp = (List<string>)Utils.ByteArrayToObject(data);
 
                 // foreach (var i in temp)
@@ -278,7 +278,7 @@ namespace CameraTrackingAppv3
              //   b.IPAddress = sender_ip;
               //  users = (List<RecodeUser>)a[0];
                 users = (List<RecodeUser>)data;
-                ShowUsers();
+                //ShowUsers();
 
             }
 
