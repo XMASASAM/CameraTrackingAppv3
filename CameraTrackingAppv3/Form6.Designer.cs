@@ -110,9 +110,9 @@ namespace CameraTrackingAppv3
             // 
             // userControl21
             // 
-            this.userControl21.Location = new System.Drawing.Point(463, 32);
+            this.userControl21.Location = new System.Drawing.Point(138, 248);
             this.userControl21.Name = "userControl21";
-            this.userControl21.Size = new System.Drawing.Size(328, 168);
+            this.userControl21.Size = new System.Drawing.Size(555, 168);
             this.userControl21.TabIndex = 7;
             // 
             // Form6

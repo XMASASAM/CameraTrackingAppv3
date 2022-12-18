@@ -5,7 +5,7 @@ using OpenCvSharp;
 using System.Diagnostics;
 namespace CameraTrackingAppv3
 {
-    class WaitProcess:IDisposable
+    public class WaitProcess:IDisposable
     {
         Stopwatch stopwatch;
         bool f_first = true;
@@ -13,6 +13,7 @@ namespace CameraTrackingAppv3
         int step_wait = 0;
         Form7 form7;
         bool f_change_machine;
+        bool f_active_signal=false;
         public WaitProcess(bool change_machine)
         {
             //   stopwatch = new Stopwatch();
@@ -21,8 +22,8 @@ namespace CameraTrackingAppv3
             stopwatch = new Stopwatch();
             f_change_machine = change_machine;
 
-            if (change_machine)
-                System.Windows.Forms.Cursor.Hide();
+        //    if (change_machine)
+        //        System.Windows.Forms.Cursor.Hide();
 
         }
 
@@ -31,13 +32,16 @@ namespace CameraTrackingAppv3
             form7.Close();
             form7.Dispose();
         }
-
+        public void ReceiveActiveSignal()
+        {
+            f_active_signal = true;
+        }
         // public void Update(Vec2d tracker_corrected_vel)
         public bool Update(Mat frame)
         {
             if (f_change_machine)
             {
-                return false;
+                return f_active_signal;
             }
 
 

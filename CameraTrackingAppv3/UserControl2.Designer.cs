@@ -55,7 +55,7 @@ namespace CameraTrackingAppv3
             listViewItem1});
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(328, 168);
+            this.listView1.Size = new System.Drawing.Size(552, 168);
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -63,22 +63,22 @@ namespace CameraTrackingAppv3
             // ユーザ名
             // 
             this.ユーザ名.Text = "ユーザ名";
-            this.ユーザ名.Width = 82;
+            this.ユーザ名.Width = 138;
             // 
             // 機種名
             // 
             this.機種名.Text = "機種名";
-            this.機種名.Width = 82;
+            this.機種名.Width = 138;
             // 
             // IPアドレス
             // 
             this.IPアドレス.Text = "IPアドレス";
-            this.IPアドレス.Width = 82;
+            this.IPアドレス.Width = 138;
             // 
             // MACアドレス
             // 
             this.MACアドレス.Text = "MACアドレス";
-            this.MACアドレス.Width = 82;
+            this.MACアドレス.Width = 138;
             // 
             // timer1
             // 
@@ -91,7 +91,8 @@ namespace CameraTrackingAppv3
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView1);
             this.Name = "UserControl2";
-            this.Size = new System.Drawing.Size(328, 168);
+            this.Size = new System.Drawing.Size(552, 168);
+            this.Load += new System.EventHandler(this.UserControl2_Load);
             this.ResumeLayout(false);
 
         }

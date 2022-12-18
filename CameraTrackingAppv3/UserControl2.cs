@@ -44,7 +44,7 @@ namespace CameraTrackingAppv3
             {
                 var a = new string[] {i.UserName,i.MachineName,i.IPAddress,i.MACAddress};
 
-                if (my_ip.Equals(i.UserName))
+                if (my_ip.Contains(i.IPAddress))
                 {
                     a[0] = "(自分)" + a[0];
                 }
@@ -57,6 +57,11 @@ namespace CameraTrackingAppv3
         {
             if(Main.GetConnect()!=null)
             SetRecodes(Main.GetConnect().GetRecodeUsers());
+        }
+
+        private void UserControl2_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

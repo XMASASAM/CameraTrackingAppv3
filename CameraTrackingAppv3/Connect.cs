@@ -285,6 +285,7 @@ namespace CameraTrackingAppv3
             if (type == ConnectType.Active)
             {
                 //アクティブになる処理
+                Utils.MainForm.WaitProcess.ReceiveActiveSignal();
             }
 
             if(type == ConnectType.Correction)

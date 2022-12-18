@@ -20,6 +20,7 @@ namespace CameraTrackingAppv3
         SettingsConfig config;
         public UserControl1 UserControl { get { return userControl11; } }
         WaitProcess wait_process;
+        public WaitProcess WaitProcess { get { return wait_process; } }
         Connect connect;
         Mat frame;
         public Form3()
@@ -174,9 +175,7 @@ namespace CameraTrackingAppv3
             {
                 if (wait_process.Update(frame))
                 {
-                    wait_process.Dispose();
-                    f_wait_mode = false;
-                    StartCursorControl();
+                    ActiveCursor();
                 }
                 //Main.Tracker.Update(frame);
 
@@ -238,6 +237,16 @@ namespace CameraTrackingAppv3
             StopCursorControl();
             wait_process = new WaitProcess(change_machine);
         }
+
+        void ActiveCursor()
+        {
+
+            if (wait_process != null)
+                wait_process.Dispose();
+            f_wait_mode = false;
+            StartCursorControl();
+        }
+
 
         private void timer1_Tick(object sender, EventArgs e)
         {
