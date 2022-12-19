@@ -8,6 +8,7 @@ using System.Threading;
 using System.Net.NetworkInformation;
 namespace CameraTrackingAppv3
 {
+
     [Serializable]
     enum ConnectType
     {
@@ -142,12 +143,6 @@ namespace CameraTrackingAppv3
 
             UDP.ListenBroadcastMessage(out var ip);
 
-          //  other_computer.Add(ip.Address.ToString());
-
-           // TCP.SendMessage(ip.Address.ToString(),ConnectType.FirstSend,Utils.ObjectToByteArray(other_computer));
-
-
-
         }
 
 
@@ -211,41 +206,24 @@ namespace CameraTrackingAppv3
                 data = a[2];// as byte[];
             }
 
-         /*   if (type == ConnectType.FirstSend)
-            {
 
-                TCP.SendMessage(sender_ip,ConnectType.FirstReceive,Utils.ObjectToByteArray(other_computer));
-
-                SendOtherComputer(sender_ip, data);
-
-            }
-            
-            if(type == ConnectType.FirstReceive)
-            {
-                SendOtherComputer(sender_ip, data);
-            }*/
-            
-            
             if (type == ConnectType.AddIP)
             {
                 Utils.WriteLine("AddIP受け取りました!!!");
 
-             //   var a = (RecodeUser)Utils.ByteArrayToObject(data);
+
+
                 var a = (RecodeUser)(data);
                 a.IPAddress = sender_ip;
                 users.Add(a);
-              //  ShowUsers();
-                // var temp = (List<string>)Utils.ByteArrayToObject(data);
 
-                // foreach (var i in temp)
-                //     other_computer.Add(i);
 
             }
 
 
             if(type == ConnectType.Broadcast)
             {
-                //string a = (string)Utils.ByteArrayToObject(data);
+
                 string a = (string)(data);
 
                 var head = a.Substring(0, 1);
@@ -254,7 +232,7 @@ namespace CameraTrackingAppv3
 
                 if (head.Equals("1"))
                 {
-                  //  TCP.SendMessage(sender_ip, ConnectType.AddIP, Utils.ObjectToByteArray(myself));
+
                     TCP.SendMessage(sender_ip, ConnectType.AddIP, myself);
                 }else
                 if (head.Equals("2"))
@@ -272,13 +250,8 @@ namespace CameraTrackingAppv3
 
             if(type == ConnectType.LoadIP)
             {
-              //  object[] a = (object[])Utils.ByteArrayToObject(data);
-              //  object[] a = (object[])(data);
-             //   RecodeUser b = (RecodeUser)a[1];
-             //   b.IPAddress = sender_ip;
-              //  users = (List<RecodeUser>)a[0];
+
                 users = (List<RecodeUser>)data;
-                //ShowUsers();
 
             }
 
@@ -305,21 +278,6 @@ namespace CameraTrackingAppv3
         }
 
 
-       /* void SendOtherComputer(string sender_ip, byte[] data)
-        {
-            var temp = (List<string>)Utils.ByteArrayToObject(data);
-            temp.Add(sender_ip);
-            var buf = Utils.ObjectToByteArray(temp);
-
-            foreach (var i in other_computer)
-            {
-                TCP.SendMessage(i, ConnectType.AddIP, buf);
-            }
-
-            foreach (var i in temp)
-                other_computer.Add(i);
-        }*/
-
 
         void TCPReceive()
         {
@@ -340,14 +298,7 @@ namespace CameraTrackingAppv3
             using (var stream = client.GetStream())
             {
                 byte[] buf = new byte[1024];
-              //  ConnectType type = ConnectType.None;
 
-              //  if (stream.Read(buf, 0, buf.Length) > 0)
-             //   {
-
-                   // type = (ConnectType)Utils.ByteArrayToObject(buf);
-                   // Array.Clear(buf, 0, buf.Length);
-             //   }
 
                 if (stream.Read(buf, 0, buf.Length) > 0)
                 {
@@ -362,7 +313,6 @@ namespace CameraTrackingAppv3
                 }
 
 
-              //  stream.Write(new byte[] { 1 }, 0, 1);
                 stream.Close();
             }
             client.Dispose();
@@ -372,7 +322,7 @@ namespace CameraTrackingAppv3
         {
             while (f_connect)
             {
-                IPEndPoint ip = null;//new IPEndPoint(IPAddress.Any,Utils.PortNum);
+                IPEndPoint ip = null;
                 Utils.WriteLine("UDP受け取り待ち");
 
                 byte[] buf = udpListener.Receive(ref ip);
@@ -399,15 +349,10 @@ namespace CameraTrackingAppv3
         //一定時間が経過した後、他のパソコンへデータを送信する処理
         public void SequenceLoadSignal()
         {
-            //  var temp = new List<RecodeUser>(users);
-            //   temp.Add(myself);
-           // object[] send = new object[2];
-          //  send[0] = users;
-          //  send[1] = myself;
+
             foreach(var i in users)
             {
-              //  if (i.Equals(myself)) continue;
-              //  TCP.SendMessage(i.IPAddress, ConnectType.LoadIP, Utils.ObjectToByteArray(send));
+
                 TCP.SendMessage(i.IPAddress, ConnectType.LoadIP,users);
             }
         }
@@ -500,7 +445,7 @@ namespace CameraTrackingAppv3
 
     static class TCP
     {
-        //static public bool SendMessage(string target_ip,ConnectType type,byte[] data)
+
         static public bool SendMessage(string target_ip,ConnectType type,object data)
         {
             
@@ -518,19 +463,12 @@ namespace CameraTrackingAppv3
                     client.Connect(ip);
                     using (var stream = client.GetStream())
                     {
-                        //   Utils.WriteLine("パスワードの送信");
 
-                        //   buf1 = Encoding.UTF8.GetBytes(Utils.Password);
-                        //   stream.Write(buf1, 0, buf1.Length);
-                        //   Console.WriteLine("以下サーバへ送信");
                         object[] send_data = new object[2];
                         send_data[0] = type;
                         send_data[1] = data;
-                        buf1 = Utils.ObjectToByteArray(send_data);//Encoding.UTF8.GetBytes(type);
+                        buf1 = Utils.ObjectToByteArray(send_data);
                         stream.Write(buf1, 0, buf1.Length);
-
-                      //  buf1 = Encoding.UTF8.GetBytes(type);
-                      //  stream.Write(data, 0, data.Length);
 
                         ok = true;
 
@@ -550,9 +488,7 @@ namespace CameraTrackingAppv3
 
         static public bool ReceiveMessage(string target_ip,out IPEndPoint end_point ,out ConnectType type , out byte[] data)
         {
-         //   IPAddress host1 = IPAddress.Any;//System.Net.Dns.GetHostEntry("localhost").AddressList[0];;
-        //    int port1 = PortNum;
-        //    IPEndPoint ipe1 = new IPEndPoint(host1, port1);
+
             TcpListener server;
             string recvline, sendline = null;
 
@@ -594,24 +530,17 @@ namespace CameraTrackingAppv3
                         Utils.WriteLine("以下相手からの入力");
                         if (ok && stream.Read(buf, 0, buf.Length) > 0)
                         {
-                            //recvline = reg.Replace(Encoding.UTF8.GetString(buf), "");
-                          //  Utils.WriteLine("recieve_type:" + recvline.ToString());
-                            //data = recvline;
-                            type = (ConnectType)Utils.ByteArrayToObject(buf);//recvline;
-                            //if (recvline.Equals("q"))
-                            //    break;
+
+                            type = (ConnectType)Utils.ByteArrayToObject(buf);
+
                              Array.Clear(buf, 0, buf.Length);
                         }
 
                         if (ok && stream.Read(buf, 0, buf.Length) > 0)
                         {
-                            //recvline = reg.Replace(Encoding.UTF8.GetString(buf), "");
-                         //   Utils.WriteLine("recieve_data:"+buf.ToString());
-                            //data = recvline;
+
                             data = buf;
-                            //if (recvline.Equals("q"))
-                            //    break;
-                           // Array.Clear(buf, 0, buf.Length);
+
                         }
 
                     }

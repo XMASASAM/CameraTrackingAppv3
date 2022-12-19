@@ -63,6 +63,29 @@ namespace CameraTrackingAppv3.Properties {
         /// <summary>
         ///   &lt;?xml version=&quot;1.0&quot;?&gt;
         ///&lt;!--
+        ///    Stump-based 20x20 frontal eye detector.
+        ///    Created by Shameem Hameed (http://umich.edu/~shameem)
+        ///
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        ///
+        ///  IMPORTANT: READ BEFORE DOWNLOADING, COPYING, INSTALLING OR USING.
+        ///
+        ///  By downloading, copying, installing or using the software you agree to this license.
+        ///  If you do not agree to this license, do not download, install,
+        ///  copy or use the software.
+        ///
+        ///
+        ///                        Intel License Agr [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string haarcascade_eye {
+            get {
+                return ResourceManager.GetString("haarcascade_eye", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   &lt;?xml version=&quot;1.0&quot;?&gt;
+        ///&lt;!--
         ///    Stump-based 24x24 discrete(?) adaboost frontal face detector.
         ///    Created by Rainer Lienhart.
         ///
@@ -80,6 +103,25 @@ namespace CameraTrackingAppv3.Properties {
         internal static string haarcascade_frontalface_default {
             get {
                 return ResourceManager.GetString("haarcascade_frontalface_default", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   &lt;?xml version=&quot;1.0&quot;?&gt;
+        ///&lt;!--
+        ///25x15 Mouth detector computed with 7000 positive samples
+        ///2006-present, Modesto Castrillon-Santana (SIANI, Universidad de Las Palmas de Gran Canaria, Spain.
+        ///
+        ///COMMERCIAL USE:
+        ///If you have any commercial interest in this work contact mcastrillon@iusiani.ulpgc.es
+        ///
+        ///Creative Commons Attribution-NonCommercial 4.0 International Public License
+        ///
+        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string haarcascade_mcs_mouth {
+            get {
+                return ResourceManager.GetString("haarcascade_mcs_mouth", resourceCulture);
             }
         }
         

@@ -247,6 +247,8 @@ namespace CameraTrackingAppv3
     class TrackerOpticalFlow : Tracker
     {
         CascadeClassifier face_cas;
+        CascadeClassifier eye_cas;
+        CascadeClassifier mouth_cas;
         Mat pre_gray;
         Rect2d face_rect;
         Point2f[] pre_features;
@@ -258,6 +260,8 @@ namespace CameraTrackingAppv3
             string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
 
             face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
+            eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
+            mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
         }
 
         protected override bool First(Mat gray)
@@ -270,11 +274,22 @@ namespace CameraTrackingAppv3
             face_rect = new Rect2d(0, 0, 0, 0);
             foreach (var rect in rects)
             {
-                gray.Rectangle(rect, new Scalar(0, 0, 255), 2);
+              //  gray.Rectangle(rect, new Scalar(0, 0, 255), 2);
                 if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
                 {
                     face_rect = new Rect2d(rect.X,rect.Y,rect.Width,rect.Height);
                 }
+            }
+
+
+            using(var clip = new Mat(gray,face_rect.ToRect()))
+            {
+                var eyes =  eye_cas.DetectMultiScale(gray, 1.1,6);
+                var mouth = mouth_cas.DetectMultiScale(gray, 1.1, 6);
+
+                if (eyes.Length <= 0 && mouth.Length <= 0)
+                    return false;
+
             }
 
 
