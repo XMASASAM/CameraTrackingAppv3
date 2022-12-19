@@ -133,8 +133,15 @@ namespace CameraTrackingAppv3
         public virtual bool Update(Mat frame)
         {
             bool ok = false;
-            using (Mat gray = frame.CvtColor(ColorConversionCodes.BGR2GRAY))
+            Mat gray;
+            lock (frame)
             {
+                gray = frame.CvtColor(ColorConversionCodes.BGR2GRAY);
+            }
+          //  Cv2.ImShow("wwww", gray);
+           // using (Mat )
+          //  {
+               // Cv2.ImShow("graydddd", gray);
                 if (f_first)
                 {
                     CursorControl.Init();
@@ -147,8 +154,8 @@ namespace CameraTrackingAppv3
                     ok = Process(gray);
                     f_active = true;
                 }
-            }
-
+            //  }
+            gray.Dispose();
             if (ok)
             {
                 f_error = false;
@@ -266,6 +273,8 @@ namespace CameraTrackingAppv3
 
         protected override bool First(Mat gray)
         {
+          //  Cv2.ImShow("clip1", gray);
+          //  Cv2.WaitKey(0);
             var rects = face_cas.DetectMultiScale(gray,1.1,10);
 
             if (rects.Length == 0)
@@ -284,14 +293,39 @@ namespace CameraTrackingAppv3
 
             using(var clip = new Mat(gray,face_rect.ToRect()))
             {
-                var eyes =  eye_cas.DetectMultiScale(gray, 1.1,6);
-                var mouth = mouth_cas.DetectMultiScale(gray, 1.1, 6);
+             //   var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
+                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 20);
 
-                if (eyes.Length <= 0 && mouth.Length <= 0)
+                
+
+                if (mouth.Length <=0)
                     return false;
 
+                var area = mouth[0].Width * mouth[0].Height;
+                Rect mouth_rect = mouth[0];
+                for (int i = 1; i < mouth.Length; i++)
+                    if (area < mouth[i].Width * mouth[i].Height)
+                    {
+                        mouth_rect = mouth[i];
+                        area = mouth[i].Width * mouth[i].Height;
+                    }
+
+                var clip_height_half = clip.Height * 0.7;
+                if (Utils.RectCenter2Point(mouth_rect).Y < clip_height_half)
+                    return false;
+
+             
+
+               // foreach (var i in mouth)
+               //     temp1.Rectangle(i, Scalar.Red, 2);
+               // Cv2.ImShow("wwwwssss", temp1);
+               // Cv2.WaitKey(0);
             }
 
+           /* lock (gray)
+            {
+                Cv2.ImShow("wwweeee", gray.Clone());
+            }*/
 
 
             var findfeatures_rect = Utils.RectScale2d(face_rect, .5, .5).ToRect();
