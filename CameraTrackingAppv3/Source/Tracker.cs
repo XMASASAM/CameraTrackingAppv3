@@ -294,7 +294,7 @@ namespace CameraTrackingAppv3
             using(var clip = new Mat(gray,face_rect.ToRect()))
             {
              //   var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
-                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 20);
+                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 22);
 
                 
 
