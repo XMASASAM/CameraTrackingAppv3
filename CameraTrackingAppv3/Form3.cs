@@ -127,6 +127,7 @@ namespace CameraTrackingAppv3
             Main.SetFPS(1000);
             f_control_active = true;
             MouseControl.IsControl = true;
+            
         //    if (form5 != null)
        //     {
                 form5.Visible = true;
@@ -138,6 +139,7 @@ namespace CameraTrackingAppv3
         public void StopCursorControl()
         {
             f_control_active = false;
+            Main.Tracker.Reset();
             MouseControl.IsControl = false;
          //   if (form5 != null)
                 form5.Visible = false;
@@ -175,8 +177,9 @@ namespace CameraTrackingAppv3
             {
                 Main.Tracker.Update(frame);
                 CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CorrectedCenterPoint ,Main.Tracker.CorrectedVelocity);
-               // if (form5 != null && form5.Visible)
-             //   {
+                // if (form5 != null && form5.Visible)
+                //   {
+                if (!Main.Tracker.IsError)
                     form5.Update();
              //   }
             }

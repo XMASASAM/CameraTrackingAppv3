@@ -111,6 +111,13 @@ namespace CameraTrackingAppv3
             }
         }
 
+        public void Reset()
+        {
+            f_first = true;
+            step_detect = 1000;
+            tracker.Reset();
+        }
+
     }
 
     abstract class Tracker:IDisposable
@@ -176,6 +183,12 @@ namespace CameraTrackingAppv3
         public abstract void Draw(Mat frame, Scalar color);
 
         public abstract void Dispose();
+
+        public virtual void Reset()
+        {
+            f_first = true;
+        }
+
     }
 
 
@@ -248,7 +261,10 @@ namespace CameraTrackingAppv3
         {
 
         }
-
+        public override void Reset()
+        {
+            base.Reset();
+        }
     }
 
     class TrackerOpticalFlow : Tracker
@@ -271,6 +287,13 @@ namespace CameraTrackingAppv3
             eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
             mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
             pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            face_rect = new Rect2d(0, 0, 0, 0);
+            pre_features = new Point2f[0];
         }
 
         protected override bool First(Mat gray)
@@ -456,6 +479,7 @@ namespace CameraTrackingAppv3
 
         public override void Draw(Mat frame, Scalar color)
         {
+            
             frame.Rectangle(face_rect.ToRect(),color,4);
             var offset = face_rect_point.ToPoint();
             foreach (var p in pre_features)
