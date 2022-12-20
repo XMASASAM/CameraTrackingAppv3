@@ -256,6 +256,7 @@ namespace CameraTrackingAppv3
         CascadeClassifier face_cas;
         CascadeClassifier eye_cas;
         CascadeClassifier mouth_cas;
+        CascadeClassifier pair_eye_cas;
         Mat pre_gray;
         Rect2d face_rect;
         Point2f[] pre_features;
@@ -269,6 +270,7 @@ namespace CameraTrackingAppv3
             face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
             eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
             mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
+            pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
         }
 
         protected override bool First(Mat gray)
@@ -293,12 +295,12 @@ namespace CameraTrackingAppv3
 
             using(var clip = new Mat(gray,face_rect.ToRect()))
             {
-             //   var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
+              //  var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
                 var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 30);
-
+                var pair_eyes = pair_eye_cas.DetectMultiScale(clip, 1.1, 1);
                 
 
-                if (mouth.Length <=0)
+                if (mouth.Length <=0 || pair_eyes.Length <=0)
                     return false;
 
                 var area = mouth[0].Width * mouth[0].Height;
@@ -310,8 +312,18 @@ namespace CameraTrackingAppv3
                         area = mouth[i].Width * mouth[i].Height;
                     }
 
+                Rect pair_eye_rect = pair_eyes[0];
+                area = pair_eyes[0].Width * pair_eyes[0].Height;
+                for (int i = 1; i < pair_eyes.Length; i++)
+                    if (area < pair_eyes[0].Width * pair_eyes[0].Height)
+                    {
+                        pair_eye_rect = pair_eyes[i];
+                        area = pair_eyes[0].Width * pair_eyes[0].Height; 
+                    }
+
                 var clip_height_half = clip.Height * 0.7;
                 var mouth_cp = Utils.RectCenter2Point(mouth_rect);
+                var pair_eye_cp = Utils.RectCenter2Point(pair_eye_rect);
                 if (mouth_cp.Y < clip_height_half)
                     return false;
 
@@ -320,10 +332,18 @@ namespace CameraTrackingAppv3
                     return false;
                 }
 
-           //     foreach (var i in mouth)
+                if (clip.Width * 0.45 > pair_eye_cp.X || pair_eye_cp.X > clip.Width * 0.55)
+                    return false;
+
+
+            //    foreach (var i in mouth)
            //         clip.Rectangle(i, Scalar.Red, 2);
-         //      Cv2.ImShow("wwwwssss", clip);
-          //      Cv2.WaitKey(0);
+
+           //     foreach (var i in pair_eyes)
+           //         clip.Rectangle(i, Scalar.Red, 2);
+
+           ///    Cv2.ImShow("wwwwssss", clip);
+           //     Cv2.WaitKey(0);
             }
 
            /* lock (gray)
@@ -342,7 +362,8 @@ namespace CameraTrackingAppv3
                 }*/
             }
 
-            face_rect = Utils.RectScale2d(face_rect, 0.7, 0.8);
+
+            face_rect = Utils.RectGrap(Utils.RectScale2d(face_rect, 0.7, 0.8), new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
             center_point = Utils.RectCenter2Vec2d(face_rect);
             face_rect_point = new Point2d(face_rect.X, face_rect.Y);
             face_rect_width = face_rect.Width;

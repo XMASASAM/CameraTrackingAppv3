@@ -109,6 +109,26 @@ namespace CameraTrackingAppv3.Properties {
         /// <summary>
         ///   &lt;?xml version=&quot;1.0&quot;?&gt;
         ///&lt;!--
+        ///45x11 Eye pair detector computed with 7000 positive samples
+        ///2006-present, Modesto Castrillon-Santana (SIANI, Universidad de Las Palmas de Gran Canaria, Spain.
+        ///
+        ///COMMERCIAL USE:
+        ///If you have any commercial interest in this work contact mcastrillon@iusiani.ulpgc.es
+        ///
+        ///
+        ///Creative Commons Attribution-NonCommercial 4.0 International Public License
+        ///
+        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribu [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string haarcascade_mcs_eyepair_big {
+            get {
+                return ResourceManager.GetString("haarcascade_mcs_eyepair_big", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   &lt;?xml version=&quot;1.0&quot;?&gt;
+        ///&lt;!--
         ///25x15 Mouth detector computed with 7000 positive samples
         ///2006-present, Modesto Castrillon-Santana (SIANI, Universidad de Las Palmas de Gran Canaria, Spain.
         ///

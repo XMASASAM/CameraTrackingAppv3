@@ -124,6 +124,9 @@
   <data name="haarcascade_frontalface_default" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\haarcascade_frontalface_default.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;iso-2022-jp</value>
   </data>
+  <data name="haarcascade_mcs_eyepair_big" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\haarcascade_mcs_eyepair_big.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="haarcascade_mcs_mouth" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\haarcascade_mcs_mouth.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
