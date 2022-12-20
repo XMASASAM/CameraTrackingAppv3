@@ -294,7 +294,7 @@ namespace CameraTrackingAppv3
             using(var clip = new Mat(gray,face_rect.ToRect()))
             {
              //   var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
-                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 22);
+                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 30);
 
                 
 
@@ -311,15 +311,19 @@ namespace CameraTrackingAppv3
                     }
 
                 var clip_height_half = clip.Height * 0.7;
-                if (Utils.RectCenter2Point(mouth_rect).Y < clip_height_half)
+                var mouth_cp = Utils.RectCenter2Point(mouth_rect);
+                if (mouth_cp.Y < clip_height_half)
                     return false;
 
-             
+                if(clip.Width * 0.45 > mouth_cp.X || mouth_cp.X > clip.Width * 0.55)
+                {
+                    return false;
+                }
 
-               // foreach (var i in mouth)
-               //     temp1.Rectangle(i, Scalar.Red, 2);
-               // Cv2.ImShow("wwwwssss", temp1);
-               // Cv2.WaitKey(0);
+           //     foreach (var i in mouth)
+           //         clip.Rectangle(i, Scalar.Red, 2);
+         //      Cv2.ImShow("wwwwssss", clip);
+          //      Cv2.WaitKey(0);
             }
 
            /* lock (gray)
