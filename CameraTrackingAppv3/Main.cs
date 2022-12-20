@@ -155,9 +155,11 @@ namespace CameraTrackingAppv3
 
                 if (rotate != 0)
                 {
-                    //var size = new Size()
-                    camera_frame = camera_frame.WarpAffine(rotate_mat, camera_frame.Size());
-                    
+                    using(var temp = camera_frame)
+                    {
+                        camera_frame  = camera_frame.WarpAffine(rotate_mat, camera_frame.Size());
+                    }
+
                 }
 
                 countFPS.Update();

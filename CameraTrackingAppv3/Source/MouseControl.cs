@@ -88,14 +88,14 @@ namespace CameraTrackingAppv3
             {
                 RightClick();
             }
-            else if(sub == MouseState.DoubleClick)
+            else if(sub == MouseState.LeftDoubleClick)
             {
                 LeftClick();
                 Thread.Sleep(wait_time_double);
                 LeftClick();
 
             }
-            else if (sub == MouseState.Drag)
+            else if (sub == MouseState.LeftDrag)
             {
                 f_drag = true;
                 MouseInput(NativeMethods.MOUSEEVENT.LEFTDOWN);

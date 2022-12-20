@@ -7,9 +7,11 @@ namespace CameraTrackingAppv3
     public enum MouseState
     {
         LeftClick = 0,
+        LeftDoubleClick,
+        LeftDrag,
         RightClick,
-        DoubleClick,
-        Drag,
+        RightDoubleClick,
+        RightDrag,
         ScrollUp,
         ScrollDown
     }

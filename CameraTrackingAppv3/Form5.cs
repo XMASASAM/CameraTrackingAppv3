@@ -38,11 +38,11 @@ namespace CameraTrackingAppv3
 
         private void button2_Click(object sender, EventArgs e)
         {
-            current_state = MouseState.DoubleClick;
+            current_state = MouseState.LeftDoubleClick;
         }
         private void button3_Click(object sender, EventArgs e)
         {
-            current_state = MouseState.Drag;
+            current_state = MouseState.LeftDrag;
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -99,6 +99,9 @@ namespace CameraTrackingAppv3
 
         }
 
+        private void button8_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 }
