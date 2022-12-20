@@ -147,6 +147,7 @@ namespace CameraTrackingAppv3
             this.Name = "Form5";
             this.Text = "Form5";
             this.TopMost = true;
+            this.Shown += new System.EventHandler(this.Form5_Shown);
             this.MouseEnter += new System.EventHandler(this.Form5_MouseEnter);
             this.MouseLeave += new System.EventHandler(this.Form5_MouseLeave);
             this.ResumeLayout(false);

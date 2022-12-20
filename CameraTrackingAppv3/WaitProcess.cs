@@ -75,7 +75,8 @@ namespace CameraTrackingAppv3
                     Main.SetFPS(1000);
 
                     form7 = new Form7(Utils.cvtCV2Form(MouseControl.GetLocation));
-                    form7.Show();
+                    Utils.MainForm.ActiveControl.Invoke(new Utils.InvokeVoid(form7.Show));
+                   // form7.Show();
                     stopwatch.Start();
 
                 }
@@ -85,7 +86,8 @@ namespace CameraTrackingAppv3
             {
                 if (stopwatch.ElapsedMilliseconds < 10 * 1000)
                 {
-                    form7.SecondRemining((int)(10 - stopwatch.ElapsedMilliseconds / 1000));
+                    Utils.MainForm.ActiveControl.Invoke(new Utils.InvokeInt(form7.SecondRemining), (int)(10 - stopwatch.ElapsedMilliseconds / 1000));
+                  //  form7.SecondRemining((int)(10 - stopwatch.ElapsedMilliseconds / 1000));
 
                     if (MouseControl.IsCursorOnForm)
                     {
@@ -112,8 +114,11 @@ namespace CameraTrackingAppv3
                     f_confirm = false;
                     stopwatch.Reset();
                     step_wait = 0;
-                    form7.Close();
-                    form7.Dispose();
+
+             //       Utils.MainForm.ActiveControl.Invoke(new Utils.InvokeVoid(form7.Show));
+             //       form7.Close();
+            //        form7.Dispose();
+
                     Main.SetFPS(1);
                     CursorControl.SettingMode();
                 }

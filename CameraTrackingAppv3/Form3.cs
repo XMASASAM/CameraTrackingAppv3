@@ -31,6 +31,10 @@ namespace CameraTrackingAppv3
             Main.Start(this);
             connect = new Connect();
             Main.SetConnect(connect);
+
+            form5 = new Form5(false);
+            form5.Show();
+            Visible = false;
         }
 
         //ここからスタート
@@ -38,6 +42,8 @@ namespace CameraTrackingAppv3
         {
 
             Utils.MainForm = this;
+            Visible = false;
+
             //var loaded_settings = SettingsConfig.Load(out Utils.Config);
             var loaded_settings = SettingsConfig.Load(out Utils.Config);
 
@@ -53,10 +59,12 @@ namespace CameraTrackingAppv3
                 var form = new Form1(ref Utils.Config,false,false);
                 form.Show();
             }
-
-
         }
 
+        private void Form3_Shown(object sender, EventArgs e)
+        {
+            Visible = false;
+        }
         public void FormStart(ref SettingsConfig config)
         {
             this.config = config;
@@ -119,19 +127,21 @@ namespace CameraTrackingAppv3
             Main.SetFPS(1000);
             f_control_active = true;
             MouseControl.IsControl = true;
-            if (form5 == null)
-            {
-                form5 = new Form5();
-                form5.Show();
-            }
+        //    if (form5 != null)
+       //     {
+                form5.Visible = true;
+                //form5 = new Form5();
+                //form5.Show();
+        //    }
         }
 
         public void StopCursorControl()
         {
             f_control_active = false;
             MouseControl.IsControl = false;
-            if (form5 != null)
-                form5.Close();
+         //   if (form5 != null)
+                form5.Visible = false;
+                //form5.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -165,10 +175,10 @@ namespace CameraTrackingAppv3
             {
                 Main.Tracker.Update(frame);
                 CursorControl.Update(Main.Tracker.IsError,Main.Tracker.CorrectedCenterPoint ,Main.Tracker.CorrectedVelocity);
-                if (form5 != null)
-                {
+               // if (form5 != null && form5.Visible)
+             //   {
                     form5.Update();
-                }
+             //   }
             }
 
 
@@ -176,7 +186,7 @@ namespace CameraTrackingAppv3
             {
                 if (wait_process.Update(frame))
                 {
-                    ActiveCursor();
+                     Invoke(new Utils.InvokeVoid( ActiveCursor));
                 }
                 //Main.Tracker.Update(frame);
 
@@ -254,10 +264,6 @@ namespace CameraTrackingAppv3
             //Main.Update();
         }
 
-        private void Form3_Shown(object sender, EventArgs e)
-        {
-            Visible = false;
 
-        }
     }
 }

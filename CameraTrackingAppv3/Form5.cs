@@ -10,14 +10,21 @@ namespace CameraTrackingAppv3
     public partial class Form5 : Form
     {
         MouseState current_state = MouseState.LeftClick;
+        bool visible;
 
-
-        public Form5()
+        public Form5(bool visible)
         {
             InitializeComponent();
             ControlBox = false;
+            this.visible = visible;
 
         }
+        private 
+            void Form5_Shown(object sender, EventArgs e)
+        {
+            Visible = visible;
+        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -91,5 +98,7 @@ namespace CameraTrackingAppv3
             }
 
         }
+
+
     }
 }

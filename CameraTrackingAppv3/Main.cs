@@ -61,6 +61,7 @@ namespace CameraTrackingAppv3
         static long interval_wait_time;
         static bool f_active = false;
         static Control control;
+        static public Control Control { get { return control; } }
         static Main()
         {
             current_picture_control = null;
