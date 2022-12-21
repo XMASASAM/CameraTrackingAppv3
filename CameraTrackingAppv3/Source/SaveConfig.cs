@@ -12,7 +12,8 @@ namespace CameraTrackingAppv3
     {
         public RangeOfMotionProps RangeOfMotion;
         public string CameraID = "";
-
+        public double MoveMag = 1;
+        public double ThresholdMag = 3;
         public void  Set(SettingProps props)
         {
             this.RangeOfMotion = props.RangeOfMotion;

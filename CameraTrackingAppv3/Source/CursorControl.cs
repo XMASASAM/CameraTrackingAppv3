@@ -152,9 +152,11 @@ namespace CameraTrackingAppv3
 
                     var n_range_inner_s = Math.Max(0, range_dx.Item0 * n_dx_s.Item0 + range_dx.Item1 * n_dx_s.Item1);
 
-                    var range_sp = speed / 100;
+                    // var range_sp = speed / 100;
 
-                    range_sp = Utils.Grap(0, range_sp - 0.1 / (velo_mag * velo_mag ), 1);
+                    //var range_sp = Utils.Grap(0, speed - 0.1 / (velo_mag * velo_mag ), 1);
+                    var mag_threshold = Utils.Config.Property.ThresholdMag / velo_mag;
+                    var range_sp = Utils.Grap(0,(speed - mag_threshold * mag_threshold)/30 , 1);
 
 
                   //  var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);
@@ -169,7 +171,13 @@ namespace CameraTrackingAppv3
                     //add_vel.Item0 = Math.Max(add_vel.Item0, dx.Item0);
                     //add_vel.Item1 = Math.Max(add_vel.Item1, dx.Item1);
 
-                    location += dx * k;//add_vel;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
+                    var vel = dx * k;
+                    if(Utils.GetDistanceSquared(vel.Item0,vel.Item1)>Utils.Config.Property.ThresholdMag * Utils.Config.Property.ThresholdMag)
+                    {
+                        vel *= Utils.Config.Property.MoveMag;
+                    }
+
+                    location += vel;//dx * k;//add_vel;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
                 }
 
 

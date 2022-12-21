@@ -37,6 +37,8 @@ namespace CameraTrackingAppv3
             this.button6 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.userControl21 = new CameraTrackingAppv3.UserControl2();
+            this.userControl51 = new CameraTrackingAppv3.UserControl5();
+            this.userControl52 = new CameraTrackingAppv3.UserControl5();
             this.SuspendLayout();
             // 
             // button1
@@ -115,11 +117,39 @@ namespace CameraTrackingAppv3
             this.userControl21.Size = new System.Drawing.Size(555, 168);
             this.userControl21.TabIndex = 7;
             // 
+            // userControl51
+            // 
+            this.userControl51.Decimal_Place = 2;
+            this.userControl51.DefaultValue = 100;
+            this.userControl51.Divide = 100;
+            this.userControl51.Location = new System.Drawing.Point(443, 13);
+            this.userControl51.MaxValue = 300;
+            this.userControl51.MinValue = 10;
+            this.userControl51.Name = "userControl51";
+            this.userControl51.Prop_Name = "操作の感度";
+            this.userControl51.Size = new System.Drawing.Size(276, 86);
+            this.userControl51.TabIndex = 8;
+            // 
+            // userControl52
+            // 
+            this.userControl52.Decimal_Place = 0;
+            this.userControl52.DefaultValue = 3;
+            this.userControl52.Divide = 1;
+            this.userControl52.Location = new System.Drawing.Point(443, 132);
+            this.userControl52.MaxValue = 10;
+            this.userControl52.MinValue = 2;
+            this.userControl52.Name = "userControl52";
+            this.userControl52.Prop_Name = "補正のかかる閾値[ピクセル]";
+            this.userControl52.Size = new System.Drawing.Size(276, 86);
+            this.userControl52.TabIndex = 9;
+            // 
             // Form6
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.userControl52);
+            this.Controls.Add(this.userControl51);
             this.Controls.Add(this.userControl21);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
@@ -130,6 +160,7 @@ namespace CameraTrackingAppv3
             this.Controls.Add(this.button1);
             this.Name = "Form6";
             this.Text = "Form6";
+            this.Load += new System.EventHandler(this.Form6_Load);
             this.ResumeLayout(false);
 
         }
@@ -145,5 +176,7 @@ namespace CameraTrackingAppv3
         //private UserControl2 userControl21;
         private System.Windows.Forms.Button button7;
         private UserControl2 userControl21;
+        private UserControl5 userControl51;
+        private UserControl5 userControl52;
     }
 }

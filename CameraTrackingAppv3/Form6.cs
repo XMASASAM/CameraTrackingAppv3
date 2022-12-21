@@ -10,31 +10,38 @@ namespace CameraTrackingAppv3
 {
     public partial class Form6 : Form
     {
-       // Form3 form3;
-       // Form1 form1;
-        
+        // Form3 form3;
+        // Form1 form1;
+
         public Form6()//Form3 form3,Form1 form1)
         {
             InitializeComponent();
             //this.form3 = form3;
-           // this.form1 = form1;
+            // this.form1 = form1;
 
             Utils.Temp_Config = new SettingsConfig(Utils.Config);
+
+
+        }
+
+        private void Form6_Load(object sender, EventArgs e)
+        {
+            userControl51.SetValue(Utils.Config.Property.MoveMag);
 
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Form4 form4 = new Form4(ref Utils.Temp_Config,false);
+            Form4 form4 = new Form4(ref Utils.Temp_Config, false);
             form4.Show();
 
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Form form = new Form1(ref Utils.Temp_Config, true,false);
+            Form form = new Form1(ref Utils.Temp_Config, true, false);
             form.Show();
-           // form1.FormStart(ref Utils.Temp_Config);
+            // form1.FormStart(ref Utils.Temp_Config);
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -43,6 +50,8 @@ namespace CameraTrackingAppv3
 
             Utils.Config.Save();
             SettingsConfig.Adapt(Utils.Config);
+            Utils.Config.Property.MoveMag = userControl51.GetOutPut();
+            Utils.Config.Property.ThresholdMag = userControl52.GetOutPut();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -74,5 +83,7 @@ namespace CameraTrackingAppv3
         {
             Utils.MainForm.WaitCursor(true);
         }
+
     }
+    
 }
