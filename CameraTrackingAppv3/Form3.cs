@@ -73,7 +73,8 @@ namespace CameraTrackingAppv3
             Main.ChangeDisplayCameraForm(this);
 
             CursorControl.Init();
-            CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
+            SettingsConfig.Adapt(config);
+           // CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
 
         }
 

@@ -333,8 +333,23 @@ namespace CameraTrackingAppv3
             return new Rect2d(rect.X,rect.Y, rect.Width,rect.Height);
         }
 
+        public static Rect RectsMax(Rect[] rects)
+        {
+            int a = rects[0].Width * rects[0].Height;
+            Rect ans = rects[0];
+            for(int i = 1; i < rects.Length; i++)
+            {
+                int b = rects[i].Width * rects[i].Height;
+                if( a < b)
+                {
+                    ans = rects[i];
+                    a = b;
+                }
+            }
+            return ans;
+        }
 
-        
+        public static Rect CameraFrame { get { return new Rect(0, 0, CameraWidth, CameraHeight); } }
 
         public static int CameraWidth { get; set; }
         public static int CameraHeight { get; set; }

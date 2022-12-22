@@ -35,7 +35,7 @@ namespace CameraTrackingAppv3
             f_done = false;
             f_first_event = first_event;
             Main.ChangeDisplayCameraForm(this);
-
+            SettingsConfig.Adapt(config);
             if (this.config.Property.RangeOfMotion.Points == null)
             {
                 points = new Vec2d[4];
@@ -207,6 +207,7 @@ namespace CameraTrackingAppv3
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             Main.SetRotate(trackBar1.Value);
+            config.Property.CameraAngle = trackBar1.Value;
         }
 
         private void Form4_FormClosing(object sender, FormClosingEventArgs e)

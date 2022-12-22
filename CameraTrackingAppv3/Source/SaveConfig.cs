@@ -14,10 +14,14 @@ namespace CameraTrackingAppv3
         public string CameraID = "";
         public double MoveMag = 1;
         public double ThresholdMag = 3;
+        public int CameraAngle = 0;
         public void  Set(SettingProps props)
         {
             this.RangeOfMotion = props.RangeOfMotion;
             this.CameraID = props.CameraID;
+            this.CameraAngle = props.CameraAngle;
+            this.MoveMag = props.MoveMag;
+            this.ThresholdMag = props.ThresholdMag;
         }
 
     }
@@ -123,6 +127,7 @@ namespace CameraTrackingAppv3
         {
             CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
             CursorControl.IsRangeOfMotion = true;
+            Main.SetRotate(config.Property.CameraAngle);
 
         }
 

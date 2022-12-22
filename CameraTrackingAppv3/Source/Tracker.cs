@@ -169,6 +169,7 @@ namespace CameraTrackingAppv3
             }
             else
             {
+             //   Utils.WriteLine("Error!!!!!!");
                 Velocity = new Vec2d(0, 0);
                 f_error = true;
                 f_first = true;
@@ -195,38 +196,71 @@ namespace CameraTrackingAppv3
 
     class TrackerInfrared:Tracker
     {
+        CascadeClassifier face_cas;
+   //     AKAZE akaze;
         int wide = 50;
         Rect2d pre_rect;
         double pre_area;
      //   Vec2d center_point;
         Vec2d pre_center_point;
+     //   KeyPoint[] target_keypoints;
+     //   Mat target_discriptors;
+     //   DescriptorMatcher matcher;
+        public TrackerInfrared()
+        {
+            face_cas = new CascadeClassifier(Utils.PathResource + "\\haarcascade_frontalface_default.xml");
+        //    akaze = AKAZE.Create();
+        //    matcher = DescriptorMatcher.Create("BruteForce");
+        }
+
         protected override bool First(Mat gray)
         {
-            if(FindBlob.Rect(gray,180,out pre_center_point, out var rect))
+            //var rects = face_cas.DetectMultiScale(gray, 1.1, 10);
+
+            // if (rects.Length == 0)
+
+            //akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
+
+            //matcher.Match(target_discriptors,)
+
+            if (FindBlob.Rect(gray, 180, out pre_center_point, out var rect))
             {
 
-                pre_rect = Utils.RectWide(Utils.Rect2Rect2d(rect), wide, wide);
+                pre_rect = MakeRect(pre_center_point, wide);//Utils.RectWide(Utils.Rect2Rect2d(rect), wide, wide);
                 pre_area = rect.Width * rect.Height;
+
                 //pre_center_point = Utils.RectCenter2Vec2d(pre_rect);
+          //      using (var clip = new Mat(gray, pre_rect.ToRect()))
+           //     {
+           //         akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
+           //     }
                 return true;
             }
+            
+        //    else
+        //    {
+        //        var face_rect = Utils.RectsMax(rects);
+        //        pre_rect = Utils.Rect2Rect2d(face_rect);
+
+        //    }
             return false;
         }
 
         protected override bool Process(Mat gray)
         {
+
             bool ok = false;
             pre_rect = Utils.RectGrap(pre_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
-            using (var roi = new Mat(gray, pre_rect.ToRect()))
+            Rect clip_rect = pre_rect.ToRect();
+            using (var roi = new Mat(gray,clip_rect))
             {
-                ok = FindBlob.Rect(roi, 200, (int)pre_area,out center_point ,out var rect);
+                ok = FindBlob.Rect(roi, 180, pre_area,out center_point ,out pre_area);
 
                 if (!ok) return false;
-                var rect2d = Utils.Rect2Rect2d(rect);
-                rect2d.X += pre_rect.X;
-                rect2d.Y += pre_rect.Y;
-                pre_rect = Utils.RectWide(rect2d, wide, wide);
-                pre_area = rect.Width * rect.Height;
+                center_point.Item0 += clip_rect.X;
+                center_point.Item1 += clip_rect.Y;
+                pre_rect = MakeRect(center_point,wide);//Utils.RectWide(rect2d, wide, wide);
+              //  pre_area = rect.Width * rect.Height;
 
                 //  gray.Rectangle(pre_rect, new Scalar(255, 255, 0), 2);
                 // Cv2.ImShow("gray", gray);
@@ -238,10 +272,15 @@ namespace CameraTrackingAppv3
            // center_point = Utils.RectCenter2Vec2d(pre_rect);
 
             var vel = center_point - pre_center_point;
+          //  if (Math.Abs(vel.Item0) <= 0.5) vel.Item0 = 0;
+         //   else
+         //   if (Math.Abs(vel.Item1) <= 0.5) vel.Item1 = 0;
 
-            Velocity = new Vec2d(vel.Item0, -vel.Item1);//center_point - pre_center_point;
+            Velocity = new Vec2d(-vel.Item0, vel.Item1);//center_point - pre_center_point;
 
-            
+
+
+           // Utils.WriteLine("Velocity:" + Velocity.ToString());
 
             pre_center_point = center_point;
 
@@ -265,6 +304,12 @@ namespace CameraTrackingAppv3
         {
             base.Reset();
         }
+
+        Rect2d MakeRect(Vec2d cp,double wide)
+        {
+            return new Rect2d(cp.Item0 - wide * 0.5 , cp.Item1 - wide * 0.5, wide, wide);
+        }
+
     }
 
     class TrackerOpticalFlow : Tracker
@@ -298,8 +343,7 @@ namespace CameraTrackingAppv3
 
         protected override bool First(Mat gray)
         {
-          //  Cv2.ImShow("clip1", gray);
-          //  Cv2.WaitKey(0);
+
             var rects = face_cas.DetectMultiScale(gray,1.1,10);
 
             if (rects.Length == 0)
@@ -308,7 +352,6 @@ namespace CameraTrackingAppv3
             face_rect = new Rect2d(0, 0, 0, 0);
             foreach (var rect in rects)
             {
-              //  gray.Rectangle(rect, new Scalar(0, 0, 255), 2);
                 if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
                 {
                     face_rect = new Rect2d(rect.X,rect.Y,rect.Width,rect.Height);
@@ -318,7 +361,6 @@ namespace CameraTrackingAppv3
 
             using(var clip = new Mat(gray,face_rect.ToRect()))
             {
-              //  var eyes =  eye_cas.DetectMultiScale(clip, 1.1,20);
                 var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 30);
                 var pair_eyes = pair_eye_cas.DetectMultiScale(clip, 1.1, 1);
                 
@@ -359,30 +401,12 @@ namespace CameraTrackingAppv3
                     return false;
 
 
-            //    foreach (var i in mouth)
-           //         clip.Rectangle(i, Scalar.Red, 2);
-
-           //     foreach (var i in pair_eyes)
-           //         clip.Rectangle(i, Scalar.Red, 2);
-
-           ///    Cv2.ImShow("wwwwssss", clip);
-           //     Cv2.WaitKey(0);
             }
-
-           /* lock (gray)
-            {
-                Cv2.ImShow("wwweeee", gray.Clone());
-            }*/
-
 
             var findfeatures_rect = Utils.RectScale2d(face_rect, .5, .5).ToRect();
             using (var clip = new Mat(gray,findfeatures_rect)) {
                 pre_features = GetGoodFeatures(clip);
 
-            /*    foreach(var p in pre_features)
-                {
-                    clip.Circle((int)p.X,(int)p.Y, 2, Scalar.White, 2);
-                }*/
             }
 
 
@@ -473,6 +497,7 @@ namespace CameraTrackingAppv3
 
             Velocity =new Vec2d( -vel.X , vel.Y );
 
+           // Utils.WriteLine("Velocity:" + Velocity.ToString());
 
             return true;
         }
@@ -505,115 +530,5 @@ namespace CameraTrackingAppv3
 
     }
 
-    /*
-    class TrackerNormal:Tracker
-    {
-        CascadeClassifier face_cas;
-        int wide = 50;
-        int threshold;
-        public TrackerNormal()
-        {
-            string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
-
-            face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
-           
-        }
-
-        protected override bool First(Mat gray)
-        {
-            var rects = face_cas.DetectMultiScale(gray);
-
-            if (rects.Length == 0)
-                return false;
-
-            var face_rect = new Rect(0, 0, 0, 0);
-            foreach (var rect in rects)
-            {
-                //gray.Rectangle(rect, new Scalar(0, 0, 255), 2);
-                if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
-                {
-                    face_rect = rect;
-                }
-            }
-
-            var roi_rect = Utils.RectScale(face_rect, 0.7, 1.2);
-            var roi = new Mat(gray,roi_rect);
-
-            var hist_list = ImageProcessing.GetHistList(roi);
-
-            var ots_thre =  ImageProcessing.GetOtsuThreshold(hist_list, out var otsu_list);
-
-            var otus2d = ImageProcessing.GetHist2d(otsu_list);
-
-            otsu_list = Utils.NormalizArray(otsu_list,255);
-            var ips = Utils.GetInflectionPoint(otsu_list);
-
-            foreach (var p in ips)
-            {
-                otus2d.Line(new Point(p, 0), new Point(p, otus2d.Height - 1), Scalar.Red);
-            }
-
-         //   Cv2.ImShow("face", roi);
-         //   Cv2.ImShow("Hist", ImageProcessing.GetHist2d(hist_list));
-          //  Cv2.ImShow("otsu_Hist", otus2d);
-
-            if (Utils.FindJustThreshold(otsu_list,ots_thre,out int thre))
-            {
-
-                using(var binary = roi.Threshold(thre, 255, ThresholdTypes.Binary)){
-
-                    if (FindBlob.Rect(binary, 230, out var rect,2))
-                    {
-                      //  binary.Rectangle(rect, Scalar.White, 3);
-                      //  Cv2.ImShow("binar", binary);
-                        rect.X += roi_rect.X;
-                        rect.Y += roi_rect.Y;
-                        pre_rect = Utils.RectWide(rect, wide, wide);//rect;
-                        pre_area = rect.Width * rect.Height;
-                        threshold = thre;
-                        return true;
-                    }
-                     
-                   
-                }
-            }
-
-
-//            FindBlob.Rect(roi, 180, out var blob_rect);
-            return false;
-        }
-
-        protected override bool Process(Mat gray)
-        {
-          //  return false;
-            bool ok = false;
-            using (var roi = new Mat(gray, pre_rect))
-            {
-                using (var binary = roi.Threshold(threshold, 255, ThresholdTypes.Binary))
-                {
-                    OpenCvSharp.Point p = new Point((int)Math.Round(center_point.Item0), (int)Math.Round(center_point.Item1));
-                    ok = FindBlob.Rect(binary, 150, pre_area, p, pre_rect.TopLeft, out var rect, 2);
-                    if (ok)
-                    {
-                        rect.X += pre_rect.X;
-                        rect.Y += pre_rect.Y;
-                        pre_rect = Utils.RectWide(rect, wide, wide);
-                        pre_area = rect.Width * rect.Height;
-                    }
-                    gray.Rectangle(pre_rect, new Scalar(255, 255, 0), 2);
-                    Cv2.ImShow("gray", gray);
-                    return ok;
-                }
-            }
-
-        }
-
-        void FindBlob_Color(Mat gray)
-        {
-
-        }
-
-
-    }*/
 }
     
