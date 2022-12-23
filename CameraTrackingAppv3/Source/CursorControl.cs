@@ -7,9 +7,9 @@ namespace CameraTrackingAppv3
     static class CursorControl
     {
         static bool f_first = true;
-      //  static bool f_control_mouse = true;
-     //   static Vec2d pre_dx;
-
+        //  static bool f_control_mouse = true;
+        //   static Vec2d pre_dx;
+        static Vec2d pre_vel;
         static Vec2d location;
         static double speed;
         static Point mouse_vel;
@@ -156,8 +156,8 @@ namespace CameraTrackingAppv3
 
                     //var range_sp = Utils.Grap(0, speed - 0.1 / (velo_mag * velo_mag ), 1);
                     var mag_threshold = Utils.Config.Property.ThresholdMag / velo_mag;
-                    var range_sp = Utils.Grap(0,(speed - mag_threshold * mag_threshold)/30 , 1);
-
+                    var range_sp = Utils.Grap(0,(speed - mag_threshold*mag_threshold)*.08 , 1);
+                    Utils.WriteLine("range_sp:"+range_sp + " speed:" + speed + " mag_threshold: " + mag_threshold * mag_threshold);
 
                   //  var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);
                     var k = Math.Max(n_range_inner_s * range_sp + (1 - range_sp),1);
@@ -176,7 +176,16 @@ namespace CameraTrackingAppv3
                     {
                         vel *= Utils.Config.Property.MoveMag;
                     }
+                    Utils.WriteLine("Velocity: "+vel.ToString());
 
+                    //     vel.Item0 = Utils.Grap(-100, vel.Item0, 100);
+                    //     vel.Item1 = Utils.Grap(-100, vel.Item1, 100);
+
+             //       var stopper_x = Math.Abs((pre_vel.Item0 + 5)*10);
+            //        var stopper_y = Math.Abs((pre_vel.Item1 + 5)*10);
+            //        if (Math.Abs(vel.Item0) > stopper_x) vel.Item0 = Utils.Grap(-stopper_x, vel.Item0, stopper_x);
+            //        if (Math.Abs(vel.Item1) > stopper_y) vel.Item1 = Utils.Grap(-stopper_y, vel.Item1, stopper_y);
+                    pre_vel = vel;
                     location += vel;//dx * k;//add_vel;//n_range_inner_dx * range_sp + dx * (1 - range_sp);
                 }
 
@@ -212,6 +221,7 @@ namespace CameraTrackingAppv3
                 location.Item1 = MouseControl.GetLocation.Y;
                 pre_mouse_point = MouseControl.GetLocation;
                 pre_valid_point = corrected_center;
+                pre_vel = new Vec2d(10, 10);
                 f_first = false;
             }
 

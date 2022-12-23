@@ -147,14 +147,18 @@ namespace CameraTrackingAppv3
             return RectWide(rect, w, h);
         }
 
+        public static Rect RectAddWide(Rect rect,int wideX,int wideY)
+        {
+            return RectWide(rect, rect.Width + wideX, rect.Height + wideY);
+        }
+
         public static Rect RectWide(Rect rect,int wideX,int wideY)
         {
             var cp = RectCenter2Point(rect);
-
             rect.X = cp.X - (wideX >> 1);
             rect.Y = cp.Y - (wideY >> 1);
-            rect.Width = wideX ;
-            rect.Height = wideY ;
+            rect.Width = wideX;
+            rect.Height = wideY;
             return rect;
         }
 

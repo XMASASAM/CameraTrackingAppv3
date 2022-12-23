@@ -196,53 +196,30 @@ namespace CameraTrackingAppv3
 
     class TrackerInfrared:Tracker
     {
-        CascadeClassifier face_cas;
-   //     AKAZE akaze;
         int wide = 50;
         Rect2d pre_rect;
         double pre_area;
-     //   Vec2d center_point;
         Vec2d pre_center_point;
-     //   KeyPoint[] target_keypoints;
-     //   Mat target_discriptors;
-     //   DescriptorMatcher matcher;
+        int binary_threshold=180;
         public TrackerInfrared()
         {
-            face_cas = new CascadeClassifier(Utils.PathResource + "\\haarcascade_frontalface_default.xml");
-        //    akaze = AKAZE.Create();
-        //    matcher = DescriptorMatcher.Create("BruteForce");
+
         }
 
         protected override bool First(Mat gray)
         {
-            //var rects = face_cas.DetectMultiScale(gray, 1.1, 10);
 
-            // if (rects.Length == 0)
 
-            //akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
-
-            //matcher.Match(target_discriptors,)
-
-            if (FindBlob.Rect(gray, 180, out pre_center_point, out var rect))
+            if (FindBlob.Rect(gray, binary_threshold, out pre_center_point, out var rect))
             {
 
                 pre_rect = MakeRect(pre_center_point, wide);//Utils.RectWide(Utils.Rect2Rect2d(rect), wide, wide);
                 pre_area = rect.Width * rect.Height;
-
-                //pre_center_point = Utils.RectCenter2Vec2d(pre_rect);
-          //      using (var clip = new Mat(gray, pre_rect.ToRect()))
-           //     {
-           //         akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
-           //     }
+                using(var clip = new Mat(gray,pre_rect.ToRect()))
+                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(clip),out _);
                 return true;
             }
-            
-        //    else
-        //    {
-        //        var face_rect = Utils.RectsMax(rects);
-        //        pre_rect = Utils.Rect2Rect2d(face_rect);
 
-        //    }
             return false;
         }
 
@@ -254,34 +231,25 @@ namespace CameraTrackingAppv3
             Rect clip_rect = pre_rect.ToRect();
             using (var roi = new Mat(gray,clip_rect))
             {
-                ok = FindBlob.Rect(roi, 180, pre_area,out center_point ,out pre_area);
+                ok = FindBlob.Rect(roi,binary_threshold, pre_area,out center_point ,out pre_area);
 
                 if (!ok) return false;
                 center_point.Item0 += clip_rect.X;
                 center_point.Item1 += clip_rect.Y;
-                pre_rect = MakeRect(center_point,wide);//Utils.RectWide(rect2d, wide, wide);
-              //  pre_area = rect.Width * rect.Height;
+                pre_rect = MakeRect(center_point,wide);
 
-                //  gray.Rectangle(pre_rect, new Scalar(255, 255, 0), 2);
-                // Cv2.ImShow("gray", gray);
+                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(roi), out _);
 
             }
-
+           // Utils.WriteLine("threshold: " + binary_threshold);
             pre_rect = Utils.RectGrap(pre_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
 
-           // center_point = Utils.RectCenter2Vec2d(pre_rect);
+
 
             var vel = center_point - pre_center_point;
-          //  if (Math.Abs(vel.Item0) <= 0.5) vel.Item0 = 0;
-         //   else
-         //   if (Math.Abs(vel.Item1) <= 0.5) vel.Item1 = 0;
 
-            Velocity = new Vec2d(-vel.Item0, vel.Item1);//center_point - pre_center_point;
-
-
-
-           // Utils.WriteLine("Velocity:" + Velocity.ToString());
-
+            Velocity = new Vec2d(-vel.Item0, vel.Item1);
+         //   Utils.WriteLine("Velocity: "+Velocity.ToString());
             pre_center_point = center_point;
 
             return true;

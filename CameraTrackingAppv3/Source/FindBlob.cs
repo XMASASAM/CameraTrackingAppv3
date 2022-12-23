@@ -6,16 +6,15 @@ namespace CameraTrackingAppv3
 {
     static class FindBlob
     {
-        static AKAZE akaze;
-        static   KeyPoint[] target_keypoints = new KeyPoint[0];
-        static Mat target_discriptors;
-        static   DescriptorMatcher matcher;
+        static Mat target_mat;
+        static double target_ave;
+        static double target_round;
         static bool f_first = false;
+        static Size pre_size;
+        
         static FindBlob()
         {
-            akaze = AKAZE.Create();
-            matcher = new BFMatcher(NormTypes.Hamming, false);//DescriptorMatcher.Create("BruteForce");
-            target_discriptors = new Mat();
+            target_mat = new Mat();
         }
 
         static bool BlobFilter_1(Rect rect)
@@ -27,6 +26,7 @@ namespace CameraTrackingAppv3
 
         static bool BlobFilter_2(Mat binary, Rect rect, int threshold)
         {
+
             using (var blob = new Mat(binary, rect))
             {
                 var ave = Cv2.Mean(blob)[0];
@@ -64,6 +64,8 @@ namespace CameraTrackingAppv3
 
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
             Point[] ans_ps = new Point[0];
+            double distance = double.MaxValue;
+            double score = double.MaxValue;
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
@@ -72,29 +74,46 @@ namespace CameraTrackingAppv3
                 {
                     if (f_first)
                     {
+                        if (rect.Width < pre_size.Width >> 1 || pre_size.Width << 1 < rect.Width ||
+                            rect.Height < pre_size.Height >> 1 || pre_size.Height << 1 < rect.Height)
+                            continue;
+
                         KeyPoint[] try_keypoints = new KeyPoint[0];
                         Mat try_discriptors = new Mat();
 
-                        using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectWide(rect, 50, 50), Utils.CameraFrame)))
+                        double score_temp;
+                        using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(rect, 1.1, 1.1), 10, 10), Utils.CameraFrame)))
                         {
-                            akaze.DetectAndCompute(clip, null, out try_keypoints, try_discriptors);
-                       //     Cv2.ImShow("wwwqqqaaa", clip);
-                      //      Cv2.WaitKey(0);
+                            using (var resize = clip.Resize(target_mat.Size()))
+                            {
+                                Mat diff = new Mat();
+                                //Utils.WriteLine("resiz: " +resize.ToString());
+
+                                Mat resize_correct = resize * (float)(target_ave / clip.Mean()[0]);
+
+                                Cv2.Absdiff(target_mat, resize_correct, diff);
+                                score_temp = diff.Mean()[0];
+                                diff.Dispose();
+                                resize_correct.Dispose();
+                            }
                         }
 
-                        var matches = matcher.Match(try_discriptors, target_discriptors);
-                        if (matches.Length <= 0) continue;
+                        //   Utils.WriteLine("Score:" + score_temp + " Round:" +target_round);
 
-                        float sum = 0;
-                        foreach (var i in matches)
-                            sum += i.Distance;
-                        sum /= matches.Length;
-                        Utils.WriteLine("Score:" + sum.ToString());
+                        if (score_temp * 9 >= target_round) continue;
 
-                        if (sum > 120) continue;
+                        if (score_temp < score) score = score_temp;
+                        else continue;
 
                     }
+                    else
+                    {
+                        var cp = Utils.RectCenter2Vec2d(rect);
+                        var temp = Utils.GetDistanceSquared(cp.Item0 - Utils.CameraWidth * .5, cp.Item1 - Utils.CameraHeight * .5);
 
+                        if (distance > temp) distance = temp;
+                        else continue;
+                    }
                     ans = true;
                     blob_rect = rect;
                     ans_ps = contour;
@@ -107,17 +126,25 @@ namespace CameraTrackingAppv3
             center_point = new Vec2d(0, 0);
             if (ans)
             {
+
                 if (!f_first)
-                    using (var clip = new Mat(gray, Utils.RectWide(blob_rect, 50, 50)))
+                    using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(blob_rect, 1.1, 1.1), 10, 10), Utils.CameraFrame)))
                     {
-                        akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
-                      //  Cv2.ImShow("target", clip);
-                    //    Cv2.WaitKey(0);
+                        target_mat = clip.Clone();
+                        target_ave = target_mat.Mean()[0];
+                        var www = blob_rect.Width * 0.05 + 5;
+                        var hhh = blob_rect.Height * 0.05 + 5;
+                        target_round = www * clip.Height * 2 + hhh * clip.Width * 2 - www * hhh * 4;
+                        //  Cv2.ImShow("target", clip);
+                        //  Cv2.WaitKey(0);
+                        //  akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
+                        //  Cv2.ImShow("target", clip);
+                        //    Cv2.WaitKey(0);
                     }
 
                 f_first = true;
                 center_point = GetCenterPoint(ans_ps);
-
+                pre_size = blob_rect.Size;
 
             }
 
