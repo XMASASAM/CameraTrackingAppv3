@@ -29,59 +29,58 @@ namespace CameraTrackingAppv3
         /// </summary>
         private void InitializeComponent()
         {
-            this.userControl21 = new CameraTrackingAppv3.UserControl2();
-            this.userControl22 = new CameraTrackingAppv3.UserControl2();
-            this.userControl23 = new CameraTrackingAppv3.UserControl2();
-            this.userControl24 = new CameraTrackingAppv3.UserControl2();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // userControl21
+            // comboBox1
             // 
-            this.userControl21.Location = new System.Drawing.Point(-1, 3);
-            this.userControl21.Name = "userControl21";
-            this.userControl21.Size = new System.Drawing.Size(99, 128);
-            this.userControl21.TabIndex = 0;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(3, 21);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(220, 23);
+            this.comboBox1.TabIndex = 9;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // userControl22
+            // label2
             // 
-            this.userControl22.Location = new System.Drawing.Point(97, 3);
-            this.userControl22.Name = "userControl22";
-            this.userControl22.Size = new System.Drawing.Size(99, 128);
-            this.userControl22.TabIndex = 1;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 3);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(56, 15);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "カメラ一覧";
             // 
-            // userControl23
+            // button1
             // 
-            this.userControl23.Location = new System.Drawing.Point(195, 3);
-            this.userControl23.Name = "userControl23";
-            this.userControl23.Size = new System.Drawing.Size(99, 128);
-            this.userControl23.TabIndex = 2;
-            // 
-            // userControl24
-            // 
-            this.userControl24.Location = new System.Drawing.Point(293, 3);
-            this.userControl24.Name = "userControl24";
-            this.userControl24.Size = new System.Drawing.Size(99, 128);
-            this.userControl24.TabIndex = 3;
+            this.button1.Location = new System.Drawing.Point(229, 14);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(80, 35);
+            this.button1.TabIndex = 7;
+            this.button1.Text = "起動";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // UserControl3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.userControl24);
-            this.Controls.Add(this.userControl23);
-            this.Controls.Add(this.userControl22);
-            this.Controls.Add(this.userControl21);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.button1);
             this.Name = "UserControl3";
-            this.Size = new System.Drawing.Size(392, 131);
+            this.Size = new System.Drawing.Size(313, 58);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private UserControl2 userControl21;
-        private UserControl2 userControl22;
-        private UserControl2 userControl23;
-        private UserControl2 userControl24;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button1;
     }
 }

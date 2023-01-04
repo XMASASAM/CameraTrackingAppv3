@@ -12,6 +12,9 @@ namespace CameraTrackingAppv3
         RightClick,
         RightDoubleClick,
         RightDrag,
+        MiddleClick,
+        MiddleDoubleClick,
+        MiddleDrag,
         ScrollUp,
         ScrollDown
     }

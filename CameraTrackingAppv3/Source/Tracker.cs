@@ -16,33 +16,40 @@ namespace CameraTrackingAppv3
       //  Vec2d pre_vel;
         Vec2d corrected_vel;
         Vec2d corrected_center_point;
+        System.Diagnostics.Stopwatch stopwatch;
         public GeneralTracker(Mat frame)
         {
-            f_infrared = DetectColorORGray(frame);
+            f_infrared = DetectInfraredColor(frame);
             if (f_infrared)
                 tracker = new TrackerInfrared();
             else
                 tracker = new TrackerOpticalFlow();
-
+            stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
         }
 
         public bool Update(Mat frame)
         {
 
-            if (step_detect++ > 15)
+            if (stopwatch.ElapsedMilliseconds > 1000)
             {
-                step_detect = 0;
+                stopwatch.Restart();
+                //step_detect = 0;
                 bool f_pre_infrared = f_infrared;
-                f_infrared = DetectColorORGray(frame);
+                f_infrared = DetectInfraredColor(frame);
 
                 if (f_infrared && !f_pre_infrared)
                 {
+                  //  Utils.ShowMat("test", frame);
+                    Utils.WriteLine("赤外線モード!!!!");
                     tracker.Dispose();
                     tracker = new TrackerInfrared();
                     f_first = true;
                 }
                 else if (!f_infrared && f_pre_infrared)
                 {
+                    Utils.WriteLine("通常カメラモード!!!!");
+
                     tracker.Dispose();
                     tracker = new TrackerOpticalFlow();
                     f_first = true;
@@ -95,19 +102,60 @@ namespace CameraTrackingAppv3
 
         public bool IsError { get { return tracker.IsError; } }
 
-        public bool DetectColorORGray(Mat frame)
+        public bool IsSettingRect { get { return tracker.IsSettingRect; } }
+
+        public bool DetectInfraredColor(Mat frame)
         {
             using (var resize = frame.Resize(new OpenCvSharp.Size(10, 10)))
             {
-                var bgr = resize.Mean();
-                if (Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
+                //var bgr = resize.Mean();
+                bool ok = true;
+                Cv2.Split(resize, out var splits);
+
+                Mat diff = new Mat();
+
+                Cv2.Absdiff(splits[0], splits[1], diff);
+                Cv2.MinMaxLoc(diff, out _, out double dis);//.Mean()[0] > 1.5;
+                
+                ok = dis < 2;
+
+                if (ok)
                 {
+                    Cv2.Absdiff(splits[1], splits[2], diff);
+                    Cv2.MinMaxLoc(diff, out _, out dis);//.Mean()[0] > 1.5;
+
+                    ok = dis < 2;
+                }
+
+                if (ok)
+                {
+                    Cv2.Absdiff(splits[2], splits[0], diff);
+                    Cv2.MinMaxLoc(diff, out _, out dis);//.Mean()[0] > 1.5;
+
+                    ok = dis < 2;
+                }
+
+                diff.Dispose();
+                splits[0].Dispose();
+                splits[1].Dispose();
+                splits[2].Dispose();
+
+                return ok;
+                //   var c_b = splits[0].Mean()[0];
+                //   var c_g = splits[1].Mean()[0];
+                //   var c_r = splits[2].Mean()[0];
+                //   Utils.WriteLine("split:(b,g,r) " + "(" + c_b + "," + c_g + "," + c_r + ")");
+                //  Utils.WriteLine("mean:(b,g,r) " + "(" + bgr[0] + "," + bgr[1] + "," + bgr[2] + ")");
+
+             /*   if (ok)//Math.Abs(bgr[0] - bgr[1]) < 1.5 && Math.Abs(bgr[2] - bgr[1]) < 1.5)
+                {
+                    
                     return true;
                 }
                 else
                 {
                     return false;
-                }
+                }*/
             }
         }
 
@@ -116,6 +164,11 @@ namespace CameraTrackingAppv3
             f_first = true;
             step_detect = 1000;
             tracker.Reset();
+        }
+
+        public void SetTrackerRect(Rect rect)
+        {
+            tracker.SetTrackerRect(rect);
         }
 
     }
@@ -130,6 +183,10 @@ namespace CameraTrackingAppv3
         protected Vec2d center_point;
        // protected Vec2d pre_center_point;
         protected bool f_error = true;
+        protected bool f_first_clip_rect = false;
+
+        protected Rect first_clip_rect;
+
         public Vec2d CenterPoint { get { return center_point; } }
 
         public Vec2d Velocity { get; protected set; }
@@ -137,6 +194,9 @@ namespace CameraTrackingAppv3
         public bool IsActive { get { return f_active; } }
 
         public bool IsError { get { return f_error; } }
+
+        public bool IsSettingRect { get { return f_first_clip_rect; } }
+        int debug_count = 0;
         public virtual bool Update(Mat frame)
         {
             bool ok = false;
@@ -145,34 +205,31 @@ namespace CameraTrackingAppv3
             {
                 gray = frame.CvtColor(ColorConversionCodes.BGR2GRAY);
             }
-          //  Cv2.ImShow("wwww", gray);
-           // using (Mat )
-          //  {
-               // Cv2.ImShow("graydddd", gray);
-                if (f_first)
-                {
-                    CursorControl.Init();
-                    ok = First(gray);
-                    f_first = !ok;
-              //      f_first2 = true;
-                }
-                else
-                {
-                    ok = Process(gray);
-                    f_active = true;
-                }
-            //  }
+
+            if (f_first)
+            {
+                CursorControl.Init();
+                ok = First(gray);
+                f_first = !ok;
+            }
+            else
+            {
+                ok = Process(gray);
+                f_active = true;
+            }
+
             gray.Dispose();
+
             if (ok)
             {
                 f_error = false;
             }
             else
             {
-             //   Utils.WriteLine("Error!!!!!!");
-                Velocity = new Vec2d(0, 0);
+                debug_count++;
+                Init();
                 f_error = true;
-                f_first = true;
+           //     Utils.WriteLine("errorが起きたぞ!!!"+debug_count);
             }
             return ok;
         }
@@ -190,6 +247,21 @@ namespace CameraTrackingAppv3
             f_first = true;
         }
 
+        public void SetTrackerRect(Rect rect)
+        {
+            Init();
+            f_first_clip_rect = true;
+            first_clip_rect = rect;
+            FindBlob.Init();
+
+        }
+
+        void Init()
+        {
+            Velocity = new Vec2d(0, 0);
+            //f_error = true;
+            f_first = true;
+        }
     }
 
 
@@ -201,6 +273,7 @@ namespace CameraTrackingAppv3
         double pre_area;
         Vec2d pre_center_point;
         int binary_threshold=180;
+        bool f_first_threshold = true;
         public TrackerInfrared()
         {
 
@@ -208,19 +281,55 @@ namespace CameraTrackingAppv3
 
         protected override bool First(Mat gray)
         {
-
-
-            if (FindBlob.Rect(gray, binary_threshold, out pre_center_point, out var rect))
+            Mat mat = gray;
+            Vec2d offset = new Vec2d(0, 0);
+            if (f_first_clip_rect)
             {
+                if (first_clip_rect.Size.Width < 3 || first_clip_rect.Size.Height < 3)
+                    return false;
 
-                pre_rect = MakeRect(pre_center_point, wide);//Utils.RectWide(Utils.Rect2Rect2d(rect), wide, wide);
-                pre_area = rect.Width * rect.Height;
-                using(var clip = new Mat(gray,pre_rect.ToRect()))
-                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(clip),out _);
-                return true;
+                mat = new Mat(gray, first_clip_rect);
+                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(mat), out _);
+                offset = new Vec2d(first_clip_rect.X ,first_clip_rect.Y);
             }
 
-            return false;
+            if (f_first_threshold)
+            {
+                binary_threshold = Utils.Config.Property.InfraredFirstThreshold;
+
+                if (Utils.Config.IsHaveTargetImage)
+                {
+                    FindBlob.SetTargetImage(Utils.Config.TrackingTargetImage, Utils.Config.Property.TrackingTargetMean, Utils.Config.Property.TrackingTargetAround);
+                    binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(Utils.Config.TrackingTargetImage), out _);
+                  //  binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(mat), out _);
+                }
+
+                f_first_threshold = false;
+            }
+            
+
+            bool f = FindBlob.Rect(mat, binary_threshold,offset, out pre_center_point, out var rect);
+
+            if (f)
+            {
+
+                pre_rect = Utils.RectAddWide(Utils.Rect2Rect2d(rect), wide, wide);
+                pre_area = rect.Width * rect.Height;
+                using (var clip = new Mat(mat, Utils.RectGrap(pre_rect.ToRect(), new Rect(new Point(0, 0), mat.Size()))))
+                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(clip),out _);
+
+                if (f_first_clip_rect)
+                    pre_rect.Location += first_clip_rect.Location;
+                
+            }
+
+            if (f_first_clip_rect)
+            {
+                if (f) f_first_clip_rect = false;
+                mat.Dispose();
+            }
+
+            return f;
         }
 
         protected override bool Process(Mat gray)
@@ -231,12 +340,14 @@ namespace CameraTrackingAppv3
             Rect clip_rect = pre_rect.ToRect();
             using (var roi = new Mat(gray,clip_rect))
             {
-                ok = FindBlob.Rect(roi,binary_threshold, pre_area,out center_point ,out pre_area);
+                ok = FindBlob.Rect(roi,binary_threshold, pre_area,out center_point ,out var blob_rect , out pre_area,0);
 
                 if (!ok) return false;
+                blob_rect.X += clip_rect.X;
+                blob_rect.Y += clip_rect.Y;
                 center_point.Item0 += clip_rect.X;
                 center_point.Item1 += clip_rect.Y;
-                pre_rect = MakeRect(center_point,wide);
+                pre_rect = Utils.RectAddWide(Utils.Rect2Rect2d(blob_rect),wide,wide);//MakeRect(center_point,wide);
 
                 binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(roi), out _);
 
@@ -273,19 +384,20 @@ namespace CameraTrackingAppv3
             base.Reset();
         }
 
-        Rect2d MakeRect(Vec2d cp,double wide)
-        {
-            return new Rect2d(cp.Item0 - wide * 0.5 , cp.Item1 - wide * 0.5, wide, wide);
-        }
+        // Rect2d MakeRect(Vec2d cp,double wide)
+        //  {
+        //      return Utils.RectAddWide();//new Rect2d(cp.Item0 - wide * 0.5 , cp.Item1 - wide * 0.5, wide, wide);
+        //  }
+
 
     }
 
     class TrackerOpticalFlow : Tracker
     {
-        CascadeClassifier face_cas;
-        CascadeClassifier eye_cas;
-        CascadeClassifier mouth_cas;
-        CascadeClassifier pair_eye_cas;
+   //     CascadeClassifier face_cas;
+  //      CascadeClassifier eye_cas;
+   //     CascadeClassifier mouth_cas;
+    //    CascadeClassifier pair_eye_cas;
         Mat pre_gray;
         Rect2d face_rect;
         Point2f[] pre_features;
@@ -294,12 +406,12 @@ namespace CameraTrackingAppv3
         double face_rect_height;
         public TrackerOpticalFlow()
         {
-            string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
+     //       string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
 
-            face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
-            eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
-            mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
-            pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
+      //      face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
+      //      eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
+      //      mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
+      //      pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
         }
 
         public override void Reset()
@@ -312,89 +424,102 @@ namespace CameraTrackingAppv3
         protected override bool First(Mat gray)
         {
 
-            var rects = face_cas.DetectMultiScale(gray,1.1,10);
+            /*     var rects = face_cas.DetectMultiScale(gray,1.1,10);
 
-            if (rects.Length == 0)
-                return false;
+                 if (rects.Length == 0)
+                     return false;
 
-            face_rect = new Rect2d(0, 0, 0, 0);
-            foreach (var rect in rects)
-            {
-                if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
-                {
-                    face_rect = new Rect2d(rect.X,rect.Y,rect.Width,rect.Height);
-                }
-            }
-
-
-            using(var clip = new Mat(gray,face_rect.ToRect()))
-            {
-                var mouth = mouth_cas.DetectMultiScale(clip, 1.1, 30);
-                var pair_eyes = pair_eye_cas.DetectMultiScale(clip, 1.1, 1);
-                
-
-                if (mouth.Length <=0 || pair_eyes.Length <=0)
-                    return false;
-
-                var area = mouth[0].Width * mouth[0].Height;
-                Rect mouth_rect = mouth[0];
-                for (int i = 1; i < mouth.Length; i++)
-                    if (area < mouth[i].Width * mouth[i].Height)
-                    {
-                        mouth_rect = mouth[i];
-                        area = mouth[i].Width * mouth[i].Height;
-                    }
-
-                Rect pair_eye_rect = pair_eyes[0];
-                area = pair_eyes[0].Width * pair_eyes[0].Height;
-                for (int i = 1; i < pair_eyes.Length; i++)
-                    if (area < pair_eyes[0].Width * pair_eyes[0].Height)
-                    {
-                        pair_eye_rect = pair_eyes[i];
-                        area = pair_eyes[0].Width * pair_eyes[0].Height; 
-                    }
-
-                var clip_height_half = clip.Height * 0.7;
-                var mouth_cp = Utils.RectCenter2Point(mouth_rect);
-                var pair_eye_cp = Utils.RectCenter2Point(pair_eye_rect);
-                if (mouth_cp.Y < clip_height_half)
-                    return false;
-
-                if(clip.Width * 0.45 > mouth_cp.X || mouth_cp.X > clip.Width * 0.55)
-                {
-                    return false;
-                }
-
-                if (clip.Width * 0.45 > pair_eye_cp.X || pair_eye_cp.X > clip.Width * 0.55)
-                    return false;
+                 face_rect = new Rect2d(0, 0, 0, 0);
+                 foreach (var rect in rects)
+                 {
+                     if (face_rect.Width * face_rect.Height < rect.Width * rect.Height)
+                     {
+                         face_rect = new Rect2d(rect.X,rect.Y,rect.Width,rect.Height);
+                     }
+                 }
 
 
-            }
+                 using(var clip = new Mat(gray,face_rect.ToRect()))
+                 {
+                     var pair_eyes = pair_eye_cas.DetectMultiScale(clip, 1.1, 1);
 
-            var findfeatures_rect = Utils.RectScale2d(face_rect, .5, .5).ToRect();
+                     if (pair_eyes.Length <=0)
+                         return false;
+
+                     Rect pair_eye_rect = pair_eyes[0];
+                     var area = pair_eyes[0].Width * pair_eyes[0].Height;
+                     for (int i = 1; i < pair_eyes.Length; i++)
+                         if (area < pair_eyes[0].Width * pair_eyes[0].Height)
+                         {
+                             pair_eye_rect = pair_eyes[i];
+                             area = pair_eyes[0].Width * pair_eyes[0].Height; 
+                         }
+
+                     var clip_height_half = clip.Height * 0.7;
+                     var pair_eye_cp = Utils.RectCenter2Point(pair_eye_rect);
+
+
+                     if (clip.Width * 0.45 > pair_eye_cp.X || pair_eye_cp.X > clip.Width * 0.55)
+                         return false;
+
+
+                 }*/
+
+
+
+            //   var findfeatures_rect = Utils.RectScale2d(zoom_rect, zoom_rate_x, zoom_rate_y).ToRect();
+
+            //    ImageProcessing.FindCentralGoodFeatures(gray,face_rect,.5,.5); 
+            /*Utils.RectScale2d(face_rect, .5, .5).ToRect();
             using (var clip = new Mat(gray,findfeatures_rect)) {
                 pre_features = GetGoodFeatures(clip);
 
+            }*/
+
+            Mat mat = gray;
+            Vec2d offset = new Vec2d(0, 0);
+            if (f_first_clip_rect)
+            {
+                mat = new Mat(gray, first_clip_rect);
+                offset.Item0 = first_clip_rect.Location.X;
+                offset.Item1 = first_clip_rect.Location.Y;
             }
 
+            if (!ImageProcessing.DetectOneFrontFace(mat, out face_rect))
+            {
+                if (f_first_clip_rect)
+                    mat.Dispose();
+                return false;
+            }
+            var findfeatures_rect = Utils.RectScale2d(face_rect, .5, .5).ToRect();
+            pre_features = ImageProcessing.FindGoodFeatures(mat, findfeatures_rect);
 
-            face_rect = Utils.RectGrap(Utils.RectScale2d(face_rect, 0.7, 0.8), new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
+            using (var clip = new Mat(mat, face_rect.ToRect()))
+                pre_gray = clip.Clone();
+
+            face_rect.X += offset.Item0;
+            face_rect.Y += offset.Item1;
+
+            findfeatures_rect.X += (int)offset.Item0;
+            findfeatures_rect.Y += (int)offset.Item1;
+
             center_point = Utils.RectCenter2Vec2d(face_rect);
             face_rect_point = new Point2d(face_rect.X, face_rect.Y);
             face_rect_width = face_rect.Width;
             face_rect_height = face_rect.Height;
 
-            using (var clip = new Mat(gray,face_rect.ToRect()))
-            {
-                pre_gray = clip.Clone();
-            }
-
             var t = findfeatures_rect.Location - face_rect.Location;
-            Point2f dis =  new Point2f((float)t.X,(float)t.Y );
+            Point2f dis =  new Point2f((float)(t.X),(float)(t.Y) );
             for(int i = 0; i<pre_features.Length; i++)
             {
                 pre_features[i] += dis;
 
+            }
+
+            if (f_first_clip_rect)
+            {
+                mat.Dispose();
+                f_first_clip_rect = false;
             }
 
             return true;
@@ -423,8 +548,12 @@ namespace CameraTrackingAppv3
                 }
 
             }
-            
-            if (pre_fp.Count == 0) return false;
+
+            if (pre_fp.Count == 0)
+            {
+              //  Utils.WriteLine("countが0!!!");
+                return false;
+            }
 
             float div_count = 1 / (float)pre_fp.Count;
             vel.X *= div_count;
@@ -454,6 +583,8 @@ namespace CameraTrackingAppv3
 
             if (next_ps.Count <= 5)
             {
+               // Utils.WriteLine("countが5以下!!!");
+
                 return false;
                // pre_features = GetGoodFeatures(pre_gray);
             }
@@ -488,8 +619,8 @@ namespace CameraTrackingAppv3
 
         public override void Dispose()
         {
-            if (face_cas != null && !face_cas.IsDisposed)
-                face_cas.Dispose();
+          //  if (face_cas != null && !face_cas.IsDisposed)
+          //      face_cas.Dispose();
 
             if (pre_gray != null && !pre_gray.IsDisposed)
                 pre_gray.Dispose();

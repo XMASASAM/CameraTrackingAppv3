@@ -14,11 +14,20 @@ namespace CameraTrackingAppv3
     {
         public enum MOUSEEVENT
         {
+            MOVE = 0x1,
             LEFTDOWN = 0x2,
             LEFTUP = 0x4,
-            RIGHTTDOWN = 0x8,
+            RIGHTDOWN = 0x8,
             RIGHTUP = 0x10,
-            WHEEL = 0x800
+            MIDDLEDOWN= 0x20,
+            MIDDLEUP = 0x40,
+            XDOWN = 0x100,
+            XUP = 0x800,
+            WHEEL = 0x800,
+            HWHEEL = 0x1000,
+            MOVE_NOCOALESCE = 0x2000,
+            VIRTUALDESK = 0x4000,
+            ABSOLUTE = 0x8000
         }
      /*   public const int MOUSEEVENTF_LEFTDOWN = 0x2;
         public const int MOUSEEVENTF_LEFTUP = 0x4;

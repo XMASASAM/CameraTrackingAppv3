@@ -79,5 +79,10 @@ namespace CameraTrackingAppv3
             PictureClear();
         }
 
+        public PictureBox GetPictureBox()
+        {
+            return pictureBox1;
+        }
+
     }
 }

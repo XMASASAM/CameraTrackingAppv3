@@ -16,20 +16,20 @@ namespace CameraTrackingAppv3
 {
     public partial class Form1 : Form,IFormUpdate
     {
-        VideoCapture capture;
-        ManagementEventWatcher insertWatcher;
-        ManagementEventWatcher removeWatcher;
-        List<string> deviceID = new List<string>();
-        bool f_start_up = false;
-        bool f_first = false;
-        Mat frame;
-        delegate void ControlFormDelegate();
-        string active_camera_id = "";
-        public UserControl1 UserControl { get { return userControl11; } }
-        public string GetActiveCameraID { get { return active_camera_id; } }
+        //VideoCapture capture;
+      //  ManagementEventWatcher insertWatcher;
+      //  ManagementEventWatcher removeWatcher;
+      //  List<string> deviceID = new List<string>();
+     //   bool f_start_up = false;
+    //    bool f_first = false;
+    //    Mat frame;
+    ////    delegate void ControlFormDelegate();
+    //    string active_camera_id = "";
+    //    public UserControl1 UserControl { get { return userControl11; } }
+   //     public string GetActiveCameraID { get { return active_camera_id; } }
 
-        bool f_jump2form3 = false;
-        bool f_decide_skip = false;
+   //     bool f_jump2form3 = false;
+    //    bool f_decide_skip = false;
 
 
         SettingsConfig config;
@@ -39,7 +39,7 @@ namespace CameraTrackingAppv3
             InitializeComponent();
             this.config = config;
 
-
+            /*
             f_jump2form3 = jump2Form3;
             f_decide_skip = decide_skip;
             f_first = !this.config.Property.CameraID.Equals("");
@@ -53,23 +53,25 @@ namespace CameraTrackingAppv3
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
 
-
+            */
         }
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
-            
+            userControl31.SetUserControl1(Main.GetUserControl1);
+            userControl31.Init(config);
+
             new DisplayInformation(this);
 
 
-            
+            /*
             if (config.Property.CameraID.Equals(""))
             {
                 userControl11.VisibleCameraName(false);
                 userControl11.VisibleFPS(false);
-            }
+            }*/
 
         }
         private void Form1_Shown(object sender, EventArgs e)
@@ -78,13 +80,14 @@ namespace CameraTrackingAppv3
 
             LoadDeviceList();
 
-            if (config.VideoCapture != null)
+        /*    if (config.VideoCapture != null)
             {
                 capture = this.config.VideoCapture;
                 active_camera_id = this.config.Property.CameraID;
                 Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
-            }
+            }*/
         }
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -298,6 +301,8 @@ namespace CameraTrackingAppv3
 
         public void FormDraw()
         {
+            if (frame.IsDisposed)
+                return;
             Main.DisplayCamera(frame);
         }
 

@@ -27,6 +27,7 @@ namespace CameraTrackingAppv3
         static Connect connect;
         static System.Drawing.Point comform_picture_offset;
         static System.Drawing.Point comform_picture_size;
+        static double comform_picture_scale = 1;
         static int rotate = 0;
         static Mat rotate_mat;
         static bool f_set_up = false;
@@ -36,7 +37,11 @@ namespace CameraTrackingAppv3
         static bool f_first_camera = true;
 
         static UserControl1 current_picture_control;
-       // static Form current_form;
+        static public UserControl1 GetUserControl1
+        {
+            get { return current_picture_control; }
+        }
+        // static Form current_form;
         static GeneralTracker mouse_tracker;
         static CountFPS countFPS;
 
@@ -51,8 +56,11 @@ namespace CameraTrackingAppv3
         static System.Diagnostics.Stopwatch stopwatch;
         static long interval_wait_time;
         static bool f_active = false;
+        static public bool IsActive { get{return f_active; } }
         static Control control;
         static public Control Control { get { return control; } }
+        static public double ComformPictureScale { get { return comform_picture_scale; } }
+        static public System.Drawing.Point ComformOffset { get { return comform_picture_offset; } }
         static Main()
         {
             current_picture_control = null;
@@ -67,6 +75,7 @@ namespace CameraTrackingAppv3
         {
             if (f_active) return;
             f_active  = true;
+       //     control = Utils.MainForm.ActiveControl;//cont;
             control = cont;
             Thread thread = new Thread(new ThreadStart(Loop));
             thread.Start();
@@ -84,6 +93,7 @@ namespace CameraTrackingAppv3
 
         static public void SetRotate(int degree)
         {
+            if (rotate == degree) return;
             rotate = degree;
             var cp = new Point2f(Utils.CameraWidth *.5f, Utils.CameraHeight * .5f);
             rotate_mat = Cv2.GetRotationMatrix2D(cp, degree, 1);
@@ -106,6 +116,8 @@ namespace CameraTrackingAppv3
                // control.Invoke(new Utils.InvokeVoid(Update));
                 Update();
             }
+            control.Invoke(new Utils.InvokeVoid(Utils.MainForm.Close));
+            
         }
 
         static void Update()
@@ -116,8 +128,8 @@ namespace CameraTrackingAppv3
 
             if (!f_set_up)
             {
-                if (current_picture_control != null)
-                    control.Invoke(new Utils.InvokeVoid(current_picture_control.DisplayClear));
+               // if (current_picture_control != null)
+              //      control.Invoke(new Utils.InvokeVoid(current_picture_control.DisplayClear));
                 //CurrentPictureControl.VisibleCameraName(false);
                 return;
             }
@@ -144,6 +156,7 @@ namespace CameraTrackingAppv3
             if (ok)
             {
 
+               // control.Invoke(new Utils.InvokeShowMat(Cv2.ImShow), "test", camera_frame);
                 if (rotate != 0)
                 {
                     using(var temp = camera_frame)
@@ -152,32 +165,36 @@ namespace CameraTrackingAppv3
                     }
 
                 }
+             //   control.Invoke(new Utils.InvokeShowMat(Cv2.ImShow), "test2", camera_frame);
 
                 countFPS.Update();
 
                 control.Invoke(new Utils.InvokeInt(current_picture_control.SetFPS),countFPS.Get);
 
              //   f_infrared_mode = DetectColorORGray(camera_frame);
-
+             
                 if (f_first_camera)
                     Sub_FirstCamera(camera_frame);
 
 
                 if (form_update != null)
                     form_update(ref camera_frame);
+           //     control.Invoke(new Utils.InvokeShowMat(Cv2.ImShow), "test3", camera_frame);
+
                 if (form_draw != null)
                     control.Invoke(new Utils.InvokeVoid(form_draw));
+           //     control.Invoke(new Utils.InvokeShowMat(Cv2.ImShow), "test4", camera_frame);
 
 
             }
             else
             {
-               // f_set_up = false;
+                f_set_up = false;
                 control.Invoke(new Utils.InvokeVoid(current_picture_control.PictureClear));
              //   capture.Release();
              //   capture.Dispose();
                 //capture = null;
-             //   Utils.Alert_Error("カメラからの画像読み取りができませんでした");
+                Utils.Alert_Error("カメラからの画像読み取りができませんでした");
             }
                 
             
@@ -215,12 +232,12 @@ namespace CameraTrackingAppv3
             }
                 int w = capture.FrameWidth;
                 int h = capture.FrameHeight;
-                Utils.ZoomFitSize(w, h, pictureBoxW, pictureBoxH, out int ox, out int oy, out int rw, out int rh, out double _);
+                Utils.ZoomFitSize(w, h, pictureBoxW, pictureBoxH, out int ox, out int oy, out int rw, out int rh, out double scale);
                 comform_picture_offset.X = ox;
                 comform_picture_offset.Y = oy;
                 comform_picture_size.X = rw;
                 comform_picture_size.Y = rh;
-            
+            comform_picture_scale = scale;
             f_set_up = true;
         }
 

@@ -17,7 +17,7 @@ namespace CameraTrackingAppv3
         static bool f_cursor_stay;
         static System.Diagnostics.Stopwatch dwell_time;
         static bool f_range_of_motion = false;
-
+        //static int dwell_threshold_time = 500;
 
         static Vec2d cursor_magnification = new Vec2d(14,14);
 
@@ -39,7 +39,7 @@ namespace CameraTrackingAppv3
         public static bool IsDwell { get; private set; }
         public static bool IsDwellImpulse { get; private set; }
 
-
+        public static int DwellThresholdTime { get; set; } = 500;
 
         public static bool IsRangeOfMotion { get { return f_range_of_motion; } set { f_range_of_motion = value; } }
 
@@ -64,6 +64,7 @@ namespace CameraTrackingAppv3
         {
             f_first = true;
             f_cursor_stay = false;
+            dwell_time.Reset();
         }
 
         static public void Init(SettingsConfig config)
@@ -99,7 +100,7 @@ namespace CameraTrackingAppv3
             {
                 pre_valid_point = sensor_center;
             }
-
+            var pre_location = location;
 
             if (f_range_of_motion)
             {
@@ -157,7 +158,7 @@ namespace CameraTrackingAppv3
                     //var range_sp = Utils.Grap(0, speed - 0.1 / (velo_mag * velo_mag ), 1);
                     var mag_threshold = Utils.Config.Property.ThresholdMag / velo_mag;
                     var range_sp = Utils.Grap(0,(speed - mag_threshold*mag_threshold)*.08 , 1);
-                    Utils.WriteLine("range_sp:"+range_sp + " speed:" + speed + " mag_threshold: " + mag_threshold * mag_threshold);
+                 //   Utils.WriteLine("range_sp:"+range_sp + " speed:" + speed + " mag_threshold: " + mag_threshold * mag_threshold);
 
                   //  var k = Math.Max( n_range_inner * range_sp + distance * (1 - range_sp),1);
                     var k = Math.Max(n_range_inner_s * range_sp + (1 - range_sp),1);
@@ -175,8 +176,10 @@ namespace CameraTrackingAppv3
                     if(Utils.GetDistanceSquared(vel.Item0,vel.Item1)>Utils.Config.Property.ThresholdMag * Utils.Config.Property.ThresholdMag)
                     {
                         vel *= Utils.Config.Property.MoveMag;
+                        vel.Item0 *= Utils.Config.Property.AxisXMag;
+                        vel.Item1 *= Utils.Config.Property.AxisYMag;
                     }
-                    Utils.WriteLine("Velocity: "+vel.ToString());
+              //      Utils.WriteLine("Velocity: "+vel.ToString());
 
                     //     vel.Item0 = Utils.Grap(-100, vel.Item0, 100);
                     //     vel.Item1 = Utils.Grap(-100, vel.Item1, 100);
@@ -205,7 +208,9 @@ namespace CameraTrackingAppv3
 
             location.Item0 = Utils.Grap(0, location.Item0, Utils.AllScreenWidth);
             location.Item1 = Utils.Grap(0, location.Item1, Utils.AllScreenHeight);
-            MouseControl.SetLocation((int)location.Item0, (int)location.Item1);
+            //MouseControl.SetLocation((int)location.Item0, (int)location.Item1);
+         //   MouseControl.SetLocationAnimation(pre_location,location);
+            MouseControl.SetLocationAnimation(location);
         }
 
 
@@ -223,6 +228,7 @@ namespace CameraTrackingAppv3
                 pre_valid_point = corrected_center;
                 pre_vel = new Vec2d(10, 10);
                 f_first = false;
+                f_cursor_stay = true;
             }
 
             MoveCursor(corrected_center,corrected_vel);
@@ -240,10 +246,10 @@ namespace CameraTrackingAppv3
 
             if (f_cursor_stay)
             {
-                if(!f_pre_stay)
-                    dwell_time.Start();
+                if (!f_pre_stay)
+                    dwell_time.Restart();
 
-                if (dwell_time.ElapsedMilliseconds > 500)
+                if (dwell_time.ElapsedMilliseconds > DwellThresholdTime)
                 {
                     IsDwell = true;
                     IsDwellImpulse = true;
@@ -265,10 +271,14 @@ namespace CameraTrackingAppv3
 
 
         }
+        static public void SetLocation(Vec2d point)
+        {
+            location = point;
+        }
 
         static public void SetRangeOfMotion(RangeOfMotionProps prop)
         {
-
+            if (prop.Equals(range_of_motion)) return;
             range_of_motion = prop;
 
 

@@ -61,6 +61,16 @@ namespace CameraTrackingAppv3.Properties {
         }
         
         /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap correct {
+            get {
+                object obj = ResourceManager.GetObject("correct", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   &lt;?xml version=&quot;1.0&quot;?&gt;
         ///&lt;!--
         ///    Stump-based 20x20 frontal eye detector.
@@ -75,7 +85,7 @@ namespace CameraTrackingAppv3.Properties {
         ///  copy or use the software.
         ///
         ///
-        ///                        Intel License Agr [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///                        Int [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string haarcascade_eye {
             get {
@@ -98,7 +108,7 @@ namespace CameraTrackingAppv3.Properties {
         ///  copy or use the software.
         ///
         ///
-        ///                        Intel License Agreeme [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///                        Intel L [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string haarcascade_frontalface_default {
             get {
@@ -118,7 +128,7 @@ namespace CameraTrackingAppv3.Properties {
         ///
         ///Creative Commons Attribution-NonCommercial 4.0 International Public License
         ///
-        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribu [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Comm [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string haarcascade_mcs_eyepair_big {
             get {
@@ -137,7 +147,7 @@ namespace CameraTrackingAppv3.Properties {
         ///
         ///Creative Commons Attribution-NonCommercial 4.0 International Public License
         ///
-        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons A [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string haarcascade_mcs_mouth {
             get {
@@ -151,6 +161,26 @@ namespace CameraTrackingAppv3.Properties {
         internal static System.Drawing.Bitmap icon_loader_c_ww_01_s1 {
             get {
                 object obj = ResourceManager.GetObject("icon_loader_c_ww_01_s1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap not_found {
+            get {
+                object obj = ResourceManager.GetObject("not_found", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   型 System.Drawing.Bitmap のローカライズされたリソースを検索します。
+        /// </summary>
+        internal static System.Drawing.Bitmap pc {
+            get {
+                object obj = ResourceManager.GetObject("pc", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

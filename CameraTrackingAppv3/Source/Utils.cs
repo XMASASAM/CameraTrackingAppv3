@@ -27,6 +27,8 @@ namespace CameraTrackingAppv3
         public delegate void InvokeInt(int send);
         public delegate void InvokeBool(bool send);
         public delegate void InvokeString(string send);
+        public delegate void InvokePoint(System.Drawing.Point send);
+        public delegate void InvokeShowMat(string name, Mat mat);
         public delegate void InvokeVoid();
         public delegate void InvokeLoadAlert(string title,string message,Image image,System.Drawing.Point start_point,bool bottom);
 
@@ -103,10 +105,27 @@ namespace CameraTrackingAppv3
         {
             if (loadalert.ContainsKey(title))
                 return;
-
-            loadalert.Add(title, new Form2(title,message,image,center_locate,bottom));
+            var form2 = new Form2(title, message, image, center_locate, bottom);
+            loadalert.Add(title, form2);
             loadalert[title].Show();
             WriteLine("Load Start:" + title);
+            return;
+        }
+
+        public static Form2 GetShowLoadAlert(string title, string message, Image image, System.Drawing.Point center_locate, bool bottom)
+        {
+            Form2 form2;
+            if (loadalert.ContainsKey(title))
+            {
+                form2 = loadalert[title];
+
+                return loadalert[title];
+            }
+            form2 = new Form2(title, message, image, center_locate, bottom);
+            loadalert.Add(title, form2);
+            loadalert[title].Show();
+            WriteLine("Load Start:" + title);
+            return form2;
         }
 
         public static void CloseLoadAlert(string title)
@@ -148,6 +167,11 @@ namespace CameraTrackingAppv3
         }
 
         public static Rect RectAddWide(Rect rect,int wideX,int wideY)
+        {
+            return RectWide(rect, rect.Width + wideX, rect.Height + wideY);
+        }
+
+        public static Rect2d RectAddWide(Rect2d rect, double wideX, double wideY)
         {
             return RectWide(rect, rect.Width + wideX, rect.Height + wideY);
         }
@@ -353,6 +377,16 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
+        public static Rect RectGrapCameraFrame(Rect rect)
+        {
+            return Utils.RectGrap(rect,CameraFrame);
+        }
+
+        public static Rect2d RectGrapCameraFrame(Rect2d rect)
+        {
+            return RectGrap(rect,Rect2Rect2d(CameraFrame));
+        }
+
         public static Rect CameraFrame { get { return new Rect(0, 0, CameraWidth, CameraHeight); } }
 
         public static int CameraWidth { get; set; }
@@ -439,6 +473,14 @@ namespace CameraTrackingAppv3
                 list.Add(adapter.GetPhysicalAddress().ToString());
             }
             return list;
+
+
+
+        }
+
+        static public void ShowMat(string name , Mat mat)
+        {
+            MainForm.Invoke(new InvokeShowMat(Cv2.ImShow), name, mat);
         }
 
     }

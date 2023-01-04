@@ -56,7 +56,7 @@ namespace CameraTrackingAppv3
     {
         TcpListener tcpListener;
         UdpClient udpListener;
-
+        int port_num = -1;//62355;
         delegate void SendData(string sender_ip, ConnectType type, byte[] data);
 
 
@@ -67,9 +67,10 @@ namespace CameraTrackingAppv3
         double timeout_reload = 0.5;
         double timeout_found_ip = 0.5;
 
-        public Connect()
+        public Connect(int port_num= 62355)
         {
-            Init();
+           // this.port_num = port_num;
+            Init(this.port_num);
         }
 
         public List<RecodeUser> GetRecodeUsers()
@@ -77,18 +78,27 @@ namespace CameraTrackingAppv3
             return users;
         }
 
-        public bool Init()
+        public bool Init(int port_num)
         {
-
+            if (port_num == this.port_num)
+                return true;
             ReloadMyRecode();
 
-            IPEndPoint ip = new IPEndPoint(IPAddress.Any, Utils.PortNum);
-            bool ok = CheckPort();
+            IPEndPoint ip = new IPEndPoint(IPAddress.Any,port_num);
+            bool ok = CheckPort(port_num);
             if (ok)
             {
+
+                if (tcpListener != null)
+                    tcpListener.Stop();
+                if (udpListener != null)
+                    udpListener.Close();
+
                 tcpListener = new TcpListener(ip);
                 tcpListener.Start();
-                udpListener = new UdpClient(Utils.PortNum);
+                udpListener = new UdpClient(port_num);
+                this.port_num = port_num;
+
             }
             return ok;
         }
@@ -131,24 +141,24 @@ namespace CameraTrackingAppv3
 
         public void ReLoadIPAddress()
         {
-            if (!CheckPort()) return;
+            if (!CheckPort(port_num)) return;
 
-            UDP.SendBroadcastMessage(Utils.Password);
+            UDPSendBroadcastMessage(Utils.Password);
 
         }
 
         public void ReceiveChangeMessage()
         {
-            if (!CheckPort()) return;
+            if (!CheckPort(port_num)) return;
 
-            UDP.ListenBroadcastMessage(out var ip);
+            UDPListenBroadcastMessage(out var ip);
 
         }
 
 
-        bool CheckPort()
+        bool CheckPort(int port_num)
         {
-            var port_num = Utils.PortNum;
+            //var port_num = Utils.PortNum;
             var p = IPGlobalProperties.GetIPGlobalProperties();//.GetActiveTcpListeners();
             bool ok = true;
             foreach (var i in p.GetActiveTcpListeners())
@@ -233,7 +243,7 @@ namespace CameraTrackingAppv3
                 if (head.Equals("1"))
                 {
 
-                    TCP.SendMessage(sender_ip, ConnectType.AddIP, myself);
+                    TCPSendMessage(sender_ip, ConnectType.AddIP, myself);
                 }else
                 if (head.Equals("2"))
                 {
@@ -242,7 +252,7 @@ namespace CameraTrackingAppv3
                         //ReloadMyRecode();
                         //アクティブになる処理
                         //TCP.SendMessage(sender_ip, ConnectType.Correction, Utils.ObjectToByteArray(body));
-                        TCP.SendMessage(sender_ip, ConnectType.Correction, body);
+                        TCPSendMessage(sender_ip, ConnectType.Correction, body);
                     }
                 }
             }
@@ -281,12 +291,22 @@ namespace CameraTrackingAppv3
 
         void TCPReceive()
         {
+
             while (f_connect)
             {
-                var thre = new Thread(new ParameterizedThreadStart(TCPReadData));
-                Utils.WriteLine("TCP受け取り待ち");
-                thre.Start(tcpListener.AcceptTcpClient());
-                Utils.WriteLine("TCP受け取けとりました!!!!");
+                try
+                {
+                    Utils.WriteLine("TCP受け取り待ち");
+                    var client = tcpListener.AcceptTcpClient();
+                    var thre = new Thread(new ParameterizedThreadStart(TCPReadData));
+                    thre.Start(client);
+                    Utils.WriteLine("TCP受け取けとりました!!!!");
+                }
+                catch//SocketException e)
+                {
+                    Utils.WriteLine("tcplisnearがエラーを起こしました");
+                    Thread.Sleep(1000);
+                }
 
             }
         }
@@ -322,19 +342,27 @@ namespace CameraTrackingAppv3
         {
             while (f_connect)
             {
-                IPEndPoint ip = null;
-                Utils.WriteLine("UDP受け取り待ち");
+                try
+                {
+                    IPEndPoint ip = null;
+                    Utils.WriteLine("UDP受け取り待ち");
 
-                byte[] buf = udpListener.Receive(ref ip);
-                Utils.WriteLine("UDP受け取りました!!!!");
+                    byte[] buf = udpListener.Receive(ref ip);
+                    Utils.WriteLine("UDP受け取りました!!!!");
 
-                var thre = new Thread(new ParameterizedThreadStart(Event));
-                object[] a = new object[3];
+                    var thre = new Thread(new ParameterizedThreadStart(Event));
+                    object[] a = new object[3];
 
-                a[0] = ip.Address.ToString();
-                a[1] = ConnectType.Broadcast;
-                a[2] = Utils.ByteArrayToObject(buf);
-                thre.Start(a);
+                    a[0] = ip.Address.ToString();
+                    a[1] = ConnectType.Broadcast;
+                    a[2] = Utils.ByteArrayToObject(buf);
+                    thre.Start(a);
+                }
+                catch
+                {
+                    Utils.WriteLine("udplisnearがエラーを起こしました");
+                    Thread.Sleep(1000);
+                }
             }
         }
 
@@ -343,7 +371,7 @@ namespace CameraTrackingAppv3
         {
             users.Clear();
             //users.Add(myself);
-            UDP.SendBroadcastMessage("1");
+            UDPSendBroadcastMessage("1");
         }
 
         //一定時間が経過した後、他のパソコンへデータを送信する処理
@@ -353,7 +381,7 @@ namespace CameraTrackingAppv3
             foreach(var i in users)
             {
 
-                TCP.SendMessage(i.IPAddress, ConnectType.LoadIP,users);
+                TCPSendMessage(i.IPAddress, ConnectType.LoadIP,users);
             }
         }
 
@@ -363,10 +391,10 @@ namespace CameraTrackingAppv3
             //暫定
             var a = users[selected_index];
           //  var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, Utils.ObjectToByteArray("1"));
-            var ok = TCP.SendMessage(a.IPAddress, ConnectType.Active, "1");
+            var ok = TCPSendMessage(a.IPAddress, ConnectType.Active, "1");
             if (!ok)
             {
-                UDP.SendBroadcastMessage("2" + a.MACAddress);
+                UDPSendBroadcastMessage("2" + a.MACAddress);
 
             }
             return ok;
@@ -385,15 +413,12 @@ namespace CameraTrackingAppv3
             }
         }
 
-    }
 
-    static class UDP
-    {
 
-        static public void SendBroadcastMessage(string data)
+        void UDPSendBroadcastMessage(string data)
         {
             // 送受信に利用するポート番号
-            var port = Utils.PortNum;
+            var port = port_num;//Utils.PortNum;
 
             // 送信データ
             var buffer = Utils.ObjectToByteArray(data);//Encoding.UTF8.GetBytes(data);
@@ -410,17 +435,17 @@ namespace CameraTrackingAppv3
         }
 
 
-        static public void ListenBroadcastMessage(out IPEndPoint remote)
+        void UDPListenBroadcastMessage(out IPEndPoint remote)
         {
             // 送受信に利用するポート番号
-            var port = Utils.PortNum;
+            var port = port_num;//Utils.PortNum;
 
             // ブロードキャストを監視するエンドポイント
 
 
             // UdpClientを生成
             var client = new UdpClient(port);
-            
+
             // データ受信を待機（同期処理なので受信完了まで処理が止まる）
             // 受信した際は、 remote にどの IPアドレス から受信したかが上書きされる
             bool ok = false;
@@ -441,14 +466,10 @@ namespace CameraTrackingAppv3
             }
             Utils.WriteLine("パスワード通過");
         }
-    }
 
-    static class TCP
-    {
-
-        static public bool SendMessage(string target_ip,ConnectType type,object data)
+        bool TCPSendMessage(string target_ip, ConnectType type, object data)
         {
-            
+
             byte[] buf1;// = new byte[1024];
             //   Regex reg = new Regex("\0");
             bool ok = false;
@@ -486,7 +507,7 @@ namespace CameraTrackingAppv3
 
         }
 
-        static public bool ReceiveMessage(string target_ip,out IPEndPoint end_point ,out ConnectType type , out byte[] data)
+        bool TCPReceiveMessage(string target_ip, out IPEndPoint end_point, out ConnectType type, out byte[] data)
         {
 
             TcpListener server;
@@ -533,7 +554,7 @@ namespace CameraTrackingAppv3
 
                             type = (ConnectType)Utils.ByteArrayToObject(buf);
 
-                             Array.Clear(buf, 0, buf.Length);
+                            Array.Clear(buf, 0, buf.Length);
                         }
 
                         if (ok && stream.Read(buf, 0, buf.Length) > 0)
@@ -559,6 +580,8 @@ namespace CameraTrackingAppv3
             }
             return ok;
         }
+
     }
+
 
 }

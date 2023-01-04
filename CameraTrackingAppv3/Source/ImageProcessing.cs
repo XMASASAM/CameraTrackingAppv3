@@ -7,9 +7,21 @@ namespace CameraTrackingAppv3
     static class ImageProcessing
     {
         static Mat karnel3;
+        static CascadeClassifier face_cas;
+        static CascadeClassifier eye_cas;
+        static CascadeClassifier mouth_cas;
+        static CascadeClassifier pair_eye_cas;
         static ImageProcessing()
         {
             karnel3 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
+
+            string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
+
+            face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
+            eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
+            mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
+            pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
+
         }
 
         static public int[] cvtMat2IntArray(Mat mat)
@@ -126,13 +138,60 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
-        static public void Filter_FindBlob(Mat gray,out Mat binary , out Mat erode, int iteration = 1)
+        static public void Filter_FindBlob(Mat gray,int threshold,out Mat binary , out Mat erode, int iteration = 1)
+        {
+            binary = gray.Threshold(threshold,255,ThresholdTypes.Binary);//gray.Threshold(0, 255, ThresholdTypes.Otsu);
+            erode = binary.Erode(karnel3, null, iteration);
+        }
+        static public void Filter_FindBlob(Mat gray, out Mat binary, out Mat erode, int iteration = 1)
         {
             binary = gray.Threshold(0, 255, ThresholdTypes.Otsu);
             erode = binary.Erode(karnel3, null, iteration);
         }
 
+        static public bool DetectOneFrontFace(Mat gray , out Rect2d face_rect)
+        {
+            var rects = face_cas.DetectMultiScale(gray, 1.1, 10);
+            face_rect = new Rect2d(0, 0, 0, 0);
+
+            if (rects.Length == 0)
+                return false;
+
+            face_rect =Utils.Rect2Rect2d(Utils.RectsMax(rects));
+
+            using (var clip = new Mat(gray, face_rect.ToRect()))
+            {
+                var pair_eyes = pair_eye_cas.DetectMultiScale(clip, 1.1, 1);
+
+                if (pair_eyes.Length <= 0)
+                    return false;
+
+                Rect pair_eye_rect = Utils.RectsMax(pair_eyes);
+
+                var pair_eye_cp = Utils.RectCenter2Point(pair_eye_rect);
+
+                if (clip.Width * 0.45 > pair_eye_cp.X || pair_eye_cp.X > clip.Width * 0.55)
+                    return false;
 
 
+            }
+            return true;
+        } 
+
+        static public Point2f[] FindGoodFeatures(Mat gray , Rect zoom_rect)
+        {
+            
+           // var findfeatures_rect = Utils.RectScale2d(zoom_rect, zoom_rate_x, zoom_rate_y).ToRect();
+            using (var clip = new Mat(gray, zoom_rect))
+            {
+                return GetGoodFeatures(clip);
+
+            }
+        }
+
+        static Point2f[] GetGoodFeatures(Mat mat)
+        {
+            return Cv2.GoodFeaturesToTrack(mat, 20, 0.001, 10, null, 20, true, 1);
+        }
     }
 }

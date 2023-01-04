@@ -6,12 +6,37 @@ namespace CameraTrackingAppv3
 {
     static class FindBlob
     {
-        static Mat target_mat;
+        static Mat target_mat = null;
         static double target_ave;
         static double target_round;
         static bool f_first = false;
-        static Size pre_size;
+        static Size pre_size = new Size(-1,-1);
         
+        static public Mat GetTargetImage()
+        {
+          //  if (target_mat != null && target_mat.Size().Equals(new Size(0, 0))) return null;
+            return target_mat;
+        }
+
+        static public double GetTargetMean()
+        {
+            return target_ave;
+        }
+
+        static public double GetTargetAround()
+        {
+            return target_round;
+        }
+
+        static public void SetTargetImage(Mat mat , double ave , double around)
+        {
+            target_mat = mat.Clone();
+            target_ave = ave;
+            target_round = around;
+            f_first = true;
+        }
+
+
         static FindBlob()
         {
             target_mat = new Mat();
@@ -45,7 +70,7 @@ namespace CameraTrackingAppv3
             return BlobFilter_2(binary, rect, threshold);
         }
 
-        static bool BlobFlilter(Rect rect, double area, double pre_area, Mat binary, int threshold)
+        static bool BlobFlilter(Rect rect, double area, double pre_area, Mat binary,int threshold)
         {
             if (!BlobFilter_1(rect))
                 return false;
@@ -56,11 +81,11 @@ namespace CameraTrackingAppv3
             return BlobFilter_2(binary, rect, threshold);
         }
 
-        static public bool Rect(Mat gray, int threshold, out Vec2d center_point, out Rect blob_rect, int iteration = 1)
+        static public bool Rect(Mat gray, int threshold,Vec2d offset, out Vec2d center_point, out Rect blob_rect, int iteration = 1)
         {
             blob_rect = new Rect();
             bool ans = false;
-            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
+            ImageProcessing.Filter_FindBlob(gray,threshold,out Mat binary, out Mat erode,Utils.Config.Property.InfraredFirstErodeIteration);
 
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
             Point[] ans_ps = new Point[0];
@@ -69,20 +94,23 @@ namespace CameraTrackingAppv3
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
+                if (rect.Width < 2 || rect.Height < 2) continue;
+
+                if(pre_size.Width>0)
+                if (rect.Width < pre_size.Width *0.33 || pre_size.Width *3 < rect.Width ||
+                    rect.Height < pre_size.Height *0.33 || pre_size.Height *3 < rect.Height)
+                    continue;
 
                 if (BlobFlilter(rect, binary, threshold))
                 {
                     if (f_first)
                     {
-                        if (rect.Width < pre_size.Width >> 1 || pre_size.Width << 1 < rect.Width ||
-                            rect.Height < pre_size.Height >> 1 || pre_size.Height << 1 < rect.Height)
-                            continue;
 
                         KeyPoint[] try_keypoints = new KeyPoint[0];
                         Mat try_discriptors = new Mat();
 
                         double score_temp;
-                        using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(rect, 1.1, 1.1), 10, 10), Utils.CameraFrame)))
+                        using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(rect, 1.1, 1.1), 10, 10),new Rect(new Point(0,0),gray.Size()))))
                         {
                             using (var resize = clip.Resize(target_mat.Size()))
                             {
@@ -102,18 +130,20 @@ namespace CameraTrackingAppv3
 
                         if (score_temp * 9 >= target_round) continue;
 
-                        if (score_temp < score) score = score_temp;
-                        else continue;
+                       // if (score_temp < score) score = score_temp;
+                      //  else continue;
 
                     }
-                    else
-                    {
+                   // else
+                  //  {
                         var cp = Utils.RectCenter2Vec2d(rect);
-                        var temp = Utils.GetDistanceSquared(cp.Item0 - Utils.CameraWidth * .5, cp.Item1 - Utils.CameraHeight * .5);
+                        var temp = Utils.GetDistanceSquared(cp.Item0 + offset.Item0 - Utils.CameraWidth * .5, cp.Item1 + offset.Item1 - Utils.CameraHeight * .5);
 
-                        if (distance > temp) distance = temp;
-                        else continue;
-                    }
+                    if (distance > temp) distance = temp;
+                    else continue;
+                    //  }
+
+
                     ans = true;
                     blob_rect = rect;
                     ans_ps = contour;
@@ -128,13 +158,14 @@ namespace CameraTrackingAppv3
             {
 
                 if (!f_first)
-                    using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(blob_rect, 1.1, 1.1), 10, 10), Utils.CameraFrame)))
+                    using (var clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(blob_rect, 1.1, 1.1), 10, 10), new Rect(new Point(0, 0), gray.Size()))))
                     {
-                        target_mat = clip.Clone();
-                        target_ave = target_mat.Mean()[0];
-                        var www = blob_rect.Width * 0.05 + 5;
-                        var hhh = blob_rect.Height * 0.05 + 5;
-                        target_round = www * clip.Height * 2 + hhh * clip.Width * 2 - www * hhh * 4;
+                        SetTargetImage(clip, blob_rect);
+                   //     target_mat = clip.Clone();
+                  //      target_ave = target_mat.Mean()[0];
+                  ///      var www = blob_rect.Width * 0.05 + 5;
+                  //      var hhh = blob_rect.Height * 0.05 + 5;
+                  //      target_round = www * clip.Height * 2 + hhh * clip.Width * 2 - www * hhh * 4;
                         //  Cv2.ImShow("target", clip);
                         //  Cv2.WaitKey(0);
                         //  akaze.DetectAndCompute(clip, null, out target_keypoints, target_discriptors);
@@ -152,13 +183,14 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
-        static public bool Rect(Mat gray, int threshold, double pre_area,out Vec2d center_point, out double blob_area,int iteration = 1)
+        static public bool Rect(Mat gray, int threshold, double pre_area,out Vec2d center_point,out Rect blob_rect, out double blob_area,int iteration = 1)
         {
-           // blob_rect = new Rect();
+            blob_rect = new Rect();
             bool ans = false;
             blob_area = pre_area;
             double min_diff = double.MaxValue;
-            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,iteration);
+            // ImageProcessing.Filter_FindBlob(gray,threshold,out Mat binary, out Mat erode,iteration);
+            ImageProcessing.Filter_FindBlob(gray, out Mat binary, out Mat erode,Utils.Config.Property.InfraredTrackErodeIteration);//iteration);
           //  Cv2.ImShow("binaryyyy", binary);
          //   Cv2.ImShow("erode", erode);
             Cv2.FindContours(erode, out var contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxNone);
@@ -166,14 +198,22 @@ namespace CameraTrackingAppv3
             foreach (var contour in contours)
             {
                 var rect = Cv2.BoundingRect(contour);
+
+                if (rect.Width < 2 || rect.Height < 2) continue;
+
+
                 var area = Cv2.ContourArea(contour);//rect.Width * rect.Height;
-                if (BlobFlilter(rect, area, pre_area, binary, threshold))
+                if (BlobFlilter(rect, area, pre_area, binary,threshold))
                 {
+                    if (rect.Width < pre_size.Width >> 1 || pre_size.Width << 1 < rect.Width ||
+                        rect.Height < pre_size.Height >> 1 || pre_size.Height << 1 < rect.Height)
+                        continue;
+
                     ans = true;
                     var diff = Math.Abs(area - pre_area);
                     if (min_diff > diff)
                     {
-                        // blob_rect = rect;
+                        blob_rect = rect;
                         blob_area = area;
                         min_diff = diff;
                         ans_ps = contour;
@@ -187,13 +227,15 @@ namespace CameraTrackingAppv3
             if (ans)
             {
                 center_point = GetCenterPoint(ans_ps);
-              //  center_point.Item0 += blob_rect.TopLeft.X;
-              //  center_point.Item1 += blob_rect.TopLeft.Y;
+                pre_size = blob_rect.Size;
+
+                //  center_point.Item0 += blob_rect.TopLeft.X;
+                //  center_point.Item1 += blob_rect.TopLeft.Y;
             }
-            
+
             return ans;
         }
-
+        /*
         static public bool Rect(Mat gray, int threshold, int pre_area,Point pre_point,Point clip_topleft,out Vec2d center_point, out Rect blob_rect, int iteration = 1)
         {
             blob_rect = new Rect();
@@ -233,7 +275,7 @@ namespace CameraTrackingAppv3
 
 
             return ans;
-        }
+        }*/
 
         static Vec2d GetCenterPoint(Point[] ps)
         {
@@ -249,6 +291,27 @@ namespace CameraTrackingAppv3
 
             return ans;
         }
+
+        static void SetTargetImage(Mat mat,Rect inaround_rect)
+        {
+            if (target_mat != null)
+            {
+                target_mat.Dispose();
+            }
+
+            target_mat = mat.Clone();
+            target_ave = target_mat.Mean()[0];
+            var www = inaround_rect.Width * 0.05 + 5;
+            var hhh = inaround_rect.Height * 0.05 + 5;
+            target_round = www * mat.Height * 2 + hhh * mat.Width * 2 - www * hhh * 4;
+        }
+
+        static public void Init()
+        {
+            f_first = false;
+            pre_size = new Size(-1, -1);
+        }
+
 
     }
 }

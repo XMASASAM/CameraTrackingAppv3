@@ -34,6 +34,7 @@ namespace CameraTrackingAppv3
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.userControl11 = new CameraTrackingAppv3.UserControl1();
+            this.userControl31 = new CameraTrackingAppv3.UserControl3();
             this.SuspendLayout();
             // 
             // button1
@@ -44,6 +45,7 @@ namespace CameraTrackingAppv3
             this.button1.TabIndex = 0;
             this.button1.Text = "起動";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
@@ -64,6 +66,7 @@ namespace CameraTrackingAppv3
             this.label2.Size = new System.Drawing.Size(56, 15);
             this.label2.TabIndex = 5;
             this.label2.Text = "カメラ一覧";
+            this.label2.Visible = false;
             // 
             // comboBox1
             // 
@@ -73,6 +76,7 @@ namespace CameraTrackingAppv3
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(220, 23);
             this.comboBox1.TabIndex = 6;
+            this.comboBox1.Visible = false;
             // 
             // userControl11
             // 
@@ -81,12 +85,20 @@ namespace CameraTrackingAppv3
             this.userControl11.Size = new System.Drawing.Size(306, 285);
             this.userControl11.TabIndex = 7;
             // 
+            // userControl31
+            // 
+            this.userControl31.Location = new System.Drawing.Point(10, -1);
+            this.userControl31.Name = "userControl31";
+            this.userControl31.Size = new System.Drawing.Size(313, 58);
+            this.userControl31.TabIndex = 8;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(330, 375);
             this.ControlBox = false;
+            this.Controls.Add(this.userControl31);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label2);
@@ -109,7 +121,8 @@ namespace CameraTrackingAppv3
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox1;
         private UserControl1 userControl11;
-       // private UserControl1 userControl12;
+        private UserControl3 userControl31;
+        // private UserControl1 userControl12;
     }
 }
 

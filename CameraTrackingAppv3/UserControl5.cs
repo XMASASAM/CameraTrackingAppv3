@@ -43,11 +43,12 @@ namespace CameraTrackingAppv3
         [EditorBrowsable]
         [Description("最初の値")]
         [Category("動作")]
-        public int DefaultValue { get { return trackBar1.Value; } set { trackBar1.Value = value; } }
+        public int DefaultValue { get { return trackBar1.Value; } set { trackBar1.Value =(int)Utils.Grap(trackBar1.Minimum, value,trackBar1.Maximum); } }
 
 
         private void button2_Click(object sender, EventArgs e)
         {
+            if(trackBar1.Maximum>trackBar1.Value)
             trackBar1.Value++;
         }
 
@@ -59,7 +60,8 @@ namespace CameraTrackingAppv3
 
         private void button1_Click(object sender, EventArgs e)
         {
-            trackBar1.Value--;
+            if (trackBar1.Minimum < trackBar1.Value)
+                trackBar1.Value--;
         }
 
         double output;
@@ -99,6 +101,7 @@ namespace CameraTrackingAppv3
         public void SetValue(double value)
         {
             DefaultValue = (int)(value * Divide);
+            output = value;
         }
 
     }

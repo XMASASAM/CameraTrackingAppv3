@@ -85,6 +85,7 @@ namespace CameraTrackingAppv3
             this.trackBar1.TabIndex = 4;
             this.trackBar1.TickFrequency = 30;
             this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            this.trackBar1.ValueChanged += new System.EventHandler(this.trackBar1_ValueChanged);
             // 
             // Form4
             // 

@@ -15,14 +15,59 @@ namespace CameraTrackingAppv3
         public double MoveMag = 1;
         public double ThresholdMag = 3;
         public int CameraAngle = 0;
+        public double AxisXMag = 1;
+        public double AxisYMag = 1;
+        public int PortNumber = 62355;
+        public double ClickInterval = 0.5;
+        public double DoubleClickInterval = 0.5;
+        public int InfraredFirstThreshold = 180;
+        public int InfraredFirstErodeIteration = 1;
+        public int InfraredTrackErodeIteration = 0;
+        public double TrackingTargetMean=0;
+        public double TrackingTargetAround=0;
+
         public void  Set(SettingProps props)
         {
-            this.RangeOfMotion = props.RangeOfMotion;
-            this.CameraID = props.CameraID;
-            this.CameraAngle = props.CameraAngle;
-            this.MoveMag = props.MoveMag;
-            this.ThresholdMag = props.ThresholdMag;
+            RangeOfMotion = props.RangeOfMotion;
+            CameraID = props.CameraID;
+            CameraAngle = props.CameraAngle;
+            MoveMag = props.MoveMag;
+            ThresholdMag = props.ThresholdMag;
+            AxisXMag = props.AxisXMag;
+            AxisYMag = props.AxisYMag;
+            PortNumber = props.PortNumber;
+            ClickInterval = props.ClickInterval;
+            DoubleClickInterval = props.DoubleClickInterval;
+            InfraredFirstThreshold = props.InfraredFirstThreshold;
+            InfraredFirstErodeIteration = props.InfraredFirstErodeIteration;
+            InfraredTrackErodeIteration = props.InfraredTrackErodeIteration;
+            TrackingTargetMean = props.TrackingTargetMean;
+            TrackingTargetAround = props.TrackingTargetAround;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is SettingProps)) return false;
+            SettingProps p = (SettingProps)obj;
+
+            return RangeOfMotion.Equals(p.RangeOfMotion) &&
+                CameraID.Equals(p.CameraID) &&
+                MoveMag == p.MoveMag &&
+                ThresholdMag == p.ThresholdMag &&
+                CameraAngle == p.CameraAngle &&
+                AxisXMag == p.AxisXMag &&
+                AxisYMag == p.AxisYMag &&
+                PortNumber == p.PortNumber &&
+                ClickInterval == p.ClickInterval &&
+                DoubleClickInterval == p.DoubleClickInterval &&
+                InfraredFirstThreshold == p.InfraredFirstThreshold &&
+                InfraredFirstErodeIteration == p.InfraredFirstErodeIteration &&
+                InfraredTrackErodeIteration == p.InfraredTrackErodeIteration &&
+                TrackingTargetMean == p.TrackingTargetMean &&
+                TrackingTargetAround == p.TrackingTargetAround;
+
+        }
+
 
     }
 
@@ -30,10 +75,32 @@ namespace CameraTrackingAppv3
     public class SettingsConfig:IDisposable
     {
         static readonly string save_path = Utils.PathResource + "\\settings.config";
-
+        static readonly string tracking_target_image_path = Utils.PathResource + "\\infraref_tracking_target_image.png";
         public SettingProps Property;
 
         public VideoCapture VideoCapture { get; set; } = null;
+        Mat tracking_target_mat = null;
+        bool f_change_tracking_target_mat = false;
+        public Mat TrackingTargetImage { 
+            get { 
+                return tracking_target_mat; 
+            }
+            set {
+                if (tracking_target_mat != null && !tracking_target_mat.IsDisposed&&!tracking_target_mat.Empty())
+                {
+                    if (tracking_target_mat == value)
+                        return;
+
+                    tracking_target_mat.Dispose();
+                }
+
+                f_change_tracking_target_mat = true;
+                tracking_target_mat = value;
+            } }
+        public bool IsHaveTargetImage { get {
+                return TrackingTargetImage != null && !TrackingTargetImage.Empty();
+            } 
+        }
 
         static public string GetPathSave { get { return save_path; } }
 
@@ -59,6 +126,7 @@ namespace CameraTrackingAppv3
         public void Set(SettingsConfig config)
         {
             Property.Set(config.Property);
+            TrackingTargetImage = config.TrackingTargetImage;
             this.VideoCapture = config.VideoCapture;
         }
 
@@ -71,6 +139,13 @@ namespace CameraTrackingAppv3
 
             bf1.Serialize(fs1, Property);
             fs1.Close();
+
+            if (IsHaveTargetImage && f_change_tracking_target_mat)
+            {
+                f_change_tracking_target_mat = false;
+                Cv2.ImWrite(tracking_target_image_path,TrackingTargetImage);
+            }
+
             return ok;
         }
 
@@ -97,6 +172,19 @@ namespace CameraTrackingAppv3
             }
 
             fs2.Close();
+
+            if (settings.Property.PortNumber == 0)
+            {
+                settings.Property.PortNumber = 62355;
+            }
+
+
+            if(System.IO.File.Exists(tracking_target_image_path))
+            {
+                using(Mat mat = Cv2.ImRead(tracking_target_image_path))
+                settings.tracking_target_mat = mat.CvtColor(ColorConversionCodes.BGR2GRAY);
+
+            }
 
 
             return ok;
@@ -125,10 +213,14 @@ namespace CameraTrackingAppv3
 
         static public void Adapt(SettingsConfig config)
         {
+            if (config.VideoCapture == null)
+                throw new Exception("videoCaptureがnullのため適応させられません");
             CursorControl.SetRangeOfMotion(config.Property.RangeOfMotion);
             CursorControl.IsRangeOfMotion = true;
             Main.SetRotate(config.Property.CameraAngle);
-
+            Main.GetConnect().Init(config.Property.PortNumber);
+            CursorControl.DwellThresholdTime = (int)(1000*config.Property.ClickInterval);
+            MouseControl.WaitTimeDouble = (int)config.Property.DoubleClickInterval;
         }
 
     }
