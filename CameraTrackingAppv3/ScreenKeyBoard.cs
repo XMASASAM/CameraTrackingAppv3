@@ -9,6 +9,13 @@ namespace CameraTrackingAppv3
     {
         const string title = "キーボード";
         static bool f_active = false;
+        static string osk_command = "osk";
+
+        public static void SetOSKCommand(string command)
+        {
+            osk_command = command;
+        }
+
         public static void Switch(bool on)
         {
        //     if (f_active) return;
@@ -22,9 +29,9 @@ namespace CameraTrackingAppv3
 
         public static void On()
         {
-        //    f_active = true;
-          //  Utils.MainForm.Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert),title, "起動中...", Properties.Resources.icon_loader_c_ww_01_s1, MouseControl.GetLocation, false);
-            bool f = RunCommand("/c osk.exe", out _, out var error);
+            //    f_active = true;
+            //  Utils.MainForm.Invoke(new Utils.InvokeLoadAlert(Utils.ShowLoadAlert),title, "起動中...", Properties.Resources.icon_loader_c_ww_01_s1, MouseControl.GetLocation, false);
+            bool f = RunCommand("/c "+osk_command, out _, out var error);
          //   Utils.MainForm.Invoke(new Utils.InvokeString(Utils.CloseLoadAlert), title);
             if (!f)
                 Utils.Alert_Error(error);

@@ -43,6 +43,8 @@ namespace CameraTrackingAppv3
 
         public static bool IsRangeOfMotion { get { return f_range_of_motion; } set { f_range_of_motion = value; } }
 
+
+
         public static void SettingMode()
         {
             Init();
@@ -81,12 +83,13 @@ namespace CameraTrackingAppv3
        //     pre_dx = dx;
 
             var k = 0.8f * speed  + 4f;
+           // Utils.WriteLine("vel:" + speed );
 
-
+          //  Utils.WriteLine("correct_vel:" + (speed * Main.InvElapsedMilliseconds * Main.InvElapsedMilliseconds));
             dx *= Math.Min(k,14) * velo_mag;
 
-            if (Math.Abs(dx.Item0) < 1) dx.Item0 = 0;
-            if (Math.Abs(dx.Item1) < 1) dx.Item1 = 0;
+         //   if (Math.Abs(dx.Item0) < 1) dx.Item0 = 0;
+        //    if (Math.Abs(dx.Item1) < 1) dx.Item1 = 0;
 
             return dx;
         }

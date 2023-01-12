@@ -191,6 +191,7 @@ namespace CameraTrackingAppv3
 
 
             config.Property.RangeOfMotion = range;
+            
 
             if (FindBlob.GetTargetImage()!=null && !FindBlob.GetTargetImage().Empty())
             {
@@ -224,7 +225,7 @@ namespace CameraTrackingAppv3
                 }
                 else
                 {
-                    Utils.WriteLine(Utils.PathResource + "がありませんでした。なので作成しました。セーブしました");
+                    Utils.WriteLine(Utils.SavePath + "がありませんでした。なので作成しました。セーブしました");
                 }
 
                 CursorControl.IsRangeOfMotion = true;
@@ -249,6 +250,7 @@ namespace CameraTrackingAppv3
             if (f_first_event)
             {
                 var form = new Form1(ref config, false,false);
+                form.Show();
 
             }else
             {
@@ -367,7 +369,8 @@ namespace CameraTrackingAppv3
 
 
             }
-            Utils.MainForm.Invoke(new Utils.InvokeVoid(form2.Close));
+            if (InvokeRequired)
+                Utils.MainForm.Invoke(new Utils.InvokeVoid(form2.Close));
         }
 
        

@@ -50,13 +50,16 @@ namespace CameraTrackingAppv3
             this.userControl31 = new CameraTrackingAppv3.UserControl3();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.userControl59 = new CameraTrackingAppv3.UserControl5();
+            this.userControl58 = new CameraTrackingAppv3.UserControl5();
+            this.userControl57 = new CameraTrackingAppv3.UserControl5();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
-            this.userControl55 = new CameraTrackingAppv3.UserControl5();
             this.userControl56 = new CameraTrackingAppv3.UserControl5();
-            this.userControl57 = new CameraTrackingAppv3.UserControl5();
-            this.userControl58 = new CameraTrackingAppv3.UserControl5();
-            this.userControl59 = new CameraTrackingAppv3.UserControl5();
+            this.userControl55 = new CameraTrackingAppv3.UserControl5();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -65,6 +68,7 @@ namespace CameraTrackingAppv3
             this.tabPage5.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tabPage6.SuspendLayout();
+            this.tabPage7.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -178,6 +182,7 @@ namespace CameraTrackingAppv3
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Controls.Add(this.tabPage6);
+            this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Location = new System.Drawing.Point(1, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -301,6 +306,45 @@ namespace CameraTrackingAppv3
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "赤外線カメラモード";
             // 
+            // userControl59
+            // 
+            this.userControl59.Decimal_Place = 0;
+            this.userControl59.DefaultValue = 0;
+            this.userControl59.Divide = 1;
+            this.userControl59.Location = new System.Drawing.Point(7, 209);
+            this.userControl59.MaxValue = 3;
+            this.userControl59.MinValue = 0;
+            this.userControl59.Name = "userControl59";
+            this.userControl59.Prop_Name = "追跡ノイズ縮小回数";
+            this.userControl59.Size = new System.Drawing.Size(276, 86);
+            this.userControl59.TabIndex = 2;
+            // 
+            // userControl58
+            // 
+            this.userControl58.Decimal_Place = 0;
+            this.userControl58.DefaultValue = 1;
+            this.userControl58.Divide = 1;
+            this.userControl58.Location = new System.Drawing.Point(7, 117);
+            this.userControl58.MaxValue = 3;
+            this.userControl58.MinValue = 0;
+            this.userControl58.Name = "userControl58";
+            this.userControl58.Prop_Name = "初期ノイズ縮小回数";
+            this.userControl58.Size = new System.Drawing.Size(276, 86);
+            this.userControl58.TabIndex = 1;
+            // 
+            // userControl57
+            // 
+            this.userControl57.Decimal_Place = 0;
+            this.userControl57.DefaultValue = 180;
+            this.userControl57.Divide = 1;
+            this.userControl57.Location = new System.Drawing.Point(7, 23);
+            this.userControl57.MaxValue = 255;
+            this.userControl57.MinValue = 0;
+            this.userControl57.Name = "userControl57";
+            this.userControl57.Prop_Name = "初期閾値(意味ない)";
+            this.userControl57.Size = new System.Drawing.Size(276, 86);
+            this.userControl57.TabIndex = 0;
+            // 
             // groupBox1
             // 
             this.groupBox1.Location = new System.Drawing.Point(7, 17);
@@ -321,19 +365,6 @@ namespace CameraTrackingAppv3
             this.tabPage6.Text = "マウス";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
-            // userControl55
-            // 
-            this.userControl55.Decimal_Place = 1;
-            this.userControl55.DefaultValue = 5;
-            this.userControl55.Divide = 10;
-            this.userControl55.Location = new System.Drawing.Point(7, 14);
-            this.userControl55.MaxValue = 20;
-            this.userControl55.MinValue = 1;
-            this.userControl55.Name = "userControl55";
-            this.userControl55.Prop_Name = "クリック閾値[s]";
-            this.userControl55.Size = new System.Drawing.Size(276, 86);
-            this.userControl55.TabIndex = 0;
-            // 
             // userControl56
             // 
             this.userControl56.Decimal_Place = 1;
@@ -347,44 +378,46 @@ namespace CameraTrackingAppv3
             this.userControl56.Size = new System.Drawing.Size(276, 86);
             this.userControl56.TabIndex = 1;
             // 
-            // userControl57
+            // userControl55
             // 
-            this.userControl57.Decimal_Place = 0;
-            this.userControl57.DefaultValue = 180;
-            this.userControl57.Divide = 1;
-            this.userControl57.Location = new System.Drawing.Point(7, 23);
-            this.userControl57.MaxValue = 255;
-            this.userControl57.MinValue = 0;
-            this.userControl57.Name = "userControl57";
-            this.userControl57.Prop_Name = "初期閾値(意味ない)";
-            this.userControl57.Size = new System.Drawing.Size(276, 86);
-            this.userControl57.TabIndex = 0;
+            this.userControl55.Decimal_Place = 1;
+            this.userControl55.DefaultValue = 5;
+            this.userControl55.Divide = 10;
+            this.userControl55.Location = new System.Drawing.Point(7, 14);
+            this.userControl55.MaxValue = 20;
+            this.userControl55.MinValue = 1;
+            this.userControl55.Name = "userControl55";
+            this.userControl55.Prop_Name = "クリック閾値[s]";
+            this.userControl55.Size = new System.Drawing.Size(276, 86);
+            this.userControl55.TabIndex = 0;
             // 
-            // userControl58
+            // tabPage7
             // 
-            this.userControl58.Decimal_Place = 0;
-            this.userControl58.DefaultValue = 1;
-            this.userControl58.Divide = 1;
-            this.userControl58.Location = new System.Drawing.Point(7, 117);
-            this.userControl58.MaxValue = 3;
-            this.userControl58.MinValue = 0;
-            this.userControl58.Name = "userControl58";
-            this.userControl58.Prop_Name = "初期ノイズ縮小回数";
-            this.userControl58.Size = new System.Drawing.Size(276, 86);
-            this.userControl58.TabIndex = 1;
+            this.tabPage7.Controls.Add(this.textBox1);
+            this.tabPage7.Controls.Add(this.label2);
+            this.tabPage7.Location = new System.Drawing.Point(4, 24);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Size = new System.Drawing.Size(571, 305);
+            this.tabPage7.TabIndex = 6;
+            this.tabPage7.Text = "キーボード";
+            this.tabPage7.UseVisualStyleBackColor = true;
             // 
-            // userControl59
+            // label2
             // 
-            this.userControl59.Decimal_Place = 0;
-            this.userControl59.DefaultValue = 0;
-            this.userControl59.Divide = 1;
-            this.userControl59.Location = new System.Drawing.Point(7, 209);
-            this.userControl59.MaxValue = 3;
-            this.userControl59.MinValue = 0;
-            this.userControl59.Name = "userControl59";
-            this.userControl59.Prop_Name = "追跡ノイズ縮小回数";
-            this.userControl59.Size = new System.Drawing.Size(276, 86);
-            this.userControl59.TabIndex = 2;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(8, 18);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(94, 15);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "キーボードのコマンド";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(108, 13);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(155, 23);
+            this.textBox1.TabIndex = 1;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // Form6
             // 
@@ -406,6 +439,8 @@ namespace CameraTrackingAppv3
             this.tabPage5.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.tabPage6.ResumeLayout(false);
+            this.tabPage7.ResumeLayout(false);
+            this.tabPage7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -441,5 +476,8 @@ namespace CameraTrackingAppv3
         private UserControl5 userControl58;
         private UserControl5 userControl57;
         private UserControl5 userControl56;
+        private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label2;
     }
 }

@@ -41,6 +41,9 @@ namespace CameraTrackingAppv3
 
             userControl31.SetUserControl1(Main.GetUserControl1);
             userControl31.Init(Utils.Config);
+
+            textBox1.Text = Utils.Config.Property.OSKCommand;
+
          //   userControl31.StartUp(Utils.Temp_Config.Property.CameraID);
 
         }
@@ -161,6 +164,9 @@ namespace CameraTrackingAppv3
             Utils.Temp_Config.Property.InfraredFirstThreshold = (int)userControl57.GetOutPut();
             Utils.Temp_Config.Property.InfraredFirstErodeIteration = (int)userControl58.GetOutPut();
             Utils.Temp_Config.Property.InfraredTrackErodeIteration = (int)userControl59.GetOutPut();
+
+            Utils.Temp_Config.Property.OSKCommand = textBox1.Text;
+
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -171,6 +177,11 @@ namespace CameraTrackingAppv3
         private void tabPage5_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            Utils.Temp_Config.Property.OSKCommand = textBox1.Text;
         }
     }
     

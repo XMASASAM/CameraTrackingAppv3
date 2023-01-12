@@ -22,14 +22,14 @@ namespace CameraTrackingAppv3
       //  List<string> deviceID = new List<string>();
      //   bool f_start_up = false;
     //    bool f_first = false;
-    //    Mat frame;
+        Mat frame;
     ////    delegate void ControlFormDelegate();
     //    string active_camera_id = "";
-    //    public UserControl1 UserControl { get { return userControl11; } }
+        public UserControl1 UserControl { get { return userControl11; } }
    //     public string GetActiveCameraID { get { return active_camera_id; } }
 
-   //     bool f_jump2form3 = false;
-    //    bool f_decide_skip = false;
+        bool f_jump2form3 = false;
+        bool f_decide_skip = false;
 
 
         SettingsConfig config;
@@ -38,7 +38,8 @@ namespace CameraTrackingAppv3
         {
             InitializeComponent();
             this.config = config;
-
+            f_jump2form3 = jump2Form3;
+          //  textBox1.Text = config.Property.SavePath;
             /*
             f_jump2form3 = jump2Form3;
             f_decide_skip = decide_skip;
@@ -56,12 +57,25 @@ namespace CameraTrackingAppv3
             */
         }
 
+     //   public UserControl1 UserControl => throw new NotImplementedException();
+
+        public void FormDraw()
+        {
+            if (frame.IsDisposed)
+                return;
+            Main.DisplayCamera(frame);
+            // throw new NotImplementedException();
+        }
+
+        public void FormUpdate(ref Mat frame)
+        {
+            this.frame = frame;
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
-            userControl31.SetUserControl1(Main.GetUserControl1);
-            userControl31.Init(config);
+
 
             new DisplayInformation(this);
 
@@ -74,42 +88,41 @@ namespace CameraTrackingAppv3
             }*/
 
         }
+
         private void Form1_Shown(object sender, EventArgs e)
         {
             Main.ChangeDisplayCameraForm(this);
+            userControl31.SetUserControl1(userControl11);
+            userControl31.Init(config,false);
 
-            LoadDeviceList();
+            //       LoadDeviceList();
 
-        /*    if (config.VideoCapture != null)
-            {
-                capture = this.config.VideoCapture;
-                active_camera_id = this.config.Property.CameraID;
-                Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
-            }*/
+            /*    if (config.VideoCapture != null)
+                {
+                    capture = this.config.VideoCapture;
+                    active_camera_id = this.config.Property.CameraID;
+                    Main.SetUpVideoCapture(capture, UserControl.Width, UserControl.Height);
+                }*/
         }
 
-
+        
         private void button1_Click(object sender, EventArgs e)
         {
-            var selected_index = comboBox1.SelectedIndex;
-            Utils.WriteLine(comboBox1.SelectedIndex.ToString());
-            if (selected_index < 0)
-            {
-                Utils.Alert_Note("起動できるカメラがありません");
-                return;
-            }
+            //  var selected_index = comboBox1.SelectedIndex;
+            //  Utils.WriteLine(comboBox1.SelectedIndex.ToString());
+
 
             //if (f_start_up || (!f_first && active_camera_id.Equals(deviceID[comboBox1.SelectedIndex])))
-            if (f_start_up || (active_camera_id.Equals(deviceID[comboBox1.SelectedIndex])))
-                return;
+          //  if (f_start_up || (active_camera_id.Equals(deviceID[comboBox1.SelectedIndex])))
+           //     return;
             
-            f_start_up = true;
-            var thread = new Thread(new ParameterizedThreadStart(ComformCamera));
-            thread.Start(selected_index);
-            userControl11.VisibleFPS(false);
-
+       //     f_start_up = true;
+       //     var thread = new Thread(new ParameterizedThreadStart(ComformCamera));
+       //     thread.Start(selected_index);
+       //     userControl11.VisibleFPS(false);
+        //    */
         }
-
+        /*
         private void DeviceInsertedEvent(object sender, EventArrivedEventArgs e)
         {
 
@@ -139,11 +152,11 @@ namespace CameraTrackingAppv3
             }
 
         }
-
-
+        */
+        
         void ComformCamera(object index)
         {
-            var p = this.Location;
+       /*     var p = this.Location;
             var cp = userControl11.GetPictureBoxCenterPoint();
             p.X += userControl11.Location.X + cp.X;
             p.Y += userControl11.Location.Y + cp.Y;
@@ -187,11 +200,11 @@ namespace CameraTrackingAppv3
          //   Invoke(new Utils.InvokeString(Utils.CloseLoadAlert), "カメラを起動");
             Invoke(new Utils.InvokeInt(DisplayActiveCamera),(int)index);
 
-
+            */
         }
         void LoadDeviceList()
         {
-            comboBox1.Items.Clear();
+           /* comboBox1.Items.Clear();
 
             GetAllConnectedCameras(out var cameralist,out deviceID);
 
@@ -226,20 +239,20 @@ namespace CameraTrackingAppv3
                 }
                 f_first = false;
             }
-
+            */
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            insertWatcher.Dispose();
-            removeWatcher.Dispose();
+           // insertWatcher.Dispose();
+           // removeWatcher.Dispose();
             Dispose();
         }
 
 
         void DisplayActiveCamera(int index)
         {
-            active_camera_id = deviceID[index];
+          /*  active_camera_id = deviceID[index];
 
 
             Main.SetUpVideoCapture(capture, userControl11.PictureWidth, userControl11.PictureHeight);
@@ -255,7 +268,7 @@ namespace CameraTrackingAppv3
             {
                 button2_Click(null, EventArgs.Empty);
 
-            }
+            }*/
 
         }
 
@@ -263,20 +276,48 @@ namespace CameraTrackingAppv3
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if(capture ==null || !capture .IsOpened())
+            /*   if(capture ==null || !capture .IsOpened())
+               {
+                   Utils.Alert_Note("カメラを起動してください");
+                   return;
+               }
+
+
+
+
+               if (f_jump2form3)
+               {
+                   if(!f_decide_skip)
+                       config.Save();
+                   Utils.MainForm.FormStart(ref config);
+               }
+               else
+               {
+                   var form = new Form4(ref config, true);
+                   form.Show();
+               }
+               insertWatcher.Stop();
+               removeWatcher.Stop();
+              // this.Visible = false;
+               Close();
+               */
+
+            var cap = userControl31.ActiveVideoCapture();
+            if (cap == null || (cap != null && !cap.IsOpened()))//selected_index < 0)
             {
                 Utils.Alert_Note("カメラを起動してください");
                 return;
             }
 
-
-            config.Property.CameraID = active_camera_id;
-            config.VideoCapture = capture ;
+            config.Property.CameraID = userControl31.ActiveCameraID();
+            config.VideoCapture = cap;
+          //  config.Property.SavePath = textBox1.Text;
+            //Utils.PathResource = config.Property.SavePath;
 
             if (f_jump2form3)
             {
-                if(!f_decide_skip)
-                    config.Save();
+               //if (!f_decide_skip)
+               //     config.Save();
                 Utils.MainForm.FormStart(ref config);
             }
             else
@@ -284,17 +325,17 @@ namespace CameraTrackingAppv3
                 var form = new Form4(ref config, true);
                 form.Show();
             }
-            insertWatcher.Stop();
-            removeWatcher.Stop();
-           // this.Visible = false;
+
+           // var form = new Form4(ref config, true);
+           // form.Show();
             Close();
-            
+
         }
 
 
 
 
-        public void FormUpdate(ref Mat frame)
+      /*  public void FormUpdate(ref Mat frame)
         {
             this.frame = frame;
         }
@@ -304,8 +345,8 @@ namespace CameraTrackingAppv3
             if (frame.IsDisposed)
                 return;
             Main.DisplayCamera(frame);
-        }
+        }*/
 
-
+        
     }
 }

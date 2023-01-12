@@ -57,6 +57,8 @@ namespace CameraTrackingAppv3
         //ここからスタート
         private void Form3_Load(object sender, EventArgs e)
         {
+            SettingsConfig.MakeInitialFolder();
+            ImageProcessing.Load();
             //.Visible = true;
             Utils.MainForm = this;
             //Visible = false;

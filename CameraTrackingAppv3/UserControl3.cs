@@ -54,7 +54,7 @@ namespace CameraTrackingAppv3
         }
         
 
-        public void Init(SettingsConfig config)
+        public void Init(SettingsConfig config,bool have_active=true)
         {
             WqlEventQuery insertQuery = new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_USBHub'");
             insertWatcher = new ManagementEventWatcher(insertQuery);
@@ -66,24 +66,39 @@ namespace CameraTrackingAppv3
             removeWatcher.EventArrived += new EventArrivedEventHandler(DeviceRemovedEvent);
             removeWatcher.Start();
 
-            active_camera_id = config.Property.CameraID;
-            capture = config.VideoCapture;
+
+          //  if (have_active)
+         //   {
+                capture = config.VideoCapture;
+            if (capture != null)
+                active_camera_id = config.Property.CameraID;
+        //    }
+        //    else
+         //   {
+         //       StartUp(config.Property.CameraID);
+          //  }
+
             if (!active_camera_id.Equals(""))
             {
                 StartUp(active_camera_id);
             }
-           
-         /*   var searcher = new ManagementObjectSearcher(@"SELECT * FROM Win32_PnPSignedDriver WHERE DeviceID LIKE 'USB%' AND DeviceClass = 'Camera'");
-
-            foreach (var device in searcher.Get().Cast<ManagementObject>())//.OrderBy(n => n["PDO"]))
+            else
             {
-                Utils.WriteLine("-----");
-                Utils.WriteLine(device.GetPropertyValue("FriendlyName") as string);
-                Utils.WriteLine(device.GetPropertyValue("DeviceClass") as string);
-                Utils.WriteLine(device.GetPropertyValue("DeviceID") as string);
-                Utils.WriteLine(device.GetPropertyValue("PDO") as string);
-                Utils.WriteLine("-----");
-            }*/
+                StartUp(config.Property.CameraID);
+               // LoadDeviceList();
+            }
+
+            /*   var searcher = new ManagementObjectSearcher(@"SELECT * FROM Win32_PnPSignedDriver WHERE DeviceID LIKE 'USB%' AND DeviceClass = 'Camera'");
+
+               foreach (var device in searcher.Get().Cast<ManagementObject>())//.OrderBy(n => n["PDO"]))
+               {
+                   Utils.WriteLine("-----");
+                   Utils.WriteLine(device.GetPropertyValue("FriendlyName") as string);
+                   Utils.WriteLine(device.GetPropertyValue("DeviceClass") as string);
+                   Utils.WriteLine(device.GetPropertyValue("DeviceID") as string);
+                   Utils.WriteLine(device.GetPropertyValue("PDO") as string);
+                   Utils.WriteLine("-----");
+               }*/
 
         }
 

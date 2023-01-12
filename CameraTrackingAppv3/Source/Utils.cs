@@ -23,6 +23,7 @@ namespace CameraTrackingAppv3
     {
 
         public static string UserName;
+        public static string SavePath;
         static Dictionary<string, Form2> loadalert = new Dictionary<string, Form2>();//   Form2 loadalert = null;
         public delegate void InvokeInt(int send);
         public delegate void InvokeBool(bool send);
@@ -392,7 +393,7 @@ namespace CameraTrackingAppv3
         public static int CameraWidth { get; set; }
         public static int CameraHeight { get; set; }
 
-        public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
+       // public static readonly string PathResource = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
 
         static public byte[] ObjectToByteArray(object obj)
         {

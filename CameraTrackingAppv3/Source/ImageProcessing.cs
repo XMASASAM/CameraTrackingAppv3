@@ -11,18 +11,25 @@ namespace CameraTrackingAppv3
         static CascadeClassifier eye_cas;
         static CascadeClassifier mouth_cas;
         static CascadeClassifier pair_eye_cas;
+        
         static ImageProcessing()
         {
             karnel3 = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
 
-            string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
+         //   string res_path = System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\..\\..\\Resources";
 
+
+
+        }
+        static public void Load()
+        {
+            string res_path = Utils.SavePath;
             face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
             eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
             mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
             pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");
-
         }
+
 
         static public int[] cvtMat2IntArray(Mat mat)
         {

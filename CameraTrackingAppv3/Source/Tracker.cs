@@ -74,7 +74,7 @@ namespace CameraTrackingAppv3
                 f_first = true;
             }
 
-            return tracker.Update(frame);
+            return ok;//tracker.Update(frame);
         }
 
         public void Draw(Mat frame, Scalar color)
@@ -199,6 +199,7 @@ namespace CameraTrackingAppv3
         int debug_count = 0;
         public virtual bool Update(Mat frame)
         {
+          //  Utils.WriteLine("Tracker_Update");
             bool ok = false;
             Mat gray;
             lock (frame)
@@ -271,16 +272,23 @@ namespace CameraTrackingAppv3
         int wide = 50;
         Rect2d pre_rect;
         double pre_area;
+        double pre_cross_area;
         Vec2d pre_center_point;
+        Vec2d pre_correct_vel;
         int binary_threshold=180;
+        int first_binary_threshold;
+        Size first_target_size;
         bool f_first_threshold = true;
+    //    System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
         public TrackerInfrared()
         {
 
         }
-
+        long miss_time = 0;
         protected override bool First(Mat gray)
         {
+            pre_center_point = new Vec2d(0, 0);
+            pre_cross_area = 0;
             Mat mat = gray;
             Vec2d offset = new Vec2d(0, 0);
             if (f_first_clip_rect)
@@ -290,13 +298,15 @@ namespace CameraTrackingAppv3
 
                 mat = new Mat(gray, first_clip_rect);
                 binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(mat), out _);
+                first_binary_threshold = binary_threshold;
                 offset = new Vec2d(first_clip_rect.X ,first_clip_rect.Y);
+                first_target_size = new Size(-1, -1);
             }
 
             if (f_first_threshold)
             {
                 binary_threshold = Utils.Config.Property.InfraredFirstThreshold;
-
+                first_binary_threshold = binary_threshold;
                 if (Utils.Config.IsHaveTargetImage)
                 {
                     FindBlob.SetTargetImage(Utils.Config.TrackingTargetImage, Utils.Config.Property.TrackingTargetMean, Utils.Config.Property.TrackingTargetAround);
@@ -306,50 +316,113 @@ namespace CameraTrackingAppv3
 
                 f_first_threshold = false;
             }
-            
 
-            bool f = FindBlob.Rect(mat, binary_threshold,offset, out pre_center_point, out var rect);
+            bool f;
+            Vec2d find_center;
+            if (Utils.Config.Property.RangeOfMotion.Points ==null)
+                find_center = new Vec2d(Utils.CameraWidth * .5, Utils.CameraHeight * .5);
+            else
+            {
+                find_center = Utils.Config.Property.RangeOfMotion.CenterPoint;
+            }
+
+            double kk = Utils.Grap(0, miss_time * (1.0 / 1000),1);
+            int temp_threshold = (int)(first_binary_threshold * kk + binary_threshold * (1 - kk));
+            miss_time += Main.ElapsedMilliseconds;
+
+            f = FindBlob.Rect(mat,temp_threshold, offset,find_center, out pre_center_point, out var blob_contor,Math.Max(1,correct_iteration));
 
             if (f)
             {
+                var blob_rect = Cv2.BoundingRect(blob_contor) ;
+               // blob_rect.X += (int)offset.Item0;
+               // blob_rect.Y += (int)offset.Item1;
 
-                pre_rect = Utils.RectAddWide(Utils.Rect2Rect2d(rect), wide, wide);
-                pre_area = rect.Width * rect.Height;
+                pre_rect = Utils.RectAddWide(Utils.Rect2Rect2d(blob_rect), wide, wide);
+                pre_area = Cv2.ContourArea(blob_contor);//rect.Width * rect.Height;
                 using (var clip = new Mat(mat, Utils.RectGrap(pre_rect.ToRect(), new Rect(new Point(0, 0), mat.Size()))))
                 binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(clip),out _);
 
+               // first_target_size = blob_rect.Size;
+
                 if (f_first_clip_rect)
                     pre_rect.Location += first_clip_rect.Location;
-                
+                // pre_rect.X += (int)offset.Item0;
+                // pre_rect.Y += (int)offset.Item1;
+                /*using (var clip = new Mat(gray, pre_rect.ToRect()))
+                {
+                    Utils.ShowMat("clip_test", clip);
+                }*/
             }
 
             if (f_first_clip_rect)
             {
                 if (f) f_first_clip_rect = false;
                 mat.Dispose();
+
+
             }
+
+            if (f)
+            {
+                first_binary_threshold = binary_threshold;
+                correct_iteration = 1;
+                miss_time = 0;
+            }
+           // else
+          //      binary_threshold = first_binary_threshold;
+        //        stopwatch.Restart();
 
             return f;
         }
 
+        int correct_iteration = 1;
         protected override bool Process(Mat gray)
         {
-
+           // Utils.WriteLine("trackprocess1");
             bool ok = false;
             pre_rect = Utils.RectGrap(pre_rect, new Rect2d(0, 0, Utils.CameraWidth, Utils.CameraHeight));
             Rect clip_rect = pre_rect.ToRect();
             using (var roi = new Mat(gray,clip_rect))
             {
-                ok = FindBlob.Rect(roi,binary_threshold, pre_area,out center_point ,out var blob_rect , out pre_area,0);
+                var offset = new Vec2d(clip_rect.X , clip_rect.Y);
+             //   ok = FindBlob.Rect(roi,offset,binary_threshold, pre_area,out center_point ,out var blob_rect , out pre_area,0);
+                ok = FindBlob.Rect2(roi,Main.ElapsedMilliseconds,binary_threshold, offset,pre_center_point,pre_correct_vel,pre_area,pre_cross_area,
+                   out Vec2d prime_vel,out center_point,out var blob_contor,out pre_area,out pre_cross_area,correct_iteration);
 
                 if (!ok) return false;
-                blob_rect.X += clip_rect.X;
+           //     var blob_rect = Cv2.BoundingRect(blob_contor);
+               var blob_rect = Cv2.BoundingRect(blob_contor);
+               blob_rect.X += clip_rect.X;
                 blob_rect.Y += clip_rect.Y;
-                center_point.Item0 += clip_rect.X;
-                center_point.Item1 += clip_rect.Y;
+              //  center_point.Item0 += clip_rect.X;
+              //  center_point.Item1 += clip_rect.Y;
                 pre_rect = Utils.RectAddWide(Utils.Rect2Rect2d(blob_rect),wide,wide);//MakeRect(center_point,wide);
 
-                binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(roi), out _);
+                using (var target_clip = new Mat(gray, Utils.RectGrap(Utils.RectAddWide(Utils.RectScale(blob_rect, 1.2, 1.2), 10 + correct_iteration*2, 10+correct_iteration*2), new Rect(new Point(0, 0), gray.Size()))))
+                //    Utils.RectAddWide(blob_rect, 5, 5)))
+                {
+              //      Utils.ShowMat("threshold:", target_clip);
+                    binary_threshold = ImageProcessing.GetOtsuThreshold(ImageProcessing.GetHistList(target_clip), out _);
+                }
+           //     Utils.WriteLine("wide;" + blob_rect.Size.ToString());
+                //rect2
+                pre_correct_vel = prime_vel * .5 + pre_correct_vel * .5;
+
+                if(blob_rect.Width>10 && blob_rect.Height > 10)
+                {
+                    correct_iteration = (int)Utils.Grap(0,++correct_iteration,5);
+                    pre_area *= (blob_rect.Width * blob_rect.Height - 2 * blob_rect.Width - 2 * blob_rect.Height + 4) / (blob_rect.Width * blob_rect.Height);
+                //    Utils.WriteLine("iteration: "+correct_iteration);
+                }
+                else
+                if(blob_rect.Width<5 || blob_rect.Height<5)
+                {
+                    correct_iteration = (int)Utils.Grap(0, --correct_iteration, 5);
+                    //   Utils.WriteLine("iteration: " + correct_iteration);
+                    pre_area *= (blob_rect.Width * blob_rect.Height + 2 * blob_rect.Width + 2 * blob_rect.Height + 4) / (blob_rect.Width * blob_rect.Height);
+
+                }
 
             }
            // Utils.WriteLine("threshold: " + binary_threshold);
@@ -363,8 +436,14 @@ namespace CameraTrackingAppv3
          //   Utils.WriteLine("Velocity: "+Velocity.ToString());
             pre_center_point = center_point;
 
+
+            
+
             return true;
         }
+
+
+
 
         public override void Draw(Mat frame, Scalar color)
         {

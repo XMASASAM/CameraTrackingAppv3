@@ -32,7 +32,7 @@ namespace CameraTrackingAppv3
         static Mat rotate_mat;
         static bool f_set_up = false;
 
-
+        // static System.Diagnostics.Stopwatch stopwatch;
         static bool f_infrared_mode = true;
         static bool f_first_camera = true;
 
@@ -53,20 +53,31 @@ namespace CameraTrackingAppv3
         static public VideoCapture VideoCapture { get { return capture; } }
         static Vec2d[] range_of_motion = new Vec2d[4];
 
-        static System.Diagnostics.Stopwatch stopwatch;
-        static long interval_wait_time;
+        static System.Diagnostics.Stopwatch fps_stopwatch;
+        static System.Diagnostics.Stopwatch capture_stopwatch;
+        static long capture_milli_time;
+        static double capture_time;
+        static long fps_interval_wait_time;
         static bool f_active = false;
-        static public bool IsActive { get{return f_active; } }
+        static public bool IsActive { get { return f_active; } }
         static Control control;
         static public Control Control { get { return control; } }
         static public double ComformPictureScale { get { return comform_picture_scale; } }
         static public System.Drawing.Point ComformOffset { get { return comform_picture_offset; } }
+        static public long ElapsedMilliseconds { get { return capture_milli_time; } }
+        static public double InvElapsedMilliseconds { get { return capture_time; } }
+
+        static public bool IsHaveRangeOfMotion { get; set; }
+        static public RangeOfMotionProps RangeOfMotion {get;set;} 
+
         static Main()
         {
             current_picture_control = null;
             countFPS = new CountFPS();
-            stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Start();
+            fps_stopwatch = new System.Diagnostics.Stopwatch();
+            capture_stopwatch = new System.Diagnostics.Stopwatch();
+            fps_stopwatch.Start();
+            capture_stopwatch.Start();
             SetFPS(1000);
             
         }
@@ -88,7 +99,7 @@ namespace CameraTrackingAppv3
 
         static public void SetFPS(int fps)
         {
-            interval_wait_time = 1000 / fps;
+            fps_interval_wait_time = 1000 / fps;
         }
 
         static public void SetRotate(int degree)
@@ -122,9 +133,9 @@ namespace CameraTrackingAppv3
 
         static void Update()
         {
-            if (stopwatch.ElapsedMilliseconds < interval_wait_time)
+            if (fps_stopwatch.ElapsedMilliseconds < fps_interval_wait_time)
                 return;
-            stopwatch.Restart();
+            fps_stopwatch.Restart();
 
             if (!f_set_up)
             {
@@ -143,7 +154,16 @@ namespace CameraTrackingAppv3
                     camera_frame.Dispose();
 
                     camera_frame = new Mat();
+
+                    capture_stopwatch.Stop();
+                    capture_milli_time = capture_stopwatch.ElapsedMilliseconds;
+                    capture_time = 1.0 / capture_milli_time;
+                    capture_stopwatch.Restart();
                     ok = capture.Read(camera_frame);
+
+
+                    Utils.WriteLine("millitime:" + ElapsedMilliseconds.ToString());
+
                 }
             }
             else

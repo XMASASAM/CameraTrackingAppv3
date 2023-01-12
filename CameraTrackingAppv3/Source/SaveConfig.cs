@@ -4,6 +4,7 @@ using System.Text;
 using OpenCvSharp;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 namespace CameraTrackingAppv3
 {
 
@@ -25,7 +26,8 @@ namespace CameraTrackingAppv3
         public int InfraredTrackErodeIteration = 0;
         public double TrackingTargetMean=0;
         public double TrackingTargetAround=0;
-
+        public string SavePath = "";
+        public string OSKCommand = "osk";
         public void  Set(SettingProps props)
         {
             RangeOfMotion = props.RangeOfMotion;
@@ -43,6 +45,8 @@ namespace CameraTrackingAppv3
             InfraredTrackErodeIteration = props.InfraredTrackErodeIteration;
             TrackingTargetMean = props.TrackingTargetMean;
             TrackingTargetAround = props.TrackingTargetAround;
+            SavePath = props.SavePath;
+            OSKCommand = props.OSKCommand;
         }
 
         public override bool Equals(object obj)
@@ -64,7 +68,9 @@ namespace CameraTrackingAppv3
                 InfraredFirstErodeIteration == p.InfraredFirstErodeIteration &&
                 InfraredTrackErodeIteration == p.InfraredTrackErodeIteration &&
                 TrackingTargetMean == p.TrackingTargetMean &&
-                TrackingTargetAround == p.TrackingTargetAround;
+                TrackingTargetAround == p.TrackingTargetAround &&
+                SavePath == p.SavePath &&
+                OSKCommand == p.OSKCommand;
 
         }
 
@@ -74,8 +80,8 @@ namespace CameraTrackingAppv3
     
     public class SettingsConfig:IDisposable
     {
-        static readonly string save_path = Utils.PathResource + "\\settings.config";
-        static readonly string tracking_target_image_path = Utils.PathResource + "\\infraref_tracking_target_image.png";
+        static readonly string save_path = Utils.SavePath + "\\settings.config";
+        static readonly string tracking_target_image_path = Utils.SavePath + "\\infraref_tracking_target_image.png";
         public SettingProps Property;
 
         public VideoCapture VideoCapture { get; set; } = null;
@@ -98,7 +104,7 @@ namespace CameraTrackingAppv3
                 tracking_target_mat = value;
             } }
         public bool IsHaveTargetImage { get {
-                return TrackingTargetImage != null && !TrackingTargetImage.Empty();
+                return TrackingTargetImage != null && !TrackingTargetImage.IsDisposed && !TrackingTargetImage.Empty();
             } 
         }
 
@@ -132,13 +138,39 @@ namespace CameraTrackingAppv3
 
         public bool Save()
         {
-            bool ok = System.IO.Directory.Exists(Utils.PathResource);
+
+            FileInfo fileInfo = new FileInfo(save_path);
+            // ファイルの存在確認
+            if (!fileInfo.Exists)
+            {
+                // 既にファイルが存在しているのでエラー
+                //throw new ApplicationException("既にファイルが存在しています。");
+
+                // フォルダーの存在確認
+                if (!fileInfo.Directory.Exists)
+                {
+                    // 存在しない場合はフォルダーを作成
+                    fileInfo.Directory.Create();
+                }
+                
+
+            }
+       /*     // ファイルの作成
+            using (FileStream fileStream = fileInfo.Create())
+            {
+                byte[] bytes = new UTF8Encoding(true).GetBytes("テキストが入力されたファイル。");
+
+                // ファイルへ書き込む
+                fileStream.Write(bytes, 0, bytes.Length);
+            }*/
+
+
+            bool ok = System.IO.Directory.Exists(Utils.SavePath);
             BinaryFormatter bf1 = new BinaryFormatter();
-
             System.IO.FileStream fs1 = new System.IO.FileStream(save_path, System.IO.FileMode.Create);
-
             bf1.Serialize(fs1, Property);
             fs1.Close();
+            
 
             if (IsHaveTargetImage && f_change_tracking_target_mat)
             {
@@ -221,6 +253,42 @@ namespace CameraTrackingAppv3
             Main.GetConnect().Init(config.Property.PortNumber);
             CursorControl.DwellThresholdTime = (int)(1000*config.Property.ClickInterval);
             MouseControl.WaitTimeDouble = (int)config.Property.DoubleClickInterval;
+            ScreenKeyBoard.SetOSKCommand(config.Property.OSKCommand);
+        }
+
+        static public void MakeInitialFolder()
+        {
+            FileInfo fileInfo = new FileInfo(save_path);
+            // ファイルの存在確認
+            if (!fileInfo.Exists)
+            {
+                if (!fileInfo.Directory.Exists)
+                {
+                    fileInfo.Directory.Create();
+                }
+            }
+
+            
+
+            string face_res_path = Utils.SavePath + "\\haarcascade_frontalface_default.xml";
+            string eye_res_path = Utils.SavePath + "\\haarcascade_eye.xml";
+            string mouth_res_path = Utils.SavePath + "\\haarcascade_mcs_mouth.xml";
+            string pair_eye_path = Utils.SavePath + "\\haarcascade_mcs_eyepair_big.xml";
+            if (!File.Exists(face_res_path))
+                File.WriteAllText(face_res_path, Properties.Resources.haarcascade_frontalface_default);
+            if (!File.Exists(eye_res_path))
+                File.WriteAllText(eye_res_path, Properties.Resources.haarcascade_eye);
+            if (!File.Exists(mouth_res_path))
+                File.WriteAllText(mouth_res_path, Properties.Resources.haarcascade_mcs_mouth);
+            if (!File.Exists(pair_eye_path))
+                File.WriteAllText(pair_eye_path, Properties.Resources.haarcascade_mcs_eyepair_big);
+            /*
+            face_cas = new CascadeClassifier(res_path + "\\haarcascade_frontalface_default.xml");
+            eye_cas = new CascadeClassifier(res_path + "\\haarcascade_eye.xml");
+            mouth_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_mouth.xml");
+            pair_eye_cas = new CascadeClassifier(res_path + "\\haarcascade_mcs_eyepair_big.xml");*/
+
+
         }
 
     }

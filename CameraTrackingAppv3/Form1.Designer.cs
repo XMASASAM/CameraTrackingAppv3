@@ -50,7 +50,7 @@ namespace CameraTrackingAppv3
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(215, 327);
+            this.button2.Location = new System.Drawing.Point(215, 342);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(103, 36);
             this.button2.TabIndex = 3;
@@ -80,14 +80,14 @@ namespace CameraTrackingAppv3
             // 
             // userControl11
             // 
-            this.userControl11.Location = new System.Drawing.Point(12, 56);
+            this.userControl11.Location = new System.Drawing.Point(12, 65);
             this.userControl11.Name = "userControl11";
             this.userControl11.Size = new System.Drawing.Size(306, 285);
             this.userControl11.TabIndex = 7;
             // 
             // userControl31
             // 
-            this.userControl31.Location = new System.Drawing.Point(10, -1);
+            this.userControl31.Location = new System.Drawing.Point(9, 6);
             this.userControl31.Name = "userControl31";
             this.userControl31.Size = new System.Drawing.Size(313, 58);
             this.userControl31.TabIndex = 8;
@@ -96,7 +96,7 @@ namespace CameraTrackingAppv3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(330, 375);
+            this.ClientSize = new System.Drawing.Size(330, 389);
             this.ControlBox = false;
             this.Controls.Add(this.userControl31);
             this.Controls.Add(this.button2);
@@ -105,7 +105,7 @@ namespace CameraTrackingAppv3
             this.Controls.Add(this.button1);
             this.Controls.Add(this.userControl11);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "初期設定";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Shown += new System.EventHandler(this.Form1_Shown);
