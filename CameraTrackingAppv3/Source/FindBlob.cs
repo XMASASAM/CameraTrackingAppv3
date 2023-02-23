@@ -153,7 +153,7 @@ namespace CameraTrackingAppv3
 
                         //   Utils.WriteLine("Score:" + score_temp + " Round:" +target_round);
 
-                        if (score_temp *20 >= target_round) continue;
+                        if (score_temp *15 >= target_round) continue;
 
                        // if (score_temp < score) score = score_temp;
                       //  else continue;

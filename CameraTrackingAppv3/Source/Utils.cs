@@ -51,7 +51,8 @@ namespace CameraTrackingAppv3
         public const int PortNum = 62355;
         public const string Password = "F6WqdvHwPY0wDiQ2SbTQDx8IlEvwyUhx";
 
-
+        public static bool f_inf_capture_video = false;
+        public static VideoWriter videoWriter;
         static Utils()
         {
             PrimaryScreenWidthHalf = PrimaryScreenWidth >> 1;

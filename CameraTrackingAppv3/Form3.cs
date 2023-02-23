@@ -26,6 +26,7 @@ namespace CameraTrackingAppv3
         Mat frame;
         HashSet<Keys> down_key = new HashSet<Keys>();
         System.Diagnostics.Stopwatch error_stopwatch;
+        System.Diagnostics.Stopwatch not_error_stopwatch;
         System.Diagnostics.Stopwatch error_return_stopwatch;
         bool f_next_error = true;
         bool f_error_move_mouse = false;
@@ -43,7 +44,7 @@ namespace CameraTrackingAppv3
             pre_form_height = this.Size.Height;
 
             error_stopwatch = new System.Diagnostics.Stopwatch();
-
+            not_error_stopwatch = new System.Diagnostics.Stopwatch();
             error_return_stopwatch = new System.Diagnostics.Stopwatch();
             form5 = new Form5(true);
             var center = new System.Drawing.Point(Utils.AllScreenWidthHalf, Utils.AllScreenHeightHalf);
@@ -250,10 +251,18 @@ namespace CameraTrackingAppv3
             if(f_next_error && !pre_error)
             {
                 error_stopwatch.Restart();
+                not_error_stopwatch.Reset();
             }
 
-            if(error_stopwatch.ElapsedMilliseconds > 500)
+            if(!f_next_error && pre_error)
             {
+                not_error_stopwatch.Restart();
+            }
+
+
+            if(error_stopwatch.ElapsedMilliseconds > 500&&not_error_stopwatch.ElapsedMilliseconds<100)
+            {
+                
                 f_error_move_mouse = true;
                 error_stopwatch.Reset();
                 error_return_stopwatch.Restart();
@@ -270,6 +279,7 @@ namespace CameraTrackingAppv3
 
             if (f_error_move_mouse && !f_next_error)// && pre_error)
             {
+                CursorControl.Init();
                 f_cursor_update = false;
                 f_error_move_mouse = false;
                 error_dialog.Hide();
@@ -312,14 +322,23 @@ namespace CameraTrackingAppv3
             if (f_camera_visible)
             {
                 if (f_control_active && f_tracker_visible)
-                    Main.Tracker.Draw(ref frame);
+                    Main.Tracker.Draw(ref frame,2);
 
                 if (f_range_of_motion_visible)
-                    CursorControl.DisplayRangeOfMotion(ref frame, config.Property.RangeOfMotion);
+                    CursorControl.DisplayRangeOfMotion(ref frame, config.Property.RangeOfMotion,1);
                 // Sub_DisplayRangeOfMotion(ref frame);
 
                 Main.DisplayCamera(frame);
             }
+
+            if (Utils.f_inf_capture_video)
+            {
+                if (Utils.videoWriter.IsOpened())
+                {
+                    Utils.videoWriter.Write(frame);
+                }
+            }
+
         }
 
 

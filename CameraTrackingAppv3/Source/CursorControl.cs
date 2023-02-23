@@ -331,13 +331,13 @@ namespace CameraTrackingAppv3
             return ans;
         }
 
-        public static void DisplayRangeOfMotion(ref Mat frame,RangeOfMotionProps prop)//Vec2d[] ps=null,Vec2d[] ax=null)
+        public static void DisplayRangeOfMotion(ref Mat frame,RangeOfMotionProps prop,int tick)//Vec2d[] ps=null,Vec2d[] ax=null)
         {
 
             var ps = prop.Points;
             for (int i = 0; i < ps.Length; i++)
             {
-                frame.Circle((int)ps[i].Item0, (int)ps[i].Item1, 4, Scalar.Yellow, 4);
+                frame.Circle((int)ps[i].Item0, (int)ps[i].Item1, tick, Scalar.Yellow, tick);
             }
 
             var ax = prop.NormalAxi;
@@ -348,13 +348,13 @@ namespace CameraTrackingAppv3
 
             var cp = Utils.cvtVec2d2Point(prop.CenterPoint);
 
-            frame.Line(cp - a_x, cp, Scalar.Yellow, 4);
-            frame.Line(cp + a_x, cp, Scalar.Yellow, 4);
+            frame.Line(cp - a_x, cp, Scalar.Yellow, tick);
+            frame.Line(cp + a_x, cp, Scalar.Yellow, tick);
 
-            frame.Line(cp - a_y, cp, Scalar.Yellow, 4);
-            frame.Line(cp + a_y, cp, Scalar.Yellow, 4);
+            frame.Line(cp - a_y, cp, Scalar.Yellow, tick);
+            frame.Line(cp + a_y, cp, Scalar.Yellow, tick);
 
-            frame.Circle(cp, 5, Scalar.Yellow, 4);
+            frame.Circle(cp, tick, Scalar.Yellow, tick);
 
         }
 

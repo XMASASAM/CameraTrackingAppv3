@@ -77,19 +77,19 @@ namespace CameraTrackingAppv3
             return ok;//tracker.Update(frame);
         }
 
-        public void Draw(Mat frame, Scalar color)
+        public void Draw(Mat frame, Scalar color,int tick)
         {
-            tracker.Draw(frame, color);
+            tracker.Draw(frame, color,tick);
         }
 
-        public void Draw(ref Mat frame)
+        public void Draw(ref Mat frame,int tick)
         {
             if (!tracker.IsActive) return;
 
             if (tracker.IsError)
-                tracker.Draw(frame, Scalar.Red);
+                tracker.Draw(frame, Scalar.Red,tick);
             else
-                tracker.Draw(frame, Scalar.Green);
+                tracker.Draw(frame, Scalar.Green,tick);
         }
 
         public Vec2d CenterPoint{ get { return tracker.CenterPoint; } }
@@ -239,7 +239,7 @@ namespace CameraTrackingAppv3
 
         protected abstract bool Process(Mat gray);
 
-        public abstract void Draw(Mat frame, Scalar color);
+        public abstract void Draw(Mat frame, Scalar color,int tick);
 
         public abstract void Dispose();
 
@@ -445,11 +445,11 @@ namespace CameraTrackingAppv3
 
 
 
-        public override void Draw(Mat frame, Scalar color)
+        public override void Draw(Mat frame, Scalar color,int tick)
         {
-            frame.Rectangle(pre_rect.ToRect(), color, 4);
+            frame.Rectangle(pre_rect.ToRect(), color, tick);
             // OpenCvSharp.Point cp = Utils.RectCenter(pre_rect);
-            frame.Circle((int)center_point.Item0, (int)center_point.Item1, 4, color, 4);
+           // frame.Circle((int)center_point.Item0, (int)center_point.Item1, tick*2, color, tick);
         }
 
         public Vec2d GetCenterPoint { get { return center_point; } }
@@ -680,13 +680,13 @@ namespace CameraTrackingAppv3
             return true;
         }
 
-        public override void Draw(Mat frame, Scalar color)
+        public override void Draw(Mat frame, Scalar color,int tick)
         {
             
-            frame.Rectangle(face_rect.ToRect(),color,4);
+            frame.Rectangle(face_rect.ToRect(),color,tick);
             var offset = face_rect_point.ToPoint();
             foreach (var p in pre_features)
-                frame.Circle(p.ToPoint() + offset, 4, color, 4);
+                frame.Circle(p.ToPoint() + offset, tick, color, tick);
 
         }
 

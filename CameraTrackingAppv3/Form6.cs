@@ -44,7 +44,13 @@ namespace CameraTrackingAppv3
 
             textBox1.Text = Utils.Config.Property.OSKCommand;
 
-         //   userControl31.StartUp(Utils.Temp_Config.Property.CameraID);
+            //   userControl31.StartUp(Utils.Temp_Config.Property.CameraID);
+
+            if (Utils.f_inf_capture_video)
+            {
+                button8.Text = "録画停止";
+            }
+
 
         }
 
@@ -182,6 +188,28 @@ namespace CameraTrackingAppv3
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             Utils.Temp_Config.Property.OSKCommand = textBox1.Text;
+        }
+
+        private void tabPage8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            Utils.f_inf_capture_video = !Utils.f_inf_capture_video;
+            if (Utils.f_inf_capture_video)
+            {
+                button8.Text = "録画停止";
+                string name = textBox2.Text + "\\" + textBox3.Text;
+                Utils.videoWriter = new OpenCvSharp.VideoWriter(name,OpenCvSharp.FourCC.H264,30,Utils.CameraFrame.Size);
+
+            }
+            else
+            {
+                Utils.videoWriter.Release();
+                button8.Text = "録画開始";
+            }
         }
     }
     

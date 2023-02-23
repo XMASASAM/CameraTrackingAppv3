@@ -129,11 +129,11 @@ namespace CameraTrackingAppv3
                 }
             }
 
-            Main.Tracker.Draw(ref frame);
+            Main.Tracker.Draw(ref frame,4);
 
             if (f_done)
             {
-                CursorControl.DisplayRangeOfMotion(ref frame, range);
+                CursorControl.DisplayRangeOfMotion(ref frame, range,4);
             }
             else
             {
@@ -484,7 +484,7 @@ namespace CameraTrackingAppv3
                 degree -= 360;
             
             trackBar1.Value = (int)Utils.Grap(-180,degree,180);
-
+            Utils.WriteLine("camera_degree:" + degree.ToString());
             props.Rotation(sin, con, new Vec2d(Utils.CameraWidth * .5, Utils.CameraHeight * .5));
 
 

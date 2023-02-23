@@ -138,6 +138,7 @@ namespace CameraTrackingAppv3
 
         public bool Save()
         {
+            return true;//rokuganotame
 
             FileInfo fileInfo = new FileInfo(save_path);
             // ファイルの存在確認
@@ -183,8 +184,11 @@ namespace CameraTrackingAppv3
 
         static public bool Load(out SettingsConfig settings)
         {
-            bool ok = true;
+            bool ok = true;//rokuganotame
             settings = new SettingsConfig();
+
+            return false;
+
             if (!System.IO.File.Exists(save_path)) return false;
 
             BinaryFormatter bf2 = new BinaryFormatter();

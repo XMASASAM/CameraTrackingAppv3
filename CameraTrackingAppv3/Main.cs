@@ -162,7 +162,7 @@ namespace CameraTrackingAppv3
                     ok = capture.Read(camera_frame);
 
 
-                    Utils.WriteLine("millitime:" + ElapsedMilliseconds.ToString());
+                   // Utils.WriteLine("millitime:" + ElapsedMilliseconds.ToString());
 
                 }
             }
